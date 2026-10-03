@@ -3,7 +3,7 @@ from app.schemas import ProductSpec, CustomerProfile
 from app.engines.twin import find_twin, DISCLAIMER
 from app.engines.portfolio import portfolio_impact, rupee_impact
 from app.engines.stress import regime_stress, stress_ladder
-from app.engines.teachback import get_questions, score_answers
+from app.engines.payoff import value_fraction, loss_at_shock, scenario_table
 from app.alerts import generate_alerts
 from app.engines.market_data import get_prices
 from app import config
@@ -69,27 +69,20 @@ def test_stress_ladder_and_regimes():
     assert any(r["regime"] == "Crash" for r in regimes)
 
 
-def test_teachback_engine():
-    assessment = {"decision": "MISMATCH", "tail_loss_pct": 28.0}
-    questions = get_questions(ELN.model_dump(), assessment)
-    assert len(questions) == 3
-    for q in questions:
-        assert "id" in q
-        assert "question" in q
-        assert len(q["options"]) >= 3
+def test_cpn_protection_and_participation_updates():
+    """Verify that changing CPN protection (90% -> 70%) and participation (100% -> 150%) updates calculations."""
+    cpn90 = ProductSpec(product_type="CPN", tenor_months=12, protection_pct=90, participation_pct=100, notional=1_000_000)
+    assert float(value_fraction(cpn90, -0.20, -0.20)) == pytest.approx(0.90)
+    assert loss_at_shock(cpn90, -20.0) == pytest.approx(10.0)
 
-    # All correct scoring
-    answers_all_correct = [q["correct_index"] for q in questions]
-    score_res = score_answers(questions, answers_all_correct)
-    assert score_res["score"] == 3
-    assert score_res["understanding_flag"] is False
+    # Change protection to 70%
+    cpn70 = ProductSpec(product_type="CPN", tenor_months=12, protection_pct=70, participation_pct=100, notional=1_000_000)
+    assert float(value_fraction(cpn70, -0.20, -0.20)) == pytest.approx(0.70)
+    assert loss_at_shock(cpn70, -20.0) == pytest.approx(30.0)
 
-    # One wrong answer scoring
-    answers_one_wrong = [q["correct_index"] for q in questions]
-    answers_one_wrong[0] = (answers_one_wrong[0] + 1) % len(questions[0]["options"])
-    score_wrong_res = score_answers(questions, answers_one_wrong)
-    assert score_wrong_res["score"] == 2
-    assert score_wrong_res["understanding_flag"] is True
+    # Change participation to 150%
+    cpn_part = ProductSpec(product_type="CPN", tenor_months=12, protection_pct=100, participation_pct=150, notional=1_000_000)
+    assert float(value_fraction(cpn_part, 0.10, 0.0)) == pytest.approx(1.15)
 
 
 def test_alerts_engine():

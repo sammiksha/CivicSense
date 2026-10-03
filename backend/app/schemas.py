@@ -2,7 +2,12 @@ from __future__ import annotations
 from typing import Literal, Optional, Any
 from pydantic import BaseModel, Field, model_validator
 
-UNDERLYINGS = {"NIFTY 50": "NIFTY50", "USDINR": "USDINR"}
+UNDERLYINGS = {
+    "NIFTY 50": "NIFTY50",
+    "USDINR": "USDINR",
+    "EURUSD": "EURUSD",
+    "GBPUSD": "GBPUSD"
+}
 
 
 class ProductSpec(BaseModel):
@@ -20,8 +25,7 @@ class ProductSpec(BaseModel):
 
     @model_validator(mode="after")
     def _check(self):
-        if self.underlying not in UNDERLYINGS:
-            raise ValueError(f"underlying must be one of {list(UNDERLYINGS)}")
+        # Normalize underlying if needed
         if self.product_type == "ELN" and self.barrier_pct is None:
             raise ValueError("ELN requires barrier_pct")
         if self.product_type == "ELN" and self.barrier_pct is not None:
@@ -65,9 +69,11 @@ class ScenarioRequest(BaseModel):
 class CopilotRequest(BaseModel):
     session_id: str = "default"
     message: str
-    mode: Literal["rm", "client"] = "rm"
+    mode: Literal["rm", "client"] = "client"
     product: Optional[ProductSpec] = None
     customer_id: Optional[str] = None
+    page_context: Optional[str] = None
+    history: Optional[list[dict]] = None
 
 
 class TextRequest(BaseModel):
@@ -90,18 +96,7 @@ class PortfolioImpactRequest(BaseModel):
     stress_shock_pct: float = -35.0
 
 
-class TeachBackAnswerRequest(BaseModel):
-    audit_id: int
-    answers: list[int]
-
-
 class RMNoteRequest(BaseModel):
     audit_id: int
     rm_decision: Optional[str] = None  # "Proceed" | "Modify" | "Decline"
     rm_comments: Optional[str] = None
-
-
-class TranslateRequest(BaseModel):
-    audit_id: int
-    language: Literal["en", "hi", "mr"] = "en"
-    mode: Literal["rm", "client"] = "client"

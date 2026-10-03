@@ -174,15 +174,6 @@ tr:hover td { background:#fafbff }
 .chat-input-row input { flex:1;padding:8px 10px;border:1.5px solid var(--line);border-radius:6px;font:inherit;font-size:13px;outline:none }
 .chat-input-row input:focus { border-color:var(--pri) }
 
-/* ── Teach-back ── */
-.tb-question { margin-bottom:18px;border:1px solid var(--line);border-radius:8px;padding:14px }
-.tb-q-text { font-weight:500;margin-bottom:10px;color:var(--ink) }
-.tb-option { display:flex;align-items:center;gap:8px;padding:7px;cursor:pointer;border-radius:6px;font-size:13px;margin-bottom:4px }
-.tb-option:hover { background:var(--bg) }
-.tb-option input { cursor:pointer }
-.tb-result { margin-top:8px;padding:8px;border-radius:6px;font-size:12px }
-.tb-result.correct { background:var(--ok-l);color:var(--ok) }
-.tb-result.wrong { background:var(--bad-l);color:var(--bad) }
 
 /* ── Loading/Empty states ── */
 .loading { text-align:center;padding:40px;color:var(--mut);font-size:13px }
@@ -269,12 +260,6 @@ tr:hover td { background:#fafbff }
   <!-- Top bar -->
   <div class="top-bar">
     <div class="top-logo">FinVision <span>Understand Before You Invest</span></div>
-    <!-- Language toggle -->
-    <div style="display:flex;gap:4px;margin-left:20px">
-      <button class="btn-icon" onclick="setLang('en')" id="lang-en" style="border-color:var(--pri);color:var(--pri)">EN</button>
-      <button class="btn-icon" onclick="setLang('hi')" id="lang-hi">हि</button>
-      <button class="btn-icon" onclick="setLang('mr')" id="lang-mr">म</button>
-    </div>
     <div class="top-bar-right">
       <button class="alert-bell btn-icon" onclick="navTo('alerts')">
         🔔 <span id="alert-count-badge" class="alert-count" style="display:none">0</span>
@@ -306,8 +291,8 @@ let CUSTOMERS = [];
 let SELECTED_CUSTOMER = null;
 let LAST_ASSESSMENT = null;
 let LAST_AUDIT_ID = null;
-let CURRENT_LANG = 'en';
-let TEACH_QUESTIONS = [];
+let SESSION_CHAT_HISTORY = [];
+let LAST_CUST_QUERY = '';
 
 const $ = id => document.getElementById(id);
 const api = async (p, b, method) => {
@@ -330,10 +315,10 @@ const prod = () => {
     coupon_pct: +($('p-coupon')?.value || 12),
     strike_pct: +($('p-strike')?.value || 100),
     notional: +($('p-notional')?.value || 1000000),
-    protection_pct: +($('p-prot')?.value || 100),
+    protection_pct: +($('p-prot')?.value || 90),
     participation_pct: +($('p-part')?.value || 100),
   };
-  if (t === 'ELN') o.barrier_pct = +($('p-barrier')?.value || 70);
+  if (t === 'ELN' || t === 'DCD') o.barrier_pct = +($('p-barrier')?.value || 70);
   return o;
 };
 
@@ -419,9 +404,9 @@ const RM_NAV = [
   {id:'rm-stress', icon:'⚡', label:'Stress & Regime'},
   {id:'rm-portfolio', icon:'📁', label:'Portfolio Impact'},
   {id:'rm-repair', icon:'🔧', label:'Repair'},
-  {id:'rm-teachback', icon:'📝', label:'Teach-Back'},
   {id:'rm-notes', icon:'📄', label:'RM Notes'},
   {id:'rm-audit', icon:'🔍', label:'Audit Trail'},
+  {id:'alerts', icon:'🔔', label:'Risk Alerts'},
 ];
 const CUST_NAV = [
   {id:'cust-dashboard', icon:'⬛', label:'Dashboard'},
@@ -448,6 +433,10 @@ function navTo(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const pg = $('page-'+id);
   if (pg) pg.classList.add('active');
+  if (id === 'alerts') loadAlerts();
+  if (id === 'rm-audit') loadAuditTable();
+  if (id === 'cust-portfolio') loadCustomerPortfolio();
+  if (id === 'cust-profile') loadCustomerProfile();
 }
 
 // ══════════════ PAGE BUILDERS ══════════════
@@ -490,32 +479,33 @@ function buildRMPages() {
             <div class="form-group"><label>Tenor (months)</label><input id="p-tenor" type="number" value="12" min="1" max="120" onchange="livePayoff()"></div>
             <div class="form-group"><label>Coupon / Interest %</label><input id="p-coupon" type="number" value="12" min="0" onchange="livePayoff()"></div>
           </div>
+          <div class="form-row">
+            <div class="form-group"><label>Strike %</label><input id="p-strike" type="number" value="100" onchange="livePayoff()"></div>
+            <div class="form-group"><label>Notional (₹)</label><input id="p-notional" type="number" value="1000000" onchange="livePayoff()"></div>
+          </div>
           <div id="eln-fields">
             <div class="form-group"><label>Barrier %: <b id="bv">70</b></label>
               <input id="p-barrier" type="range" min="30" max="95" value="70" oninput="$('bv').textContent=this.value;livePayoff()">
             </div>
-            <div class="form-row">
-              <div class="form-group"><label>Strike %</label><input id="p-strike" type="number" value="100" onchange="livePayoff()"></div>
-              <div class="form-group"><label>Notional (₹)</label><input id="p-notional" type="number" value="1000000" onchange="livePayoff()"></div>
-            </div>
           </div>
           <div id="cpn-fields" style="display:none">
             <div class="form-row">
-              <div class="form-group"><label>Protection %</label><input id="p-prot" type="number" value="100" onchange="livePayoff()"></div>
-              <div class="form-group"><label>Participation %</label><input id="p-part" type="number" value="80" onchange="livePayoff()"></div>
-            </div>
-            <div class="form-row">
-              <div class="form-group"><label>Strike %</label><input id="p-strike" type="number" value="100" style="display:none" onchange="livePayoff()"></div>
-              <div class="form-group"><label>Notional (₹)</label><input id="p-notional2" type="number" value="1000000" onchange="livePayoff()"></div>
+              <div class="form-group"><label>Protection %</label><input id="p-prot" type="number" value="90" min="0" max="100" onchange="livePayoff()"></div>
+              <div class="form-group"><label>Participation %</label><input id="p-part" type="number" value="100" min="0" max="500" onchange="livePayoff()"></div>
             </div>
           </div>
           <div class="form-group mt8"><label>Upload Term Sheet (PDF/TXT)</label><input type="file" id="ts-file" accept=".pdf,.txt"></div>
           <div class="form-group"><label>...or describe in plain language</label><textarea id="ts-nl" rows="2" placeholder="One-year NIFTY note, 12% coupon, 70% barrier, 10 lakh"></textarea></div>
-          <div class="flex gap-8">
+          <div class="flex gap-8 wrap mt8">
             <button class="btn btn-secondary btn-sm" onclick="extractProduct()">Extract & Validate</button>
+            <button class="btn btn-secondary btn-sm" onclick="applyProductConfig()">Apply Product</button>
+            <button class="btn btn-secondary btn-sm" onclick="saveProductConfig()">Save</button>
+            <button class="btn btn-secondary btn-sm" onclick="resetProductConfig()">Reset</button>
+            <button class="btn btn-secondary btn-sm" onclick="scrollToPayoff()">View Payoff</button>
+            <button class="btn btn-secondary btn-sm" onclick="scrollToScenarios()">View Scenarios</button>
           </div>
           <div id="ex-msg" class="text-sm mut mt8"></div>
-          <button class="btn btn-primary btn-full mt14" onclick="runAssessment()">Run Full Assessment</button>
+          <button class="btn btn-primary btn-full mt14" onclick="runAssessment()">Run Analysis & Full Assessment</button>
         </div>
       </div>
       <div>
@@ -551,11 +541,6 @@ function buildRMPages() {
     <div id="rm-repair-content"><div class="empty">Run an assessment first.</div></div>
   </div>
 
-  <div id="page-rm-teachback" class="page">
-    <div class="section-header"><div class="section-title">Teach-Back Check</div></div>
-    <div id="rm-teachback-content"><div class="empty">Run an assessment first.</div></div>
-  </div>
-
   <div id="page-rm-notes" class="page">
     <div class="section-header"><div class="section-title">RM Justification Note</div></div>
     <div id="rm-notes-content"><div class="empty">Run an assessment first.</div></div>
@@ -567,7 +552,7 @@ function buildRMPages() {
   </div>
 
   <div id="page-alerts" class="page">
-    <div class="section-header"><div class="section-title">Risk Alerts</div></div>
+    <div class="section-header"><div class="section-title">Risk Alerts</div><button class="btn btn-secondary btn-sm" onclick="loadAlerts()">Refresh Alerts</button></div>
     <div id="alerts-content"><div class="empty">No alerts yet.</div></div>
   </div>
   `;
@@ -610,7 +595,7 @@ function buildCustomerPages() {
   </div>
 
   <div id="page-alerts" class="page">
-    <div class="section-header"><div class="section-title">🔔 Risk Alerts</div></div>
+    <div class="section-header"><div class="section-title">🔔 Risk Alerts</div><button class="btn btn-secondary btn-sm" onclick="loadAlerts()">Refresh Alerts</button></div>
     <div id="alerts-content"><div class="empty">No alerts.</div></div>
   </div>
 
@@ -618,28 +603,33 @@ function buildCustomerPages() {
     <div class="section-header">
       <div>
         <div class="section-title">FinVision AI Assistant</div>
-        <div class="section-sub">Understand your investment in plain, simple language — no confusing Wall Street jargon.</div>
+        <div class="section-sub">Ask me about your product, portfolio, scenarios and risk.</div>
+      </div>
+      <div class="flex gap-8">
+        <button class="btn btn-secondary btn-sm" onclick="clearCustChat()">Clear Chat</button>
+        <button class="btn btn-secondary btn-sm" onclick="retryCustLastQuestion()">Retry</button>
       </div>
     </div>
     <div class="card">
       <div class="flex gap-8 items-center wrap mb8" style="font-size:12px;color:var(--mut)">
         <span>Suggested Questions:</span>
-        <button class="btn btn-secondary btn-sm" onclick="custAskPrompt('What is NIFTY 50?')">💡 What is NIFTY 50?</button>
-        <button class="btn btn-secondary btn-sm" onclick="custAskPrompt('How does the barrier cushion protect me?')">🛡️ How does the barrier protect me?</button>
-        <button class="btn btn-secondary btn-sm" onclick="custAskPrompt('What happens if NIFTY falls 25%?')">📉 What if NIFTY falls 25%?</button>
-        <button class="btn btn-secondary btn-sm" onclick="custAskPrompt('How much could I lose in rupees?')">💰 How much could I lose in ₹?</button>
-        <button class="btn btn-secondary btn-sm" onclick="custAskPrompt('Is this product suitable for me?')">📋 Is this suitable for me?</button>
+        <button class="btn btn-secondary btn-sm" onclick="custAskPrompt('What happens if NIFTY falls 35%?')">📉 What if NIFTY falls 35%?</button>
+        <button class="btn btn-secondary btn-sm" onclick="custAskPrompt('Why is this product marked Review?')">⚠️ Why is this product marked Review?</button>
+        <button class="btn btn-secondary btn-sm" onclick="custAskPrompt('How much money could I lose in rupees?')">💰 How much could I lose in ₹?</button>
+        <button class="btn btn-secondary btn-sm" onclick="custAskPrompt('Can I lose my principal investment?')">🛡️ Can I lose my principal?</button>
+        <button class="btn btn-secondary btn-sm" onclick="custAskPrompt('Is this product suitable for my moderate risk profile?')">📋 Is this suitable for me?</button>
+        <button class="btn btn-secondary btn-sm" onclick="custAskPrompt('What if the market crashes like in 2020?')">⚡ 2020 Crash Replay</button>
       </div>
-      <div class="chat-box" id="cust-chat" style="height:320px">
+      <div class="chat-box" id="cust-chat" style="height:340px">
         <div class="chat-msg bot">
-          👋 <b>Hello! I am your FinVision AI Guide.</b><br><br>
-          I am here to explain structured products in plain, simple everyday language before you invest.<br><br>
-          Click any of the suggested question buttons above, or ask me anything like <i>"Can I lose my principal?"</i>, <i>"What is a coupon?"</i>, or <i>"What if the market drops 35%?"</i>.
+          👋 <b>Hello! I am your FinVision AI Assistant.</b><br><br>
+          I can explain how your structured investments work in plain, everyday English with no confusing financial jargon.<br><br>
+          Feel free to click any suggested question above or type your question below.
         </div>
       </div>
       <div class="chat-input-row">
-        <input id="cust-q" placeholder="Ask anything in plain language... e.g. What if NIFTY falls 35%?" onkeydown="if(event.key==='Enter')custAsk()">
-        <button class="btn btn-primary" onclick="custAsk()">Ask</button>
+        <input id="cust-q" placeholder="Ask me anything in plain English... (e.g. What happens if NIFTY falls 35%?)" onkeydown="if(event.key==='Enter')custAsk()">
+        <button class="btn btn-primary" onclick="custAsk()">Send</button>
       </div>
     </div>
   </div>
@@ -771,6 +761,51 @@ async function extractProduct() {
   } catch(e) { msg.textContent = 'Error: ' + e.message; }
 }
 
+// ══════════════ PRODUCT ACTIONS ══════════════
+function applyProductConfig() {
+  const p = prod();
+  livePayoff();
+  const msg = $('ex-msg');
+  if (msg) msg.innerHTML = `<span class="ok-text">✓ Applied ${p.product_type} (${p.underlying}, ${p.tenor_months}m, notional ${fmtInr(p.notional)})</span>`;
+  if (LAST_ASSESSMENT && SELECTED_CUSTOMER) {
+    runAssessment();
+  }
+}
+
+function saveProductConfig() {
+  const p = prod();
+  localStorage.setItem('fv_saved_prod', JSON.stringify(p));
+  const msg = $('ex-msg');
+  if (msg) msg.innerHTML = `<span class="ok-text">✓ Saved product configuration locally.</span>`;
+  setTimeout(() => { if (msg) msg.innerHTML = ''; }, 3000);
+}
+
+function resetProductConfig() {
+  $('p-type').value = 'ELN';
+  $('p-under').value = 'NIFTY 50';
+  $('p-tenor').value = '12';
+  $('p-coupon').value = '12';
+  $('p-strike').value = '100';
+  $('p-notional').value = '1000000';
+  if ($('p-barrier')) $('p-barrier').value = '70';
+  if ($('bv')) $('bv').textContent = '70';
+  if ($('p-prot')) $('p-prot').value = '90';
+  if ($('p-part')) $('p-part').value = '100';
+  onProductTypeChange();
+  livePayoff();
+  const msg = $('ex-msg');
+  if (msg) msg.innerHTML = `<span class="mut">Configuration reset to defaults.</span>`;
+  setTimeout(() => { if (msg) msg.innerHTML = ''; }, 2500);
+}
+
+function scrollToPayoff() {
+  $('payoff-chart')?.scrollIntoView({behavior: 'smooth', block: 'center'});
+}
+
+function scrollToScenarios() {
+  $('payoff-scenarios')?.scrollIntoView({behavior: 'smooth', block: 'center'});
+}
+
 // ══════════════ ASSESSMENT ══════════════
 async function runAssessment() {
   if (!SELECTED_CUSTOMER) { alert('Please select a customer first.'); return; }
@@ -794,7 +829,6 @@ async function runAssessment() {
     renderStress();
     renderPortfolioImpact();
     renderRepair();
-    loadTeachBack();
     loadRMNote();
     updateAlertBadge(SELECTED_CUSTOMER.id);
   } catch(e) {
@@ -1031,50 +1065,6 @@ async function renderRepair() {
   </div>`;
 }
 
-// ══════════════ TEACH-BACK ══════════════
-async function loadTeachBack() {
-  const el = $('rm-teachback-content');
-  if (!el || !LAST_AUDIT_ID) return;
-  el.innerHTML = '<div class="loading">Loading questions</div>';
-  try {
-    const r = await api(`/api/v1/teachback/${LAST_AUDIT_ID}/questions`);
-    TEACH_QUESTIONS = r.questions;
-    el.innerHTML = `
-    <div class="card">
-      <div class="card-title">Customer Understanding Check</div>
-      <div class="disclaimer">The customer should complete this section. Answers are evaluated by the deterministic engine — not by AI.</div>
-      ${r.questions.map((q,i)=>`
-        <div class="tb-question">
-          <div class="tb-q-text">${i+1}. ${q.question}</div>
-          ${q.options.map((opt,j)=>`
-            <label class="tb-option">
-              <input type="radio" name="tb-q${i}" value="${j}"> ${opt}
-            </label>`).join('')}
-        </div>`).join('')}
-      <button class="btn btn-primary" onclick="submitTeachBack()">Submit Answers</button>
-      <div id="tb-result" class="mt14"></div>
-    </div>`;
-  } catch(e) { el.innerHTML = `<div class="warn-text">Error: ${e.message}</div>`; }
-}
-
-async function submitTeachBack() {
-  const answers = TEACH_QUESTIONS.map((_, i) => {
-    const sel = document.querySelector(`input[name="tb-q${i}"]:checked`);
-    return sel ? +sel.value : 0;
-  });
-  try {
-    const r = await api(`/api/v1/teachback/${LAST_AUDIT_ID}/answer`, {audit_id: LAST_AUDIT_ID, answers});
-    const el = $('tb-result');
-    el.innerHTML = `<div class="${r.understanding_flag?'badge MISMATCH':'badge SUITABLE'}" style="font-size:14px;padding:8px 14px">
-      Understanding: ${r.score_text}</div>
-      <div class="text-sm mt8 ${r.understanding_flag?'warn-text':'ok-text'}">${r.flag_message}</div>
-      <div class="mt14">
-        ${r.details.map((d,i)=>`<div class="tb-result ${d.correct?'correct':'wrong'} mt8">
-          Q${i+1}: ${d.correct?'✓ Correct':'✗ Incorrect'} — ${d.explanation}
-        </div>`).join('')}
-      </div>`;
-  } catch(e) {}
-}
 
 // ══════════════ RM NOTE ══════════════
 async function loadRMNote() {
@@ -1268,9 +1258,33 @@ function formatChatMsg(text) {
   return clean;
 }
 
+function clearCustChat() {
+  SESSION_CHAT_HISTORY = [];
+  LAST_CUST_QUERY = '';
+  const chat = $('cust-chat');
+  if (chat) {
+    chat.innerHTML = `
+      <div class="chat-msg bot">
+        👋 <b>Hello! I am your FinVision AI Assistant.</b><br><br>
+        I can explain how your structured investments work in plain, everyday English with no confusing financial jargon.<br><br>
+        Feel free to click any suggested question above or type your question below.
+      </div>
+    `;
+  }
+}
+
+function retryCustLastQuestion() {
+  if (LAST_CUST_QUERY) {
+    const inp = $('cust-q');
+    if (inp) inp.value = LAST_CUST_QUERY;
+    custAsk();
+  }
+}
+
 async function custAsk() {
   const q = $('cust-q').value.trim();
   if (!q) return;
+  LAST_CUST_QUERY = q;
   $('cust-q').value = '';
   const chat = $('cust-chat');
   chat.innerHTML += `<div class="chat-msg user">${q}</div>`;
@@ -1278,33 +1292,37 @@ async function custAsk() {
   chat.scrollTop = chat.scrollHeight;
   try {
     const cid = SELECTED_CUSTOMER?.id || AUTH?.user?.customer_id || 'C101';
-    const r = await api('/api/v1/copilot', {session_id: 'cust-'+(AUTH?.user?.id || 'guest'), message: q, mode: 'client', customer_id: cid});
-    $('bot-latest').innerHTML = formatChatMsg(r.answer);
+    const activePage = document.querySelector('.page.active')?.id?.replace('page-', '') || 'cust-copilot';
+    const pageContext = {
+      view: activePage,
+      customer_id: cid,
+      product: LAST_ASSESSMENT?.result?.product || prod(),
+      decision: LAST_ASSESSMENT?.result?.decision || null,
+      breaking_point: LAST_ASSESSMENT?.result?.breaking_point?.mismatch_from_pct || null,
+      portfolio_concentration: LAST_ASSESSMENT?.result?.rules?.find(r=>r.rule_id==='CONCENTRATION')?.details?.concentration_pct || null
+    };
+
+    const payload = {
+      session_id: 'cust-' + (AUTH?.user?.id || 'guest'),
+      message: q,
+      mode: 'client',
+      customer_id: cid,
+      page_context: pageContext,
+      history: SESSION_CHAT_HISTORY.slice(-6)
+    };
+
+    const r = await api('/api/v1/copilot', payload);
+    const ansText = r.answer || '';
+    $('bot-latest').innerHTML = formatChatMsg(ansText);
     $('bot-latest').id = '';
+
+    SESSION_CHAT_HISTORY.push({role: 'user', content: q});
+    SESSION_CHAT_HISTORY.push({role: 'assistant', content: ansText});
   } catch(e) {
     $('bot-latest').innerHTML = `<span class="warn-text">Error: ${e.message}</span>`;
     $('bot-latest').id = '';
   }
   chat.scrollTop = chat.scrollHeight;
-}
-
-// ══════════════ LANGUAGE ══════════════
-function setLang(lang) {
-  CURRENT_LANG = lang;
-  ['en','hi','mr'].forEach(l => {
-    const el = $('lang-'+l);
-    if (el) { el.style.borderColor = l===lang ? 'var(--pri)' : 'var(--line)'; el.style.color = l===lang ? 'var(--pri)' : 'var(--mut)'; }
-  });
-  // Only rerender explanation if available
-  if (lang !== 'en' && LAST_AUDIT_ID) {
-    reExplainTranslated(lang);
-  }
-}
-
-async function reExplainTranslated(lang) {
-  // For now, show a note — full translation endpoint can be added
-  const el = $('expl-text');
-  if (el) el.innerHTML += `<br><span class="text-xs mut">[Translation to ${lang === 'hi' ? 'Hindi' : 'Marathi'} — AI-translated; verify before sharing. Financial figures are locked.]</span>`;
 }
 
 // ══════════════ INIT ══════════════

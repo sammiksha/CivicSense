@@ -12,12 +12,11 @@ from .engines.market_data import get_prices
 from .engines.portfolio import portfolio_impact as calc_portfolio_impact, rupee_impact as calc_rupee_impact
 from .engines.stress import regime_stress, stress_ladder
 from .engines.twin import find_twin
-from .engines.teachback import get_questions, score_answers
 from .extraction.term_sheet import extract_product, file_to_text
 from .rag.store import get_kb
 from .schemas import (
     AssessmentRequest, CopilotRequest, ExplainRequest, LoginRequest,
-    PortfolioImpactRequest, ProductSpec, ScenarioRequest, TeachBackAnswerRequest,
+    PortfolioImpactRequest, ProductSpec, ScenarioRequest,
     TextRequest, RMNoteRequest,
 )
 from .services import report
@@ -297,10 +296,11 @@ def copilot_ask(req: CopilotRequest):
         s.product = req.product
     if req.customer_id:
         c = find_customer(req.customer_id)
-        if c is None:
-            raise HTTPException(404, "customer not found")
-        s.customer = c
-    return copilot.ask(s, req.message, req.mode)
+        if c is not None:
+            s.customer = c
+    if req.history:
+        s.history = req.history
+    return copilot.ask(s, req.message, req.mode, page_context=req.page_context)
 
 
 # ── portfolio impact ──────────────────────────────────────────────────────────
@@ -353,49 +353,6 @@ def historical_twin_endpoint(req: ScenarioRequest):
         return result
     except Exception as e:
         raise HTTPException(422, str(e))
-
-
-# ── teach-back ────────────────────────────────────────────────────────────────
-
-@app.get("/api/v1/teachback/{audit_id}/questions")
-def teachback_questions(audit_id: int):
-    rec = audit.get(audit_id)
-    if not rec:
-        raise HTTPException(404, "audit record not found")
-    product = rec["result"]["product"]
-    assessment_result = rec["result"]
-    questions = get_questions(product, assessment_result)
-    # Strip correct_index from client-facing response
-    return {"questions": [{k: v for k, v in q.items() if k != "correct_index"} for q in questions]}
-
-
-@app.post("/api/v1/teachback/{audit_id}/answer")
-def teachback_answer(audit_id: int, req: TeachBackAnswerRequest):
-    rec = audit.get(audit_id)
-    if not rec:
-        raise HTTPException(404, "audit record not found")
-    product = rec["result"]["product"]
-    assessment_result = rec["result"]
-    questions = get_questions(product, assessment_result)
-    result = score_answers(questions, req.answers)
-    # Store in audit
-    try:
-        _store_teachback(audit_id, result)
-    except Exception:
-        pass
-    return result
-
-
-def _store_teachback(audit_id: int, result: dict):
-    rec = audit.get(audit_id)
-    if rec:
-        r = rec["result"]
-        r["teachback"] = result
-        import json, sqlite3
-        from contextlib import closing
-        with closing(audit._conn()) as c:
-            c.execute("UPDATE audit SET result_json=? WHERE id=?", (json.dumps(r), audit_id))
-            c.commit()
 
 
 # ── RM note ───────────────────────────────────────────────────────────────────

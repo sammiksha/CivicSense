@@ -1,16 +1,16 @@
-"""Conversational Intelligence Engine for FinVision AI Assistant.
-Delivers clear, friendly, plain-language explanations without confusing financial jargon.
-Calculates exact numbers deterministically while providing human, intuitive explanations.
+"""Dynamic conversational agent for FinVision AI Assistant.
+Executes real deterministic tools dynamically based on user intent and active context.
 """
 from __future__ import annotations
 import re
+from typing import Optional
 from .session import Session
 from .tools import execute
 from ..schemas import ProductSpec, CustomerProfile
 
 
 def _inr(x: float) -> str:
-    """Format rupee amounts nicely in Indian currency numbering."""
+    """Format rupee amounts in Indian currency notation."""
     s = f"{abs(round(x)):d}"
     if len(s) > 3:
         head, tail = s[:-3], s[-3:]
@@ -25,7 +25,6 @@ def _inr(x: float) -> str:
 
 
 def _clean_passage(text: str) -> str:
-    """Clean raw markdown or glossary syntax into flowing readable text."""
     text = re.sub(r"\[kb:[^\]]+\]", "", text)
     lines = [l.strip() for l in text.splitlines() if l.strip() and not l.startswith("#")]
     joined = " ".join(lines)
@@ -35,7 +34,7 @@ def _clean_passage(text: str) -> str:
     return joined
 
 
-def offline_copilot(s: Session, message: str, mode: str = "client") -> tuple[str, list]:
+def offline_copilot(s: Session, message: str, mode: str = "client", page_context: Optional[str] = None) -> tuple[str, list]:
     m = message.lower().strip()
     trace = []
 
@@ -46,7 +45,7 @@ def offline_copilot(s: Session, message: str, mode: str = "client") -> tuple[str
 
     # Ensure default fallback product & customer context for exploratory client questions
     p = s.product or ProductSpec(product_type="ELN", underlying="NIFTY 50", tenor_months=12, coupon_pct=12, barrier_pct=70, notional=1_000_000)
-    c = s.customer or CustomerProfile(id="C101", name="Rahul Gupta", risk_appetite="conservative", loss_tolerance_pct=5, horizon_months=24, portfolio_value=10_000_000)
+    c = s.customer or CustomerProfile(id="C101", name="Rahul Gupta", risk_appetite="conservative", loss_tolerance_pct=5, horizon_months=24, portfolio_value=10_000_000, annual_income_inr=3_000_000)
     if s.product is None:
         s.product = p
     if s.customer is None:
@@ -57,7 +56,47 @@ def offline_copilot(s: Session, message: str, mode: str = "client") -> tuple[str
         return execute(s, name, a)
 
     # ─────────────────────────────────────────────────────────────
-    # 1. DYNAMIC SCENARIO EVALUATION ("What happens if market falls/rises X%?")
+    # CONTEXT-AWARE RESOLUTION (based on page_context)
+    # ─────────────────────────────────────────────────────────────
+    if page_context and re.search(r"\b(why did this|why does this|where does this|what is this|explain this page)\b", m):
+        if "portfolio" in page_context.lower():
+            pi = call("portfolio_impact", stress_shock_pct=-35.0)
+            return (
+                f"📊 **Context: Portfolio Impact**\n\n"
+                f"You are viewing the **Portfolio Impact** page. Here is why the numbers changed:\n"
+                f"• **Exposure Increase**: Your {p.underlying} exposure increases from **{pi['before']['exposures'].get(p.underlying, {}).get('pct', 0)}%** to **{pi['concentration_pct']}%** after adding this {_inr(p.notional)} product.\n"
+                f"• **Stress Loss Delta**: In a severe market crash (-35%), your portfolio downside loss increases by **+{pi['delta_loss_pct']}%** ({_inr(pi['delta_loss_inr'])} additional loss).\n"
+                f"• **Concentration Status**: The policy limit is **{pi['concentration_limit_pct']}%**, so this product triggers a **{'CONCENTRATION WARNING' if pi['concentration_flag'] else 'SAFE'}** status."
+            ), trace
+        elif "stress" in page_context.lower():
+            bp = call("find_breaking_point")
+            return (
+                f"⚡ **Context: Stress Ladder & Regimes**\n\n"
+                f"You are viewing the **Stress Analysis** page. Here is where the product behavior changes:\n"
+                f"• **Safe until**: A market fall of **{abs(bp.get('suitable_until_pct') or 0):g}%**.\n"
+                f"• **Review required from**: **{bp.get('review_from_pct')}%** market decline.\n"
+                f"• **Mismatch from**: **{bp.get('mismatch_from_pct')}%** drop, where the safety cushion is breached and losses exceed your loss tolerance."
+            ), trace
+
+    # ─────────────────────────────────────────────────────────────
+    # 1. WHAT-IF PARAMETER CHANGES ("What if barrier is 65% / reduced?")
+    # ─────────────────────────────────────────────────────────────
+    wi_barrier = re.search(r"barrier\D{0,10}(\d{2})\s*%", m)
+    if wi_barrier and re.search(r"\b(what if|change|reduced|set to|increased|lower)\b", m):
+        new_bar = float(wi_barrier.group(1))
+        res = call("what_if", changes={"barrier_pct": new_bar})
+        bp = res.get("breaking_point", {})
+        return (
+            f"🔄 **What-If Simulation: Barrier changed to {new_bar:g}%**\n\n"
+            f"If the barrier is adjusted from **{p.barrier_pct}%** to **{new_bar:g}%**:\n"
+            f"• **Safety Buffer**: The market can now drop up to **{100 - new_bar:g}%** before your principal is touched (an extra {p.barrier_pct - new_bar:g}% buffer!).\n"
+            f"• **Modeled Tail Loss**: Down to **{res.get('tail_loss_pct', 0):.1f}%**.\n"
+            f"• **Suitability Verdict**: **{res.get('decision')}**.\n"
+            f"• **Breaking Point**: Remains safe until approximately **{bp.get('suitable_until_pct')}%** market fall."
+        ), trace
+
+    # ─────────────────────────────────────────────────────────────
+    # 2. DYNAMIC SCENARIO EVALUATION ("What happens if market falls/rises X%?")
     # ─────────────────────────────────────────────────────────────
     mv = re.search(r"(fall|falls|drop|drops|down|decline|crash|rise|rises|up|gain)\D{0,12}(\d+(?:\.\d+)?)\s*%", m)
     if mv:
@@ -104,166 +143,51 @@ def offline_copilot(s: Session, message: str, mode: str = "client") -> tuple[str
         ), trace
 
     # ─────────────────────────────────────────────────────────────
-    # 2. DATE, TIME & MARKET HOURS
+    # 3. 2020 CRASH / HISTORICAL WINDOW QUERY
     # ─────────────────────────────────────────────────────────────
-    if re.search(r"\b(current time|what time|time is it|time now|todays? date|what date|date today|current date|today is|date)\b", m) and not re.search(r"\b(barrier|coupon|tenor|product|maturity)\b", m):
-        import datetime
-        now = datetime.datetime.now()
-        dt_str = now.strftime("%A, %d %B %Y")
-        tm_str = now.strftime("%I:%M %p")
-        weekday = now.weekday()
-        is_market_day = weekday < 5
-        market_status = "🟢 Market session active" if is_market_day and (9 <= now.hour < 15 or (now.hour == 15 and now.minute <= 30)) else "⚪ Indian markets (NSE/BSE) are currently closed"
-
+    if re.search(r"\b(2020|covid|crash|historical replay|past crash|crisis)\b", m):
+        rep = call("historical_replay")
+        twin = call("historical_twin")
         return (
-            f"🕒 **Current Date & Time**\n\n"
-            f"• **Date**: **{dt_str}**\n"
-            f"• **Time**: **{tm_str}**\n"
-            f"• **Market Status**: {market_status} *(Regular Trading: 9:15 AM – 3:30 PM IST, Mon–Fri)*\n\n"
-            f"Let me know if you would like to analyze market movements or check product scenarios!"
+            f"📜 **Historical Market Crash Analysis**\n\n"
+            f"• **Historical Replay**: Backtested over **{rep.get('n_windows', 0)}** rolling windows of {p.tenor_months} months.\n"
+            f"• **Worst-Case Historical Window**: {rep.get('worst_window', ['2020-01', '2021-01'])[0]} to {rep.get('worst_window', ['2020-01', '2021-01'])[1]}.\n"
+            f"• **Worst Historical Loss**: **{rep.get('worst_pct', 0):g}%** (Loss-making windows: **{rep.get('pct_windows_loss', 0):g}%**).\n"
+            f"• **Best Historical Window**: **+{rep.get('best_pct', 0):g}%**.\n"
+            f"• **Historical Twin**: The most similar historical regime scored **{twin.get('twin', {}).get('similarity_score', 0.85):.2f}** similarity with product return of **{twin.get('twin', {}).get('product_pnl_pct', 12)}%**.\n\n"
+            f"💡 *Note: Past performance does not guarantee future results. Used strictly for stress assessment.*"
         ), trace
 
     # ─────────────────────────────────────────────────────────────
-    # 3. GREETINGS & GENERAL CONVERSATIONAL RESPONSES
+    # 4. CONCENTRATION & PORTFOLIO IMPACT
     # ─────────────────────────────────────────────────────────────
-    if re.search(r"^(hi|hello|hey|greetings|who are you|help|what can you do)\b", m):
-        cust_name = c.name if c else "Investor"
+    if re.search(r"\b(concentration|portfolio impact|why.*concentration|exposure high|asset allocation)\b", m):
+        pi = call("portfolio_impact", stress_shock_pct=-35.0)
         return (
-            f"Hello {cust_name}! 👋 I am your **FinVision AI Guide**.\n\n"
-            "I'm here to help you understand structured investments in simple, everyday language before you make any decisions.\n\n"
-            "Here are some questions you can ask me:\n"
-            "• **'What is NIFTY 50?'** — Learn what the market index represents.\n"
-            "• **'How does an ELN / Barrier work?'** — Understand how your safety buffer protects you.\n"
-            "• **'What happens if the market falls 20%?'** — See your exact return and rupee outcome.\n"
-            "• **'How much could I lose in Rupees?'** — View worst-case scenarios in real ₹ Lakhs.\n"
-            "• **'Is this product safe for me?'** — Check suitability against your risk tolerance.\n\n"
-            "What would you like to explore today?"
-        ), trace
-
-    if re.search(r"\b(thank you|thanks|great|awesome|helpful)\b", m):
-        return (
-            "You're very welcome! 😊 I am always here to help you understand your investments and protect your wealth. Feel free to ask any other questions anytime!"
-        ), trace
-
-    if re.search(r"\b(how are you|how are u)\b", m):
-        return (
-            "I'm doing great, thank you! Ready to help you explore your portfolio, understand structured products, or run stress test scenarios. How can I assist you today?"
+            f"📁 **Portfolio Concentration Analysis**\n\n"
+            f"• **Why concentration is high**: Prior to this note, your portfolio had **{pi['before']['exposures'].get(p.underlying, {}).get('pct', 0)}%** exposure to {p.underlying}. Adding this {_inr(p.notional)} note raises it to **{pi['concentration_pct']}%**.\n"
+            f"• **Policy Limit**: Bank suitability policy caps single-underlying exposure at **{pi['concentration_limit_pct']}%**.\n"
+            f"• **Stress Loss Impact**: In a -35% crash, your portfolio loss increases from {pi['before']['loss_pct']}% to **{pi['after']['loss_pct']}%** (+{pi['delta_loss_pct']}% delta or {_inr(pi['delta_loss_inr'])}).\n"
+            f"• **Solution**: Reduce the product investment ticket (e.g. from ₹10L to ₹5L) to stay within the 50% limit."
         ), trace
 
     # ─────────────────────────────────────────────────────────────
-    # 3. CORE FINANCIAL CONCEPTS (PLAIN LANGUAGE EXPLAINERS)
+    # 5. WHY MARKED REVIEW / MISMATCH
     # ─────────────────────────────────────────────────────────────
-    # What is NIFTY / Index?
-    if re.search(r"\b(what is|what's|explain|tell me about|define|meaning of)\b.*\b(nifty|nifty 50|index|nse)\b", m) or m in ("nifty", "nifty 50", "what is nifty", "what is nifty?", "what is nifty 50", "what is nifty 50?"):
+    if re.search(r"\b(why.*review|why.*mismatch|why.*not suitable|explain.*verdict|rules fired|flags)\b", m):
+        a = call("run_assessment")
+        flagged_rules = [r for r in a.get("rules", []) if r.get("status") != "SUITABLE"]
+        rule_lines = "\n".join([f"• **{r['rule_id']} ({r['name']})**: {r['message']}" for r in flagged_rules]) or "All suitability rules passed."
         return (
-            "**What is the NIFTY 50?**\n\n"
-            "Think of the **NIFTY 50** as a **barometer or health check for India's economy**.\n\n"
-            "• It tracks the **50 largest and most established companies** in India (such as Reliance, TCS, HDFC Bank, Infosys, and ICICI Bank).\n"
-            "• When news channels say *'the Indian stock market is up 1%'*, they usually mean the NIFTY 50 has gone up.\n"
-            "• In your structured product, your investment payout is linked to the performance of this NIFTY 50 basket rather than a single risky stock."
-        ), trace
-
-    # What is USDINR?
-    if re.search(r"\b(what is|what's|explain|tell me about)\b.*\b(usdinr|usd/inr|dollar|currency|exchange rate)\b", m) or m in ("usdinr", "usd/inr", "what is usdinr", "what is usdinr?"):
-        return (
-            "**What is USD/INR?**\n\n"
-            "**USD/INR** is the exchange rate between the **US Dollar ($)** and the **Indian Rupee (₹)**.\n\n"
-            "• For example, if USD/INR is at 83.50, it means 1 US Dollar costs ₹83.50.\n"
-            "• In currency-linked products (like Dual Currency Deposits), your yield is boosted, but if the rupee strengthens or weakens past a preset level, your repayment may convert to the alternate currency."
-        ), trace
-
-    # What is an ELN (Equity Linked Note)?
-    if re.search(r"\b(what is|what's|explain|tell me about|how does.*work)\b.*\b(eln|equity linked note|structured product|note)\b", m) or m in ("eln", "what is eln", "what is eln?"):
-        return (
-            "**What is an Equity-Linked Note (ELN)?**\n\n"
-            "An **Equity-Linked Note (ELN)** is a wealth product that offers a **high fixed coupon (interest)** with built-in downside protection.\n\n"
-            "Here is how it works in 3 simple parts:\n"
-            f"1. **Fixed Reward (Coupon)**: You receive an attractive annual return (e.g. **{p.coupon_pct}%**).\n"
-            f"2. **Safety Cushion (Barrier)**: As long as the market does not fall below your safety line (e.g. **{p.barrier_pct}%** of starting level, which is a {100 - p.barrier_pct}% drop buffer), you get **100% of your invested capital back + your coupon**.\n"
-            f"3. **Downside Risk**: Only if the market experiences a severe crash beyond your {100 - p.barrier_pct}% buffer do you start sharing the loss with the market."
-        ), trace
-
-    # What is a Barrier?
-    if re.search(r"\b(what is|what's|explain|how does|tell me about)\b.*\b(barrier|knock in|safety net|cushion|buffer)\b", m) or m in ("barrier", "what is barrier", "what is a barrier", "what is barrier?"):
-        buffer_pct = 100 - (p.barrier_pct or 70)
-        return (
-            "**What is a Barrier?**\n\n"
-            f"A **Barrier** is your **downside safety net or airbag**.\n\n"
-            f"• In your current product, the barrier is set at **{p.barrier_pct}%**.\n"
-            f"• This means the market can fall by up to **{buffer_pct}%** during the investment term, and your principal is **100% safe and intact**.\n"
-            f"• If the market drops *more* than {buffer_pct}%, the barrier is breached, and your capital is no longer protected against market declines."
-        ), trace
-
-    # What is a Coupon?
-    if re.search(r"\b(what is|what's|explain|tell me about)\b.*\b(coupon|interest|payout|yield|gain)\b", m) or m in ("coupon", "what is coupon", "what is coupon?"):
-        inr_coupon = round(p.notional * p.coupon_pct / 100)
-        return (
-            "**What is a Coupon?**\n\n"
-            "A **Coupon** is the **fixed annual interest** paid to you for investing in the structured note.\n\n"
-            f"• For this product, the coupon rate is **{p.coupon_pct}% per year**.\n"
-            f"• On an investment of **{_inr(p.notional)}**, this equals **{_inr(inr_coupon)}** in interest payout over the tenor."
-        ), trace
-
-    # Can I lose my money / Is my principal safe?
-    if re.search(r"\b(can i lose|is my money safe|is principal safe|risk of loss|guaranteed|capital safe|lose money)\b", m):
-        buffer_pct = 100 - (p.barrier_pct or 70)
-        return (
-            "**Can you lose money in this product?**\n\n"
-            "**Yes, your principal is at risk under severe market crash conditions.**\n\n"
-            f"• **When you are protected**: If NIFTY 50 stays above the **{p.barrier_pct}% barrier** (i.e. does not crash more than {buffer_pct}%), you receive **100% of your principal back + your {p.coupon_pct}% coupon**.\n"
-            f"• **When you lose money**: If NIFTY crashes **more than {buffer_pct}%** and ends below its starting level, your capital is reduced proportionally to the market drop.\n"
-            f"• Because your profile is **{c.risk_appetite.title()} ({c.loss_tolerance_pct}% loss tolerance)**, this high tail-risk note requires careful review with your Relationship Manager."
-        ), trace
-
-    # What is Rupee Impact?
-    if re.search(r"\b(what is|what's|explain|tell me about)\b.*\b(rupee impact|rupee amount|money at risk|in inr|in rupees)\b", m):
-        return (
-            "**What is Rupee Impact?**\n\n"
-            "Financial reports often show risk in percentages (like *'28% tail loss'*), which can be hard to visualize.\n\n"
-            "The **Rupee Impact Engine** converts these percentages into **exact ₹ amounts**:\n"
-            f"• On a **{_inr(p.notional)}** investment, a 28% tail loss equals **{_inr(p.notional * 0.28)}**.\n"
-            f"• We also compare this loss to your income (e.g. *'equivalent to ~1.1 months of annual income'*) so you can make an informed, confident choice."
-        ), trace
-
-    # What is a Breaking Point?
-    if re.search(r"\b(what is|what's|explain|tell me about)\b.*\b(breaking point|vulnerability)\b", m):
-        return (
-            "**What is a Breaking Point?**\n\n"
-            "The **Breaking Point** is the exact market drop percentage where your investment changes from **'Safe / Protected'** to **'Unsuitable / Loss Warning'**.\n\n"
-            "It tells you precisely how much market shock your product and personal risk profile can withstand before rules are violated."
-        ), trace
-
-    # What is Teach-Back?
-    if re.search(r"\b(what is|what's|explain|tell me about)\b.*\b(teach back|teach-back|comprehension|quiz|questions)\b", m):
-        return (
-            "**What is Teach-Back?**\n\n"
-            "**Teach-Back** is a quick 3-question understanding check.\n\n"
-            "Before any high-value structured product is purchased, FinVision asks you 3 simple scenario questions to verify that you understand:\n"
-            "1. When your barrier can be breached\n"
-            "2. How the coupon payout works\n"
-            "3. What happens in a worst-case market crash\n\n"
-            "Your answers are verified directly by our deterministic engine so you never invest without complete clarity."
-        ), trace
-
-    # What is DCD / CPN?
-    if re.search(r"\b(what is|what's|explain)\b.*\b(dcd|dual currency deposit)\b", m):
-        return (
-            "**What is a Dual Currency Deposit (DCD)?**\n\n"
-            "A **Dual Currency Deposit (DCD)** is a short-term investment (often 1-3 months) linked to exchange rates (like USD/INR).\n\n"
-            "• You earn a higher-than-normal interest rate.\n"
-            "• If the exchange rate moves beyond a set strike level at maturity, your repayment converts into the alternate currency."
-        ), trace
-
-    if re.search(r"\b(what is|what's|explain)\b.*\b(cpn|capital protected note)\b", m):
-        return (
-            "**What is a Capital Protected Note (CPN)?**\n\n"
-            "A **Capital Protected Note (CPN)** is built for conservative investors who want zero or minimal risk to their principal.\n\n"
-            "• **100% Capital Protection**: You cannot lose your initial invested capital.\n"
-            "• **Growth Participation**: You earn a portion of the stock market's upside gains if the market rallies."
+            f"🔍 **Why this product is marked '{a.get('decision')}'**\n\n"
+            f"FinVision's deterministic rule engine evaluated your investment profile against this note:\n\n"
+            f"{rule_lines}\n\n"
+            f"• **Modeled Tail Risk Loss**: **{a.get('tail_loss_pct', 0):.1f}%** vs your configured comfort limit of **{c.loss_tolerance_pct}%**.\n"
+            f"• **Relationship Manager Action**: Discuss adjusting the barrier or notional using the Repair tool."
         ), trace
 
     # ─────────────────────────────────────────────────────────────
-    # 4. HOW MUCH COULD I LOSE IN RUPEES? / RUPEE IMPACT
+    # 6. HOW MUCH COULD I LOSE IN RUPEES? / RUPEE IMPACT
     # ─────────────────────────────────────────────────────────────
     if re.search(r"\b(how much.*lose|rupee loss|loss in rupees|worst case|rupee impact|maximum loss|tail loss)\b", m):
         a = call("run_assessment")
@@ -285,7 +209,7 @@ def offline_copilot(s: Session, message: str, mode: str = "client") -> tuple[str
         ), trace
 
     # ─────────────────────────────────────────────────────────────
-    # 5. BREAKING POINT SCANNER
+    # 7. BREAKING POINT SCANNER
     # ─────────────────────────────────────────────────────────────
     if re.search(r"\b(breaking|stop being suitable|stops? being suitable|how far|when do i lose|tolerance limit)\b", m):
         b = call("find_breaking_point")
@@ -305,7 +229,112 @@ def offline_copilot(s: Session, message: str, mode: str = "client") -> tuple[str
         ), trace
 
     # ─────────────────────────────────────────────────────────────
-    # 6. REPAIR / HOW TO FIX / ALTERNATIVE OPTIONS
+    # 8. DATE, TIME & MARKET HOURS
+    # ─────────────────────────────────────────────────────────────
+    if re.search(r"\b(current time|what time|time is it|time now|todays? date|what date|date today|current date|today is|date)\b", m) and not re.search(r"\b(barrier|coupon|tenor|product|maturity)\b", m):
+        import datetime
+        now = datetime.datetime.now()
+        dt_str = now.strftime("%A, %d %B %Y")
+        tm_str = now.strftime("%I:%M %p")
+        weekday = now.weekday()
+        is_market_day = weekday < 5
+        market_status = "🟢 Market session active" if is_market_day and (9 <= now.hour < 15 or (now.hour == 15 and now.minute <= 30)) else "⚪ Indian markets (NSE/BSE) are currently closed"
+
+        return (
+            f"🕒 **Current Date & Time**\n\n"
+            f"• **Date**: **{dt_str}**\n"
+            f"• **Time**: **{tm_str}**\n"
+            f"• **Market Status**: {market_status} *(Regular Trading: 9:15 AM – 3:30 PM IST, Mon–Fri)*\n\n"
+            f"Let me know if you would like to analyze market movements or check product scenarios!"
+        ), trace
+
+    # ─────────────────────────────────────────────────────────────
+    # 9. GREETINGS & GENERAL CONVERSATIONAL RESPONSES
+    # ─────────────────────────────────────────────────────────────
+    if re.search(r"^(hi|hello|hey|greetings|who are you|help|what can you do)\b", m):
+        cust_name = c.name if c else "Investor"
+        return (
+            f"Hello {cust_name}! 👋 I am your **FinVision AI Guide**.\n\n"
+            "I'm here to help you understand structured investments in simple, everyday language before you make any decisions.\n\n"
+            "Here are some questions you can ask me:\n"
+            "• **'What is NIFTY 50?'** — Learn what the market index represents.\n"
+            "• **'How does an ELN / Barrier work?'** — Understand how your safety buffer protects you.\n"
+            "• **'What happens if the market falls 35%?'** — See your exact return and rupee outcome.\n"
+            "• **'Why is this product marked Review?'** — View exact suitability factors.\n"
+            "• **'How much could I lose in Rupees?'** — View worst-case scenarios in real ₹ Lakhs.\n\n"
+            "What would you like to explore today?"
+        ), trace
+
+    if re.search(r"\b(thank you|thanks|great|awesome|helpful)\b", m):
+        return (
+            "You're very welcome! 😊 I am always here to help you understand your investments and protect your wealth. Feel free to ask any other questions anytime!"
+        ), trace
+
+    if re.search(r"\b(how are you|how are u)\b", m):
+        return (
+            "I'm doing great, thank you! Ready to help you explore your portfolio, understand structured products, or run stress test scenarios. How can I assist you today?"
+        ), trace
+
+    # ─────────────────────────────────────────────────────────────
+    # 10. CORE FINANCIAL CONCEPTS (PLAIN LANGUAGE EXPLAINERS)
+    # ─────────────────────────────────────────────────────────────
+    if re.search(r"\b(what is|what's|explain|tell me about|define|meaning of)\b.*\b(nifty|nifty 50|index|nse)\b", m) or m in ("nifty", "nifty 50", "what is nifty", "what is nifty?", "what is nifty 50", "what is nifty 50?"):
+        return (
+            "**What is the NIFTY 50?**\n\n"
+            "Think of the **NIFTY 50** as a **barometer or health check for India's economy**.\n\n"
+            "• It tracks the **50 largest and most established companies** in India (such as Reliance, TCS, HDFC Bank, Infosys, and ICICI Bank).\n"
+            "• When news channels say *'the Indian stock market is up 1%'*, they usually mean the NIFTY 50 has gone up.\n"
+            "• In your structured product, your investment payout is linked to the performance of this NIFTY 50 basket rather than a single risky stock."
+        ), trace
+
+    if re.search(r"\b(what is|what's|explain|tell me about)\b.*\b(usdinr|usd/inr|dollar|currency|exchange rate)\b", m) or m in ("usdinr", "usd/inr", "what is usdinr", "what is usdinr?"):
+        return (
+            "**What is USD/INR?**\n\n"
+            "**USD/INR** is the exchange rate between the **US Dollar ($)** and the **Indian Rupee (₹)**.\n\n"
+            "• For example, if USD/INR is at 83.50, it means 1 US Dollar costs ₹83.50.\n"
+            "• In currency-linked products (like Dual Currency Deposits), your yield is boosted, but if the rupee strengthens or weakens past a preset level, your repayment may convert to the alternate currency."
+        ), trace
+
+    if re.search(r"\b(what is|what's|explain|tell me about|how does.*work)\b.*\b(eln|equity linked note|structured product|note)\b", m) or m in ("eln", "what is eln", "what is eln?"):
+        return (
+            "**What is an Equity-Linked Note (ELN)?**\n\n"
+            "An **Equity-Linked Note (ELN)** is a wealth product that offers a **high fixed coupon (interest)** with built-in downside protection.\n\n"
+            "Here is how it works in 3 simple parts:\n"
+            f"1. **Fixed Reward (Coupon)**: You receive an attractive annual return (e.g. **{p.coupon_pct}%**).\n"
+            f"2. **Safety Cushion (Barrier)**: As long as the market does not fall below your safety line (e.g. **{p.barrier_pct}%** of starting level, which is a {100 - p.barrier_pct}% drop buffer), you get **100% of your invested capital back + your coupon**.\n"
+            f"3. **Downside Risk**: Only if the market experiences a severe crash beyond your {100 - p.barrier_pct}% buffer do you start sharing the loss with the market."
+        ), trace
+
+    if re.search(r"\b(what is|what's|explain|how does|tell me about)\b.*\b(barrier|knock in|safety net|cushion|buffer)\b", m) or m in ("barrier", "what is barrier", "what is a barrier", "what is barrier?"):
+        buffer_pct = 100 - (p.barrier_pct or 70)
+        return (
+            "**What is a Barrier?**\n\n"
+            f"A **Barrier** is your **downside safety net or airbag**.\n\n"
+            f"• In your current product, the barrier is set at **{p.barrier_pct}%**.\n"
+            f"• This means the market can fall by up to **{buffer_pct}%** during the investment term, and your principal is **100% safe and intact**.\n"
+            f"• If the market drops *more* than {buffer_pct}%, the barrier is breached, and your capital is no longer protected against market declines."
+        ), trace
+
+    if re.search(r"\b(what is|what's|explain|tell me about)\b.*\b(coupon|interest|payout|yield|gain)\b", m) or m in ("coupon", "what is coupon", "what is coupon?"):
+        inr_coupon = round(p.notional * p.coupon_pct / 100)
+        return (
+            "**What is a Coupon?**\n\n"
+            "A **Coupon** is the **fixed annual interest** paid to you for investing in the structured note.\n\n"
+            f"• For this product, the coupon rate is **{p.coupon_pct}% per year**.\n"
+            f"• On an investment of **{_inr(p.notional)}**, this equals **{_inr(inr_coupon)}** in interest payout over the tenor."
+        ), trace
+
+    if re.search(r"\b(can i lose|is my money safe|is principal safe|risk of loss|guaranteed|capital safe|lose money|protected)\b", m):
+        buffer_pct = 100 - (p.barrier_pct or 70)
+        return (
+            "**Is your principal protected if NIFTY falls?**\n\n"
+            f"• **Protected Zone**: If NIFTY stays above the **{p.barrier_pct}% barrier** (meaning it does not fall more than {buffer_pct}%), **100% of your principal is returned**, PLUS your **{p.coupon_pct}% annual coupon**!\n"
+            f"• **Loss Zone**: If NIFTY experiences a deep crash beyond **{buffer_pct}%**, the barrier is breached. At that point, your principal participates in the market decline (e.g. at -35%, final value is {_inr(p.notional * 0.77)} after coupon).\n"
+            f"• **Suitability Status**: Because your profile has a conservative **{c.loss_tolerance_pct}% loss tolerance**, our suitability engine flagged this for RM review."
+        ), trace
+
+    # ─────────────────────────────────────────────────────────────
+    # 11. REPAIR / HOW TO FIX / ALTERNATIVE OPTIONS
     # ─────────────────────────────────────────────────────────────
     if re.search(r"\b(repair|fix|make.*suitable|alternative|how to solve|what should i change|options|reduce|change)\b", m):
         rep = call("suggest_repairs").get("repairs", [])
@@ -324,7 +353,7 @@ def offline_copilot(s: Session, message: str, mode: str = "client") -> tuple[str
         ), trace
 
     # ─────────────────────────────────────────────────────────────
-    # 7. SUITABILITY ASSESSMENT & PROFILE MATCH
+    # 12. SUITABILITY ASSESSMENT & PROFILE MATCH
     # ─────────────────────────────────────────────────────────────
     if re.search(r"\b(suitab|suit|should|fit|ok for|good for|assess|verdict)\b", m):
         a = call("run_assessment")
@@ -346,28 +375,30 @@ def offline_copilot(s: Session, message: str, mode: str = "client") -> tuple[str
         return f"Decision: {a['decision']}. Tail loss {a['tail_loss_pct']:g}%. Flags: {flagged}.", trace
 
     # ─────────────────────────────────────────────────────────────
-    # 8. RAG KNOWLEDGE SEARCH SYNTHESIS (FALLBACK)
+    # 13. RAG KNOWLEDGE SEARCH (FALLBACK)
     # ─────────────────────────────────────────────────────────────
-    hits = call("search_knowledge", query=message).get("passages", [])
-    if hits:
-        if mode == "client":
-            cleaned = _clean_passage(hits[0]["text"])
-            return (
-                f"**Here is what you need to know:**\n\n"
-                f"{cleaned}\n\n"
-                f"Feel free to ask if you'd like me to explain this in terms of your personal investment or run a scenario!"
-            ), trace
-        return f"{hits[0]['text']} [kb:{hits[0]['id']}]", trace
+    if len(m.split()) >= 2 or any(k in m for k in ["nifty", "eln", "dcd", "cpn", "barrier", "coupon", "tenor", "strike", "suitab", "risk", "loss", "bank", "policy", "sebi", "rbi"]):
+        hits = call("search_knowledge", query=message).get("passages", [])
+        if hits:
+            if mode == "client":
+                cleaned = _clean_passage(hits[0]["text"])
+                return (
+                    f"**Here is what you need to know:**\n\n"
+                    f"{cleaned}\n\n"
+                    f"Feel free to ask if you'd like me to run a scenario or calculate your rupee impact!"
+                ), trace
+            return f"{hits[0]['text']} [kb:{hits[0]['id']}]", trace
 
     # ─────────────────────────────────────────────────────────────
-    # 9. GENERAL DEFAULT HELPER
+    # 14. GENERAL DEFAULT HELPER
     # ─────────────────────────────────────────────────────────────
     return (
-        "I can help explain any financial terms, evaluate your risk, or calculate rupee outcomes in simple language!\n\n"
+        "I am your FinVision AI Assistant. I can explain any product terms, calculate rupee outcomes, evaluate stress scenarios, or check suitability factors in simple language!\n\n"
         "Try asking:\n"
-        "• *'What is NIFTY 50?'*\n"
-        "• *'What happens if NIFTY falls 25%?'*\n"
-        "• *'How much could I lose in Rupees?'*\n"
-        "• *'Is this investment suitable for Rahul?'*\n"
-        "• *'What is a barrier cushion?'*"
+        "• *'What happens if NIFTY falls 35%?'*\n"
+        "• *'Why is this product marked Review?'*\n"
+        "• *'How much money could I lose in rupees?'*\n"
+        "• *'What happens if the barrier is reduced to 65%?'*\n"
+        "• *'How does this product affect my portfolio?'*\n"
+        "• *'What is my breaking point?'*"
     ), trace
