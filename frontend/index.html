@@ -60,30 +60,65 @@ body{
 /* ── Login ── */
 #login-screen {
   min-height:100vh;display:flex;align-items:center;justify-content:center;
-  background:radial-gradient(circle at top, rgba(255,255,255,0.18), transparent 28%), linear-gradient(135deg,#071a38 0%,#0d224a 28%,#163f9d 100%);
+  background:linear-gradient(135deg,#edf3f8 0%,#f7f9fc 52%,#e6eef7 100%);
   padding:24px;
 }
 .login-box {
-  background:rgba(255,255,255,0.94);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
-  border:1px solid rgba(255,255,255,0.22);border-radius:28px;padding:34px 32px;width:100%;max-width:470px;
-  box-shadow:0 30px 80px rgba(2,6,23,0.38);
+  width:100%;max-width:1040px;min-height:610px;display:grid;grid-template-columns:0.92fr 1.08fr;
+  overflow:hidden;border:1px solid #dce4ed;border-radius:10px;background:#fff;
+  box-shadow:0 28px 80px rgba(12,35,67,0.16);animation:loginEnter .5s ease both;
 }
-.login-logo { text-align:center;margin-bottom:22px }
-.login-logo .logo-name { font-size:30px;font-weight:800;color:var(--pri);letter-spacing:-0.7px }
-.login-logo .logo-tagline { font-size:13px;color:var(--mut);margin-top:4px }
-.login-tabs { display:flex;gap:8px;margin-bottom:24px;padding:4px;background:#edf4ff;border-radius:12px }
-.login-tab { flex:1;padding:11px 10px;border-radius:10px;border:1px solid transparent;background:transparent;cursor:pointer;font:600 13px 'Inter',sans-serif;color:var(--mut);transition:.18s ease }
-.login-tab.active { border-color:rgba(30,64,175,0.18);color:var(--pri);background:#fff;box-shadow:0 8px 18px rgba(37,99,235,0.10) }
-.login-field label { display:block;font-size:12px;font-weight:600;color:var(--ink2);margin-bottom:7px }
-.login-field input { width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;font:inherit;font-size:14px;outline:none;transition:.15s;background:#f7faff }
-.login-field input:focus { border-color:rgba(37,99,235,0.55);box-shadow:0 0 0 4px rgba(37,99,235,0.08) }
-.login-field { margin-bottom:14px }
-.btn-login { width:100%;padding:14px 18px;background:linear-gradient(135deg,var(--pri-2),var(--pri));color:#fff;border:0;border-radius:12px;font:700 16px 'Inter',sans-serif;cursor:pointer;margin-top:6px;transition:.15s;box-shadow:0 16px 28px rgba(30,64,175,0.24) }
-.btn-login:hover { transform:translateY(-1px); background:linear-gradient(135deg,var(--pri),var(--pri-2)) }
-.demo-creds { background:linear-gradient(180deg,#f7faff,#eef5ff);border:1px solid rgba(59,130,246,0.15);border-radius:12px;padding:12px 14px;margin-top:16px;font-size:12px }
-.demo-creds b { color:var(--pri);display:block;margin-bottom:6px;font-size:12px }
-.demo-creds span { color:var(--mut);line-height:1.6 }
+.login-form { display:flex;flex-direction:column;justify-content:center;padding:54px clamp(30px,5vw,64px); }
+.login-logo { margin-bottom:38px }
+.login-logo .logo-name { font-size:26px;font-weight:800;color:#123b78;letter-spacing:0 }
+.login-logo .logo-tagline { font-size:12px;color:#718096;margin-top:3px }
+.login-heading { margin-bottom:24px }
+.login-heading h1 { font-size:25px;font-weight:700;color:#142c4a;line-height:1.25 }
+.login-heading p { margin-top:6px;font-size:13px;color:#718096 }
+.login-tabs { display:flex;gap:4px;margin-bottom:22px;padding:4px;background:#f0f4f8;border-radius:7px }
+.login-tab { flex:1;min-width:0;padding:10px 8px;border-radius:5px;border:1px solid transparent;background:transparent;cursor:pointer;font:600 12px 'Inter',sans-serif;color:#65758a;transition:background .18s ease,color .18s ease,border-color .18s ease }
+.login-tab.active { border-color:#dce6f1;color:#123b78;background:#fff;box-shadow:0 2px 5px rgba(16,40,72,0.07) }
+.login-field label { display:block;font-size:12px;font-weight:600;color:#344b67;margin-bottom:7px }
+.login-field input { width:100%;padding:12px 13px;border:1px solid #d7e0ea;border-radius:5px;font:inherit;font-size:14px;outline:none;transition:border-color .15s,box-shadow .15s;background:#fbfcfe;color:#142c4a }
+.login-field input::placeholder { color:#97a5b6 }
+.login-field input:focus { border-color:#3975bd;box-shadow:0 0 0 3px rgba(57,117,189,0.13);background:#fff }
+.login-field { margin-bottom:15px }
+.btn-login { width:100%;padding:13px 18px;background:#123f7b;color:#fff;border:0;border-radius:5px;font:700 14px 'Inter',sans-serif;cursor:pointer;margin-top:5px;transition:background .15s,transform .15s;box-shadow:0 5px 12px rgba(18,63,123,0.16) }
+.btn-login:hover { transform:translateY(-1px);background:#0d3266 }
+.login-visual { position:relative;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;padding:34px 38px;color:#fff;background:linear-gradient(145deg,#08234c 0%,#0b3974 58%,#1261a5 100%) }
+.login-visual::before { content:'';position:absolute;inset:0;background:linear-gradient(rgba(255,255,255,0.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.035) 1px,transparent 1px);background-size:34px 34px;mask-image:linear-gradient(to bottom,black,transparent 82%);pointer-events:none }
+.login-visual-top,.login-visual-bottom,.scenario-card { position:relative;z-index:1 }
+.login-visual-top { display:flex;justify-content:space-between;align-items:center;gap:12px }
+.visual-brand { font-size:11px;font-weight:700;letter-spacing:1.1px;color:#dceaff }
+.visual-status { display:flex;align-items:center;gap:7px;font-size:10px;color:#d5e5f8 }
+.visual-status::before { content:'';width:7px;height:7px;border-radius:50%;background:#72d7bc;box-shadow:0 0 0 3px rgba(114,215,188,0.13) }
+.visual-content { width:100%;max-width:420px;margin:auto;padding:38px 0 30px; }
+.visual-content h2 { max-width:350px;font-size:30px;font-weight:600;line-height:1.2;color:#fff }
+.visual-content p { margin-top:10px;color:#bed1e8;font-size:13px }
+.scenario-card { padding:18px 18px 14px;border:1px solid rgba(219,235,255,0.24);border-radius:7px;background:rgba(4,24,53,0.43);box-shadow:0 16px 32px rgba(0,12,32,0.16);backdrop-filter:blur(8px) }
+.scenario-card-head { display:flex;justify-content:space-between;align-items:center;gap:12px }
+.scenario-card-title { font-size:12px;font-weight:600;color:#f1f6fd }
+.scenario-chip { border:1px solid rgba(192,219,249,0.24);border-radius:999px;padding:4px 8px;color:#c4dcf6;font-size:9px;text-transform:uppercase }
+.scenario-chart { display:block;width:100%;height:126px;margin-top:12px }
+.scenario-legend { display:flex;justify-content:space-between;gap:10px;padding-top:10px;border-top:1px solid rgba(219,235,255,0.15);color:#bbcee5;font-size:10px }
+.login-visual-bottom { color:#a8c0dc;font-size:10px }
+.demo-creds { background:#f5f8fb;border:1px solid #e3eaf1;border-radius:5px;padding:10px 12px;margin-top:16px;font-size:11px }
+.demo-creds b { color:#284d78;display:block;margin-bottom:3px;font-size:11px }
+.demo-creds span { color:#718096;line-height:1.6 }
 .login-err { color:var(--bad);font-size:12px;margin-top:8px;display:none;font-weight:600 }
+@keyframes loginEnter { from { opacity:0;transform:translateY(8px) } to { opacity:1;transform:translateY(0) } }
+@media(max-width:760px) {
+  #login-screen { padding:16px;align-items:flex-start; }
+  .login-box { max-width:480px;min-height:0;margin:auto;grid-template-columns:1fr; }
+  .login-form { padding:32px 28px; }
+  .login-logo { margin-bottom:28px; }
+  .login-visual { display:none; }
+}
+@media(max-width:380px) {
+  #login-screen { padding:10px; }
+  .login-form { padding:26px 20px; }
+  .login-tab { font-size:11px; }
+}
 
 /* ── App Shell ── */
 #app-shell { display:none;min-height:100vh }
@@ -529,6 +564,12 @@ tr:hover td { background:#fafcff }
 }
 .scenario-btn:hover { border-color: var(--pri); color: var(--pri); background: #f0f7ff; }
 .scenario-btn.active { background: var(--pri); color: #fff; border-color: var(--pri); }
+.sim-run-status { min-height:18px;margin-top:7px;text-align:center;font-size:11px;color:#17634d; }
+.matrix-guide { padding:12px 14px;background:#f3f7fc;border:1px solid #dce6f1;border-radius:6px;color:#40536c;font-size:12px;line-height:1.6; }
+.matrix-guide strong { display:block;color:#17385f;font-size:12px;margin-bottom:3px; }
+.matrix-quick-tests { display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px; }
+.matrix-quick-tests-label { margin-right:2px;color:var(--ink2);font-size:12px;font-weight:600; }
+.matrix-context { margin-top:10px;color:#536982;font-size:12px;line-height:1.6; }
 .nav-badge { background: #ef4444; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 999px; margin-left: auto; }
 </style>
 </head>
@@ -537,32 +578,69 @@ tr:hover td { background:#fafcff }
 <!-- ══════════════ LOGIN ══════════════ -->
 <div id="login-screen">
   <div class="login-box">
-    <div class="login-logo">
-      <div class="logo-name">FinVision</div>
-      <div class="logo-tagline">Understand Before You Invest</div>
-    </div>
-    <div class="login-tabs">
-      <button class="login-tab active" id="tab-rm" onclick="switchLoginTab('rm')">Relationship Manager</button>
-      <button class="login-tab" id="tab-customer" onclick="switchLoginTab('customer')">Customer</button>
-    </div>
-    <div class="login-field">
-      <label>Email</label>
-      <input type="email" id="login-email" placeholder="Enter your email" onkeydown="if(event.key==='Enter')doLogin()">
-    </div>
-    <div class="login-field">
-      <label>Password</label>
-      <input type="password" id="login-password" placeholder="Enter your password" onkeydown="if(event.key==='Enter')doLogin()">
-    </div>
-    <div id="login-err" class="login-err">Invalid credentials. Please try again.</div>
-    <button class="btn-login" onclick="doLogin()">Sign In</button>
-    <div class="demo-creds" id="demo-creds-rm">
-      <b>Demo credentials (RM)</b>
-      <span>Email: rm@finvision.demo<br>Password: RM@123</span>
-    </div>
-    <div class="demo-creds" id="demo-creds-customer" style="display:none">
-      <b>Demo credentials (Customer)</b>
-      <span>Email: customer@finvision.demo<br>Password: Customer@123</span>
-    </div>
+    <section class="login-form" aria-label="Sign in">
+      <div class="login-logo">
+        <div class="logo-name">FinVision</div>
+        <div class="logo-tagline">Understand Before You Invest</div>
+      </div>
+      <div class="login-heading">
+        <h1>Welcome back</h1>
+        <p>Sign in to continue to your account.</p>
+      </div>
+      <div class="login-tabs">
+        <button class="login-tab active" id="tab-rm" onclick="switchLoginTab('rm')">Relationship Manager</button>
+        <button class="login-tab" id="tab-customer" onclick="switchLoginTab('customer')">Customer</button>
+      </div>
+      <div class="login-field">
+        <label for="login-email">Email</label>
+        <input type="email" id="login-email" placeholder="Enter your email" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <div class="login-field">
+        <label for="login-password">Password</label>
+        <input type="password" id="login-password" placeholder="Enter your password" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <div id="login-err" class="login-err">Invalid credentials. Please try again.</div>
+      <button class="btn-login" onclick="doLogin()">Sign In</button>
+      <div class="demo-creds" id="demo-creds-rm">
+        <b>Demo credentials (RM)</b>
+        <span>Email: rm@finvision.demo<br>Password: RM@123</span>
+      </div>
+      <div class="demo-creds" id="demo-creds-customer" style="display:none">
+        <b>Demo credentials (Customer)</b>
+        <span>Email: customer@finvision.demo<br>Password: Customer@123</span>
+      </div>
+    </section>
+    <aside class="login-visual" aria-label="Illustrative payoff profile">
+      <div class="login-visual-top">
+        <span class="visual-brand">FINVISION / WEALTH PLATFORM</span>
+        <span class="visual-status">Private workspace</span>
+      </div>
+      <div class="visual-content">
+        <h2>Risk, made visible.</h2>
+        <p>Structured product · Scenario view</p>
+      </div>
+      <div class="scenario-card">
+        <div class="scenario-card-head">
+          <span class="scenario-card-title">Illustrative payoff profile</span>
+          <span class="scenario-chip">At maturity</span>
+        </div>
+        <svg class="scenario-chart" viewBox="0 0 400 126" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <linearGradient id="payoff-fill" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0" stop-color="#68b8ff" stop-opacity=".32" />
+              <stop offset="1" stop-color="#68b8ff" stop-opacity="0" />
+            </linearGradient>
+          </defs>
+          <path d="M0 23H400M0 62H400M0 101H400" stroke="#d5e5f8" stroke-opacity=".14" stroke-width="1" />
+          <path d="M8 92C58 89 71 75 116 78S183 79 218 62 275 48 307 46 360 28 392 17V112H8Z" fill="url(#payoff-fill)" />
+          <path d="M8 92C58 89 71 75 116 78S183 79 218 62 275 48 307 46 360 28 392 17" fill="none" stroke="#8dccff" stroke-width="3" stroke-linecap="round" />
+          <path d="M218 16V111" stroke="#e4bd70" stroke-opacity=".82" stroke-width="1.5" stroke-dasharray="4 5" />
+          <circle cx="218" cy="62" r="4" fill="#e4bd70" />
+        </svg>
+        <div class="scenario-legend"><span>Downside</span><span>Barrier</span><span>Upside</span></div>
+      </div>
+      <div class="login-visual-bottom">FINVISION <span aria-hidden="true">·</span> Understand Before You Invest</div>
+    </aside>
   </div>
 </div>
 
@@ -1047,7 +1125,8 @@ function buildRMPages() {
           </div>
         </div>
 
-        <button class="btn btn-primary btn-full mt14" onclick="runRMSimulation()">🚀 Run Live Simulation</button>
+        <button class="btn btn-primary btn-full mt14" onclick="runRMSimulation(true)">🚀 Run Live Simulation</button>
+        <div id="sim-run-status" class="sim-run-status" aria-live="polite"></div>
       </div>
 
       <!-- Live Payoff & Results Box -->
@@ -1110,6 +1189,17 @@ function buildRMPages() {
         <span>📋 Comprehensive Market Scenario Matrix</span>
         <span class="text-xs mut">Highlights behavior across adverse shocks and bull regimes</span>
       </div>
+      <div class="matrix-guide">
+        <strong>How to read this table</strong>
+        Market move is the assumed change in the underlying at maturity. Total payout = principal returned + coupon; net P&amp;L = payout minus your investment; net return is that gain or loss as a percentage of your investment. The highlighted row matches the selected market move.
+      </div>
+      <div class="matrix-quick-tests" role="group" aria-label="Try a market scenario">
+        <span class="matrix-quick-tests-label">Try a scenario:</span>
+        <button class="scenario-btn" onclick="setSimMove(-40)">-40% Crash</button>
+        <button class="scenario-btn" onclick="setSimMove(-30)">At -30% Barrier</button>
+        <button class="scenario-btn" onclick="setSimMove(15)">+15% Rally</button>
+      </div>
+      <div id="sim-matrix-context" class="matrix-context" aria-live="polite"></div>
       <div id="sim-scenario-table" style="overflow-x:auto;margin-top:10px"></div>
     </div>
 
@@ -4580,7 +4670,7 @@ function transferSimToStudio() {
   livePayoff();
 }
 
-function runRMSimulation() {
+function runRMSimulation(showConfirmation = false) {
   if (!$('sim-hero-payout')) return;
 
   const notional = +($('sim-notional')?.value || 1000000);
@@ -4667,6 +4757,11 @@ function runRMSimulation() {
 
   // Narrative explanation
   renderSimNarrative(RM_SIM_STATE, res, targetCust);
+
+  if (showConfirmation && $('sim-run-status')) {
+    const moveLabel = `${movePct > 0 ? '+' : ''}${movePct}%`;
+    $('sim-run-status').textContent = `Updated for ${moveLabel} market movement. Maturity payout: ${fmtInr(res.finalValue)}.`;
+  }
 }
 
 function renderSimPayoffChart(state, currentRes) {
@@ -4889,6 +4984,18 @@ function renderSimPayoffChart(state, currentRes) {
 function renderSimScenarioTable(state, currentRes) {
   const el = $('sim-scenario-table');
   if (!el) return;
+
+  const context = $('sim-matrix-context');
+  if (context) {
+    if (state.productType === 'ELN') {
+      const maxDrop = 100 - state.barrierPct;
+      context.textContent = `ELN at ${state.barrierPct}% barrier: a ${maxDrop}% fall lands exactly on the barrier and is not counted as breached by this model; a larger fall puts principal at risk. This is a maturity-value illustration, not a simulation of the path taken during the investment.`;
+    } else if (state.productType === 'CPN') {
+      context.textContent = `CPN at ${state.protectionPct}% protection: the principal floor is ${fmtInr(state.notional * state.protectionPct / 100)}. Positive market movement can add value according to the ${state.participationPct}% participation rate.`;
+    } else {
+      context.textContent = `DCD: if the underlying finishes below its strike, the model applies the currency-conversion outcome; otherwise, principal and the modeled interest are returned.`;
+    }
+  }
 
   const scenarios = [-50, -40, -30, -20, -10, 0, 15, 30];
   const rows = scenarios.map(m => {
