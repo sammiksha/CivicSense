@@ -35,7 +35,7 @@ class ProductSpec(BaseModel):
 
 
 class CustomerProfile(BaseModel):
-    id: str
+    id: Optional[str] = None
     name: str = "Customer"
     risk_appetite: Literal["conservative", "moderate", "aggressive"]
     loss_tolerance_pct: float = Field(ge=0, le=100)

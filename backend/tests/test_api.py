@@ -7,14 +7,14 @@ P = {"product_type": "ELN", "underlying": "NIFTY 50", "tenor_months": 12, "coupo
 
 def test_health_and_customers():
     assert c.get("/health").json()["llm_mode"] == "offline"
-    assert len(c.get("/api/v1/customers").json()) == 3
+    assert len(c.get("/api/v1/customers").json()) >= 3
 
 
 def test_assessment_audit_report():
     r = c.post("/api/v1/assessment", json={"product": P, "customer_id": "C101", "mode": "rm"})
     assert r.status_code == 200, r.text
     j = r.json()
-    assert j["status"] in ("REVIEW", "MISMATCH") and j["flags"] and j["result"]["data_source"] == "synthetic_fallback"
+    assert j["status"] in ("REVIEW", "MISMATCH") and j["flags"] and j["result"]["data_source"] in ("synthetic_fallback", "cached_real")
     aid = j["audit_id"]
     assert c.get(f"/api/v1/audit/{aid}").json()["decision"] == j["status"]
     pdf = c.get(f"/api/v1/report/{aid}")

@@ -104,24 +104,40 @@ def save_alerts(alerts: list[dict]) -> list[int]:
     ids = []
     with closing(_conn()) as c:
         for a in alerts:
-            cur = c.execute(
-                "INSERT INTO alerts(customer_id,assessment_id,alert_type,severity,title,message,trigger_value,threshold,recommended_action,ts) VALUES(?,?,?,?,?,?,?,?,?,?)",
-                (a["customer_id"], a["assessment_id"], a["alert_type"], a["severity"],
-                 a["title"], a["message"], a["trigger_value"], a["threshold"],
-                 a["recommended_action"], a["ts"]))
-            ids.append(cur.lastrowid)
+            existing = c.execute(
+                "SELECT id FROM alerts WHERE customer_id=? AND title=? AND is_read=0",
+                (a["customer_id"], a["title"])).fetchone()
+            if existing:
+                c.execute(
+                    "UPDATE alerts SET assessment_id=?, message=?, trigger_value=?, threshold=?, ts=? WHERE id=?",
+                    (a["assessment_id"], a["message"], a["trigger_value"], a["threshold"], a["ts"], existing[0]))
+                ids.append(existing[0])
+            else:
+                cur = c.execute(
+                    "INSERT INTO alerts(customer_id,assessment_id,alert_type,severity,title,message,trigger_value,threshold,recommended_action,ts) VALUES(?,?,?,?,?,?,?,?,?,?)",
+                    (a["customer_id"], a["assessment_id"], a["alert_type"], a["severity"],
+                     a["title"], a["message"], a["trigger_value"], a["threshold"],
+                     a["recommended_action"], a["ts"]))
+                ids.append(cur.lastrowid)
         c.commit()
     return ids
 
 
-def get_alerts(customer_id: str, unread_only: bool = False) -> list[dict]:
+def get_alerts(customer_id: str | None = None, unread_only: bool = False) -> list[dict]:
     init_alerts()
     with closing(_conn()) as c:
-        q = "SELECT * FROM alerts WHERE customer_id=?"
-        if unread_only:
-            q += " AND is_read=0"
+        if customer_id and customer_id not in ("all", "*", ""):
+            q = "SELECT * FROM alerts WHERE customer_id=?"
+            params = [customer_id]
+            if unread_only:
+                q += " AND is_read=0"
+        else:
+            q = "SELECT * FROM alerts WHERE 1=1"
+            params = []
+            if unread_only:
+                q += " AND is_read=0"
         q += " ORDER BY id DESC LIMIT 50"
-        rows = c.execute(q, (customer_id,)).fetchall()
+        rows = c.execute(q, params).fetchall()
     return [dict(r) for r in rows]
 
 
@@ -132,7 +148,20 @@ def mark_read(alert_id: int):
         c.commit()
 
 
-def unread_count(customer_id: str) -> int:
+def mark_all_read(customer_id: str | None = None):
     init_alerts()
     with closing(_conn()) as c:
-        return c.execute("SELECT COUNT(*) FROM alerts WHERE customer_id=? AND is_read=0", (customer_id,)).fetchone()[0]
+        if customer_id and customer_id not in ("all", "*", ""):
+            c.execute("UPDATE alerts SET is_read=1 WHERE customer_id=?", (customer_id,))
+        else:
+            c.execute("UPDATE alerts SET is_read=1")
+        c.commit()
+
+
+def unread_count(customer_id: str | None = None) -> int:
+    init_alerts()
+    with closing(_conn()) as c:
+        if customer_id and customer_id not in ("all", "*", ""):
+            return c.execute("SELECT COUNT(*) FROM alerts WHERE customer_id=? AND is_read=0", (customer_id,)).fetchone()[0]
+        return c.execute("SELECT COUNT(*) FROM alerts WHERE is_read=0").fetchone()[0]
+

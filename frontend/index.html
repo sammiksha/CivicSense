@@ -371,6 +371,165 @@ tr:hover td { background:#fafcff }
 .regime-card.mild { background:#fefce8 }
 .regime-card.severe { background:#fff7ed }
 .regime-card.crash { background:#fff1f2 }
+
+/* ── Interactive Playground Sliders & Sandbox ── */
+.range-slider-wrap { position:relative; margin:14px 0 10px; }
+.range-slider {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 9px; border-radius: 999px;
+  background: #cbd5e1; outline: none; transition: background .2s; cursor: pointer;
+}
+.range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: #ffffff; border: 3px solid #1d4ed8;
+  box-shadow: 0 4px 14px rgba(29,78,216,0.38);
+  cursor: grab; transition: transform .15s ease, box-shadow .15s ease;
+}
+.range-slider::-webkit-slider-thumb:hover, .range-slider::-webkit-slider-thumb:active {
+  transform: scale(1.22); box-shadow: 0 6px 18px rgba(29,78,216,0.5); cursor: grabbing;
+}
+.range-slider::-moz-range-thumb {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: #ffffff; border: 3px solid #1d4ed8;
+  box-shadow: 0 4px 14px rgba(29,78,216,0.38);
+  cursor: grab; transition: transform .15s ease;
+}
+.range-slider.scenario-slider {
+  background: linear-gradient(90deg, #dc2626 0%, #ea580c 25%, #f59e0b 45%, #10b981 70%, #2563eb 100%);
+}
+.range-slider.scenario-slider::-webkit-slider-thumb {
+  border-color: #0f172a;
+}
+.slider-marks { display: flex; justify-content: space-between; font-size: 11px; color: var(--mut); margin-top: 6px; font-weight: 500; }
+.slider-val-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 12px; border-radius: 8px; font-weight: 700;
+  font-size: 15px; background: #eff6ff; color: #1d4ed8; border: 1px solid rgba(59,130,246,0.22);
+}
+.preset-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+.preset-chip {
+  padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 600;
+  background: #f1f5f9; color: var(--ink2); border: 1px solid rgba(148,163,184,0.25);
+  cursor: pointer; transition: all .15s ease; user-select: none;
+}
+.preset-chip:hover {
+  background: #e2e8f0; color: var(--pri); transform: translateY(-1px);
+}
+.preset-chip.active {
+  background: linear-gradient(135deg, var(--pri-2), var(--pri)); color: #ffffff;
+  border-color: transparent; box-shadow: 0 4px 12px rgba(37,99,235,0.25);
+}
+.scenario-btn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px;
+  border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer;
+  border: 1px solid rgba(148,163,184,0.25); background: #ffffff; color: var(--ink);
+  transition: all .15s ease;
+}
+.scenario-btn:hover {
+  background: #f8fafc; border-color: var(--pri); transform: translateY(-1px);
+}
+.scenario-btn.active {
+  background: #eff6ff; border-color: #3b82f6; color: #1d4ed8; font-weight: 700;
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.18);
+}
+.risk-meter-bar {
+  position: relative; height: 16px; border-radius: 999px;
+  background: linear-gradient(90deg, #dc2626 0%, #ea580c 25%, #f59e0b 50%, #10b981 75%, #2563eb 100%);
+  margin: 14px 0 6px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.12);
+}
+.risk-meter-pin {
+  position: absolute; top: -5px; width: 14px; height: 26px; border-radius: 7px;
+  background: #0f172a; border: 2px solid #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+  transform: translateX(-50%); transition: left .2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.play-card {
+  background: linear-gradient(180deg, #ffffff 0%, #f8faff 100%);
+  border: 1.5px solid rgba(148,163,184,0.22); border-radius: 22px; padding: 20px;
+  box-shadow: var(--shadow-card); transition: all .2s ease;
+}
+.play-hero-box {
+  background: linear-gradient(135deg, #071a38 0%, #0d2a63 50%, #163f9d 100%);
+  color: #ffffff; border-radius: 20px; padding: 22px; box-shadow: 0 16px 40px rgba(11,24,54,0.24);
+  position: relative; overflow: hidden;
+}
+.play-hero-box::before {
+  content: ''; position: absolute; inset: -40% auto auto -25%; width: 55%; height: 160%;
+  background: linear-gradient(120deg, rgba(255,255,255,0.15), rgba(255,255,255,0.01));
+  transform: rotate(18deg); pointer-events: none;
+}
+.explain-card {
+  background: linear-gradient(180deg, #ffffff 0%, #f4f8ff 100%);
+  border: 1.5px solid rgba(37,99,235,0.22); border-radius: 22px; padding: 22px;
+  box-shadow: 0 14px 32px rgba(37,99,235,0.06); margin-top: 18px;
+}
+.explain-step {
+  display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px dashed rgba(148,163,184,0.25);
+  align-items: flex-start;
+}
+.explain-step:last-child { border-bottom: none; }
+.explain-icon {
+  width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center;
+  font-size: 20px; flex-shrink: 0; background: #ffffff; border: 1.5px solid rgba(148,163,184,0.22);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+.explain-body h4 { font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+.explain-body p { font-size: 13px; color: var(--ink2); line-height: 1.65; margin: 0; }
+.quick-sim-banner {
+  background: linear-gradient(135deg, #ffffff 0%, #edf4ff 100%);
+  border: 1.5px solid rgba(37,99,235,0.25); border-radius: 22px; padding: 20px 22px;
+  box-shadow: 0 12px 28px rgba(37,99,235,0.08); margin-top: 16px;
+}
+.sim-stat-tile {
+  background: rgba(255,255,255,0.92); border: 1px solid rgba(148,163,184,0.2);
+  border-radius: 16px; padding: 14px 16px; box-shadow: 0 4px 12px rgba(15,23,42,0.03);
+}
+.sim-stat-tile .label { font-size: 11px; font-weight: 700; color: var(--mut); text-transform: uppercase; letter-spacing: .6px; }
+.sim-stat-tile .val { font-size: 20px; font-weight: 800; color: var(--ink); margin-top: 4px; }
+
+/* ── Modal Dialogs ── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(7, 26, 56, 0.72);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  z-index: 1000; display: flex; align-items: center; justify-content: center;
+  padding: 20px; animation: fadeIn .2s ease;
+}
+.modal-dialog {
+  background: #ffffff; border-radius: 24px; max-width: 680px; width: 100%;
+  max-height: 90vh; overflow-y: auto; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.3); padding: 26px 28px;
+  animation: zoomIn .2s ease;
+}
+@keyframes zoomIn { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+
+/* ── Product Catalogue & Simulator ── */
+.product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 18px; margin-top: 16px; }
+.product-card {
+  background: var(--card); border: 1.5px solid var(--line); border-radius: 18px;
+  padding: 22px; display: flex; flex-direction: column; justify-content: space-between;
+  box-shadow: var(--shadow-card); transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.product-card:hover { transform: translateY(-3px); box-shadow: 0 20px 40px rgba(13, 31, 61, 0.12); border-color: rgba(37,99,235,0.35); }
+.product-meta { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 14px 0; background: #f8fafc; border-radius: 12px; padding: 12px; }
+.product-actions { display: flex; gap: 10px; margin-top: 14px; }
+.product-actions .btn { flex: 1; text-align: center; justify-content: center; }
+
+.simulator-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media(max-width: 1024px) { .simulator-grid { grid-template-columns: 1fr; } }
+.sim-box { background: var(--card); border: 1.5px solid var(--line); border-radius: 18px; padding: 22px; box-shadow: var(--shadow-card); }
+.simulator-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 16px; }
+.sim-stat { background: #f8fafc; border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
+.sim-stat .label { font-size: 11px; color: var(--mut); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+.sim-stat .value { font-size: 18px; font-weight: 700; color: var(--ink); margin-top: 4px; }
+
+.scenario-btn {
+  padding: 7px 12px; border-radius: 8px; border: 1px solid var(--line);
+  background: #fff; font-size: 12px; font-weight: 600; color: var(--ink2);
+  cursor: pointer; transition: all 0.15s ease;
+}
+.scenario-btn:hover { border-color: var(--pri); color: var(--pri); background: #f0f7ff; }
+.scenario-btn.active { background: var(--pri); color: #fff; border-color: var(--pri); }
+.nav-badge { background: #ef4444; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 999px; margin-left: auto; }
 </style>
 </head>
 <body>
@@ -432,6 +591,83 @@ tr:hover td { background:#fafcff }
   <!-- Main content -->
   <div class="main-content" id="main-content">
     <!-- pages injected by JS -->
+  </div>
+</div>
+
+<!-- Modal: Product Details -->
+<div id="modal-product-details" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeProductModal()">
+  <div class="modal-dialog" id="modal-product-content"></div>
+</div>
+
+<!-- Modal: Add New Client -->
+<div id="modal-add-cust" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeAddCustomerModal()">
+  <div class="modal-dialog">
+    <div class="section-header" style="margin-bottom:14px">
+      <div class="section-title">👤 Add New Wealth Client</div>
+      <button class="btn btn-secondary btn-sm" onclick="closeAddCustomerModal()">✕</button>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Client ID</label>
+        <input type="text" id="add-cust-id" placeholder="e.g. C107">
+      </div>
+      <div class="form-group">
+        <label>Full Client Name</label>
+        <input type="text" id="add-cust-name" placeholder="e.g. Rohit Sharma">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Risk Appetite Profile</label>
+        <select id="add-cust-risk">
+          <option value="conservative">Conservative (Capital preservation priority)</option>
+          <option value="moderate" selected>Moderate (Balanced risk & growth)</option>
+          <option value="aggressive">Aggressive (High growth / loss tolerance)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Max Loss Tolerance (%)</label>
+        <input type="number" id="add-cust-loss-tol" value="15" min="1" max="100">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Investment Horizon (Months)</label>
+        <input type="number" id="add-cust-horizon" value="36" min="1" max="120">
+      </div>
+      <div class="form-group">
+        <label>Total Portfolio AUM (₹)</label>
+        <input type="number" id="add-cust-portfolio" value="15000000" step="500000">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Wealth Segment</label>
+        <select id="add-cust-segment">
+          <option value="HNI" selected>HNI (High Net Worth)</option>
+          <option value="UHNI">UHNI (Ultra High Net Worth)</option>
+          <option value="Affluent">Affluent / Retail</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>City</label>
+        <input type="text" id="add-cust-city" placeholder="e.g. Mumbai">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="add-cust-email" placeholder="client@finvision.demo">
+      </div>
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="text" id="add-cust-phone" placeholder="+91-98765-XXXXX">
+      </div>
+    </div>
+    <div class="flex gap-10 mt14" style="justify-content:flex-end">
+      <button class="btn btn-secondary" onclick="closeAddCustomerModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitAddCustomer()">Save & Add Client</button>
+    </div>
   </div>
 </div>
 
@@ -568,6 +804,7 @@ const RM_NAV = [
 ];
 const CUST_NAV = [
   {id:'cust-dashboard', icon:'🏠', label:'Dashboard'},
+  {id:'cust-playground', icon:'🎛️', label:'Risk Playground'},
   {id:'cust-profile', icon:'👤', label:'My Profile'},
   {id:'cust-portfolio', icon:'📁', label:'My Portfolio'},
   {id:'cust-analysis', icon:'📊', label:'Product Analysis'},
@@ -583,6 +820,7 @@ function buildSidebar(role) {
   $('sidebar').innerHTML = nav.map(n =>
     `<div class="nav-item" id="nav-${n.id}" onclick="navTo('${n.id}')">
       <span class="nav-icon">${n.icon}</span>${n.label}
+      ${n.id === 'alerts' ? '<span id="nav-alerts-badge" class="nav-badge" style="display:none">0</span>' : ''}
     </div>`
   ).join('');
 }
@@ -596,9 +834,13 @@ function navTo(id) {
   if (pg) pg.classList.add('active');
   if (id === 'alerts') loadAlerts();
   if (id === 'rm-audit') loadAuditTable();
+  if (id === 'products') renderProducts();
+  if (id === 'rm-customers') loadRMCustomers();
+  if (id === 'simulator') initRMPlayground();
   if (id === 'cust-portfolio') loadCustomerPortfolio();
   if (id === 'cust-profile') loadCustomerProfile();
   // Customer analysis pages — load on first visit
+  if (id === 'cust-playground') initCustomerPlayground();
   if (id === 'cust-analysis') runCustAnalysis();
   if (id === 'cust-payoff') loadCustPayoff();
   if (id === 'cust-stress') loadCustStress();
@@ -645,87 +887,250 @@ function buildRMPages() {
   </div>
 
   <div id="page-products" class="page">
-    <div class="section-header"><div class="section-title">Investment Products</div><button class="btn btn-secondary btn-sm" onclick="navTo('simulator')">Open Simulator</button></div>
+    <div class="section-header">
+      <div>
+        <div class="section-title">Structured & Investment Products Catalogue</div>
+        <div class="section-sub">Explore capital-market notes, equity-linked derivatives, and suitability-screened investment structures</div>
+      </div>
+      <div class="flex gap-8">
+        <button class="btn btn-secondary btn-sm" onclick="navTo('simulator')">📈 Open Simulator</button>
+        <button class="btn btn-primary btn-sm" onclick="navTo('rm-studio')">🏗 Product Studio</button>
+      </div>
+    </div>
     <div class="filter-panel">
       <div class="filter-row">
-        <div class="form-group"><label>Risk Level</label><select><option>All Profiles</option><option>Conservative</option><option>Moderate</option><option>Growth</option><option>Aggressive</option></select></div>
-        <div class="form-group"><label>Investment Amount</label><select><option>₹1L - ₹10L</option><option>₹10L - ₹25L</option><option>₹25L - ₹50L</option><option>₹50L+</option></select></div>
-        <div class="form-group"><label>Duration</label><select><option>1 - 3 years</option><option>3 - 5 years</option><option>5+ years</option></select></div>
-        <div class="form-group"><label>Expected Return</label><select><option>6% - 10%</option><option>10% - 14%</option><option>14%+</option></select></div>
-        <div class="form-group"><label>Category</label><select><option>All</option><option>Structured Products</option><option>Mutual Funds</option><option>Bonds</option></select></div>
+        <div class="form-group"><label>Risk Level</label>
+          <select id="prod-filter-risk" onchange="filterProducts()">
+            <option value="all">All Profiles</option>
+            <option value="Conservative">Conservative</option>
+            <option value="Moderate">Moderate</option>
+            <option value="Growth">Growth</option>
+            <option value="Aggressive">Aggressive</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Investment Amount</label>
+          <select id="prod-filter-amount" onchange="filterProducts()">
+            <option value="all">All Amounts</option>
+            <option value="1-10">₹1L - ₹10L</option>
+            <option value="10-25">₹10L - ₹25L</option>
+            <option value="25-50">₹25L - ₹50L</option>
+            <option value="50+">₹50L+</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Duration</label>
+          <select id="prod-filter-tenor" onchange="filterProducts()">
+            <option value="all">All Durations</option>
+            <option value="1-3">1 - 3 years</option>
+            <option value="3-5">3 - 5 years</option>
+            <option value="5+">5+ years</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Expected Return</label>
+          <select id="prod-filter-return" onchange="filterProducts()">
+            <option value="all">All Returns</option>
+            <option value="6-10">6% - 10%</option>
+            <option value="10-14">10% - 14%</option>
+            <option value="14+">14%+</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Category</label>
+          <select id="prod-filter-category" onchange="filterProducts()">
+            <option value="all">All Categories</option>
+            <option value="Structured">Structured Products</option>
+            <option value="Mutual Funds">Mutual Funds</option>
+            <option value="Bonds">Bonds</option>
+          </select>
+        </div>
       </div>
     </div>
-    <div class="product-grid">
-      <div class="product-card">
-        <div class="top-row"><h3>NIFTY Linked Growth Plan</h3><span class="tag structured">Structured</span></div>
-        <div class="product-meta">
-          <div class="meta-box"><div class="label">Expected Return</div><div class="value">11.8%</div></div>
-          <div class="meta-box"><div class="label">Risk</div><div class="value">Moderate</div></div>
-          <div class="meta-box"><div class="label">Tenor</div><div class="value">18 months</div></div>
-          <div class="meta-box"><div class="label">Min. Inv.</div><div class="value">₹1L</div></div>
-        </div>
-        <div class="product-actions"><button class="btn btn-secondary btn-sm">View Details</button><button class="btn btn-primary btn-sm">Simulate</button></div>
-      </div>
-      <div class="product-card">
-        <div class="top-row"><h3>BlueChip Equity Fund</h3><span class="tag equity">Equity</span></div>
-        <div class="product-meta">
-          <div class="meta-box"><div class="label">Expected Return</div><div class="value">14.2%</div></div>
-          <div class="meta-box"><div class="label">Risk</div><div class="value">Growth</div></div>
-          <div class="meta-box"><div class="label">Tenor</div><div class="value">5 years</div></div>
-          <div class="meta-box"><div class="label">Min. Inv.</div><div class="value">₹5K</div></div>
-        </div>
-        <div class="product-actions"><button class="btn btn-secondary btn-sm">View Details</button><button class="btn btn-primary btn-sm">Simulate</button></div>
-      </div>
-      <div class="product-card">
-        <div class="top-row"><h3>Income Builder Bond</h3><span class="tag fixed">Fixed Income</span></div>
-        <div class="product-meta">
-          <div class="meta-box"><div class="label">Expected Return</div><div class="value">8.4%</div></div>
-          <div class="meta-box"><div class="label">Risk</div><div class="value">Conservative</div></div>
-          <div class="meta-box"><div class="label">Tenor</div><div class="value">3 years</div></div>
-          <div class="meta-box"><div class="label">Min. Inv.</div><div class="value">₹25K</div></div>
-        </div>
-        <div class="product-actions"><button class="btn btn-secondary btn-sm">View Details</button><button class="btn btn-primary btn-sm">Simulate</button></div>
-      </div>
-    </div>
+    <div class="product-grid" id="product-list-grid"></div>
   </div>
 
   <div id="page-simulator" class="page">
-    <div class="section-header"><div class="section-title">Structured Product Simulator</div><button class="btn btn-secondary btn-sm" onclick="navTo('products')">Back to Products</button></div>
-    <div class="simulator-grid">
-      <div class="sim-box">
-        <div class="card-title">Scenario Inputs</div>
-        <div class="form-row">
-          <div class="form-group"><label>Investment Amount</label><input type="number" value="1000000"></div>
-          <div class="form-group"><label>Investment Duration</label><input type="number" value="18"></div>
-        </div>
-        <div class="form-row">
-          <div class="form-group"><label>Underlying Asset</label><select><option>NIFTY 50</option><option>SENSEX</option><option>Gold</option></select></div>
-          <div class="form-group"><label>Risk Profile</label><select><option>Moderate</option><option>Conservative</option><option>Growth</option></select></div>
-        </div>
-        <div class="form-row">
-          <div class="form-group"><label>Initial Asset Price</label><input type="number" value="24000"></div>
-          <div class="form-group"><label>Final Asset Price</label><input type="number" value="21600"></div>
-        </div>
-        <div class="form-row">
-          <div class="form-group"><label>Coupon Rate</label><input type="number" value="12"></div>
-          <div class="form-group"><label>Protection Level</label><input type="number" value="70"></div>
-        </div>
-        <button class="btn btn-primary btn-full mt14">Run Simulation</button>
+    <div class="section-header">
+      <div>
+        <div class="section-title">Structured Product Scenario Simulator</div>
+        <div class="section-sub">Interactive deterministic payoff modeling, barrier breach analysis, and client suitability mandate verification</div>
       </div>
+      <div class="flex gap-8">
+        <button class="btn btn-secondary btn-sm" onclick="navTo('products')">← Back to Products</button>
+        <button class="btn btn-primary btn-sm" onclick="transferSimToStudio()">Transfer to Studio →</button>
+      </div>
+    </div>
+
+    <div class="simulator-grid">
+      <!-- Input Controls Box -->
       <div class="sim-box">
-        <div class="card-title">Payoff Analysis</div>
-        <div class="chart-graph" style="height:180px; background:linear-gradient(180deg, rgba(30,64,175,0.1), rgba(4,8,17,0.05));"><div class="sparkline" style="clip-path:polygon(0% 70%, 12% 48%, 24% 56%, 38% 38%, 52% 58%, 64% 34%, 78% 44%, 100% 12%, 100% 100%, 0% 100%)"></div></div>
+        <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+          <span>⚙️ Product & Scenario Configuration</span>
+          <button class="btn btn-secondary btn-xs" onclick="resetRMSimulator()" style="font-size:11px;padding:3px 8px">Reset Defaults</button>
+        </div>
+
+        <div class="form-group" style="margin-top:10px">
+          <label>Select Target Client (Optional Mandate Check)</label>
+          <select id="sim-cust-sel" onchange="onSimCustomerChange()">
+            <option value="generic">— Generic Market Simulation (No Client) —</option>
+          </select>
+          <div id="sim-cust-mandate-info" class="text-xs mut mt4" style="line-height:1.5">Showing unconstrained market simulation. Select a client to verify outcome against their loss tolerance mandate.</div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Product Structure</label>
+            <select id="sim-ptype" onchange="onSimTypeChange();runRMSimulation()">
+              <option value="ELN">Equity-Linked Note (ELN)</option>
+              <option value="CPN">Capital Protected Note (CPN)</option>
+              <option value="DCD">Dual Currency Deposit (DCD)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Underlying Asset</label>
+            <select id="sim-underlying" onchange="runRMSimulation()">
+              <option value="NIFTY 50">NIFTY 50</option>
+              <option value="SENSEX">SENSEX</option>
+              <option value="USDINR">USD/INR</option>
+              <option value="Gold">Gold</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="flex items-center justify-between">
+            <label>Investment Notional (₹)</label>
+            <span id="sim-notional-words" class="text-xs fw6" style="color:var(--pri)">₹10,00,000 (Ten Lakhs)</span>
+          </div>
+          <input type="number" id="sim-notional" value="1000000" min="50000" step="50000" oninput="onSimNotionalInput(this.value)">
+          <div class="preset-chips" style="margin-top:8px">
+            <span class="preset-chip" onclick="setSimNotional(200000)">₹2L</span>
+            <span class="preset-chip" onclick="setSimNotional(500000)">₹5L</span>
+            <span class="preset-chip active" id="sim-chip-1000000" onclick="setSimNotional(1000000)">₹10L</span>
+            <span class="preset-chip" onclick="setSimNotional(2500000)">₹25L</span>
+            <span class="preset-chip" onclick="setSimNotional(5000000)">₹50L</span>
+            <span class="preset-chip" onclick="setSimNotional(10000000)">₹1Cr</span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Duration / Tenor (months)</label>
+            <input type="number" id="sim-tenor" value="12" min="1" max="120" oninput="runRMSimulation()">
+          </div>
+          <div class="form-group">
+            <label id="sim-coupon-label">Coupon / Yield (% p.a.)</label>
+            <input type="number" id="sim-coupon" value="12" min="0" max="50" step="0.5" oninput="runRMSimulation()">
+          </div>
+        </div>
+
+        <div id="sim-eln-fields">
+          <div class="form-group">
+            <div class="flex items-center justify-between">
+              <label>Downside Safety Barrier Level</label>
+              <b id="sim-barrier-val" style="color:var(--pri)">70% (permits -30% fall)</b>
+            </div>
+            <input type="range" id="sim-barrier" min="40" max="95" value="70" step="1" oninput="onSimBarrierSlider(this.value)">
+          </div>
+        </div>
+
+        <div id="sim-cpn-fields" style="display:none">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Capital Protection Floor (%)</label>
+              <input type="number" id="sim-prot" value="95" min="70" max="100" oninput="runRMSimulation()">
+            </div>
+            <div class="form-group">
+              <label>Upside Participation (%)</label>
+              <input type="number" id="sim-part" value="100" min="10" max="300" oninput="runRMSimulation()">
+            </div>
+          </div>
+        </div>
+
+        <!-- Market Movement / Scenario Slider -->
+        <div class="form-group mt14" style="background:#f1f5f9;padding:14px;border-radius:12px;border:1px solid var(--line)">
+          <div class="flex items-center justify-between">
+            <label style="font-weight:700">Market Movement at Maturity (%)</label>
+            <span id="sim-move-badge" class="badge" style="font-size:12px;padding:3px 10px;background:#e0f2fe;color:#0369a1">-10% (Market Dip)</span>
+          </div>
+          <input type="range" id="sim-move-slider" min="-60" max="60" value="-10" step="1" oninput="onSimMoveSlider(this.value)" style="margin:10px 0;width:100%">
+          <div class="flex gap-8 wrap" style="margin-top:6px">
+            <button class="scenario-btn" id="sim-scen--40" onclick="setSimMove(-40)">-40% Crash</button>
+            <button class="scenario-btn" id="sim-scen--30" onclick="setSimMove(-30)">-30% Barrier</button>
+            <button class="scenario-btn active" id="sim-scen--10" onclick="setSimMove(-10)">-10% Dip</button>
+            <button class="scenario-btn" id="sim-scen-0" onclick="setSimMove(0)">0% Flat</button>
+            <button class="scenario-btn" id="sim-scen-15" onclick="setSimMove(15)">+15% Bull</button>
+            <button class="scenario-btn" id="sim-scen-30" onclick="setSimMove(30)">+30% Rally</button>
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-full mt14" onclick="runRMSimulation()">🚀 Run Live Simulation</button>
+      </div>
+
+      <!-- Live Payoff & Results Box -->
+      <div class="sim-box">
+        <div class="card-title">📊 Simulated Payoff Outcome</div>
+
+        <!-- Large Payout Hero Card -->
+        <div class="play-hero-box" style="margin-top:10px">
+          <div class="flex items-center justify-between">
+            <div class="text-xs uppercase" style="letter-spacing:1px;color:#93c5fd;font-weight:700">Maturity Payout</div>
+            <span id="sim-hero-badge" class="badge SUITABLE" style="font-size:12px;padding:4px 10px">Capital Safe</span>
+          </div>
+          <div id="sim-hero-payout" style="font-size:34px;font-weight:800;letter-spacing:-0.5px;margin:8px 0;color:#fff">₹11,20,000</div>
+          <div class="flex items-center justify-between text-sm">
+            <span id="sim-hero-sub" style="color:#dbeafe">On ₹10,00,000 initial investment</span>
+            <span id="sim-hero-pnl" style="font-weight:700;color:#34d399;font-size:15px">+₹1,20,000 (+12.0%)</span>
+          </div>
+        </div>
+
+        <!-- 4 Metric Cards -->
         <div class="simulator-stats">
-          <div class="sim-stat"><div class="label">Initial Investment</div><div class="value">₹10,00,000</div></div>
-          <div class="sim-stat"><div class="label">Final Value</div><div class="value">₹11,20,000</div></div>
-          <div class="sim-stat"><div class="label">Profit / Loss</div><div class="value" style="color:#0f766e">₹1,20,000</div></div>
-          <div class="sim-stat"><div class="label">Max Loss</div><div class="value" style="color:#b91c1c">₹2,90,000</div></div>
+          <div class="sim-stat">
+            <div class="label">Initial Investment</div>
+            <div class="value" id="sim-stat-initial">₹10,00,000</div>
+          </div>
+          <div class="sim-stat">
+            <div class="label">Final Capital Returned</div>
+            <div class="value" id="sim-stat-capital">₹10,00,000</div>
+          </div>
+          <div class="sim-stat">
+            <div class="label">Coupon / Income</div>
+            <div class="value" id="sim-stat-coupon" style="color:var(--ok)">₹1,20,000</div>
+          </div>
+          <div class="sim-stat">
+            <div class="label">Capital At Risk / Downside</div>
+            <div class="value" id="sim-stat-drawdown" style="color:var(--bad)">₹0 (Safe)</div>
+          </div>
+        </div>
+
+        <!-- Mandate Check -->
+        <div id="sim-mandate-card" class="card mt14" style="background:#eff6ff;border:1px solid #bfdbfe;margin-bottom:0;padding:12px 14px">
+          <div style="font-weight:700;font-size:12px;color:var(--pri);margin-bottom:4px">🛡️ Client Risk Mandate Alignment:</div>
+          <div id="sim-mandate-text" class="text-sm" style="color:var(--ink2)">Modeled outcome conforms to conservative capital preservation threshold.</div>
+        </div>
+
+        <!-- Interactive Plotly / Payoff Curve Chart -->
+        <div class="card mt14" style="margin-bottom:0;padding:14px">
+          <div style="font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:8px;display:flex;justify-content:space-between">
+            <span>Deterministic Payoff Curve</span>
+            <span class="text-xs mut">Underlying: -50% to +50%</span>
+          </div>
+          <div id="sim-payoff-chart" style="width:100%;height:220px"></div>
         </div>
       </div>
     </div>
+
+    <!-- Multi-Scenario Matrix Table -->
     <div class="card mt14">
-      <div class="card-title">What happens to your investment?</div>
-      <p class="text-sm mut">Your product pays a coupon of 12% while the underlying market remains above the protection threshold. If the market falls sharply but stays above the barrier, you continue receiving income with limited downside. If the index breaches the protection barrier, the principal is reduced according to the payoff formula.</p>
+      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+        <span>📋 Comprehensive Market Scenario Matrix</span>
+        <span class="text-xs mut">Highlights behavior across adverse shocks and bull regimes</span>
+      </div>
+      <div id="sim-scenario-table" style="overflow-x:auto;margin-top:10px"></div>
+    </div>
+
+    <!-- Explanatory Guide -->
+    <div class="card mt14">
+      <div class="card-title">💡 Plain-Language Payoff Mechanics</div>
+      <div id="sim-narrative-explanation" class="text-sm mut" style="line-height:1.75"></div>
     </div>
   </div>
 
@@ -794,8 +1199,31 @@ function buildRMPages() {
   </div>
 
   <div id="page-rm-customers" class="page">
-    <div class="section-header"><div class="section-title">Customers</div></div>
-    <div class="card"><div id="rm-cust-detail-table"></div></div>
+    <div class="section-header">
+      <div>
+        <div class="section-title">Client Portfolio Directory</div>
+        <div class="section-sub">Manage client risk mandates, asset allocations, exposures, and suitability dossiers</div>
+      </div>
+      <div class="flex gap-8 items-center">
+        <input type="text" id="rm-cust-search" placeholder="🔍 Search name, ID, city, email..." oninput="filterRMCustomers()" style="padding:7px 12px;border:1.5px solid var(--line);border-radius:8px;font-size:13px;width:240px;outline:none;background:#fff">
+        <select id="rm-cust-risk-filter" onchange="filterRMCustomers()" style="padding:7px 10px;border:1.5px solid var(--line);border-radius:8px;font-size:13px;outline:none;background:#fff">
+          <option value="all">All Risk Profiles</option>
+          <option value="conservative">Conservative</option>
+          <option value="moderate">Moderate</option>
+          <option value="aggressive">Aggressive</option>
+        </select>
+        <button class="btn btn-primary btn-sm" onclick="openAddCustomerModal()">+ Add Client</button>
+      </div>
+    </div>
+    <div class="grid-4 mt14" id="rm-cust-kpis" style="margin-bottom:14px"></div>
+    <div class="card">
+      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+        <span>Assigned Client Portfolios</span>
+        <span class="badge INFO" id="rm-cust-count-badge" style="font-size:11px"></span>
+      </div>
+      <div id="rm-cust-detail-table"></div>
+    </div>
+    <div id="rm-cust-dossier" style="display:none" class="mt14"></div>
   </div>
 
   <div id="page-rm-studio" class="page">
@@ -896,7 +1324,47 @@ function buildRMPages() {
   </div>
 
   <div id="page-alerts" class="page">
-    <div class="section-header"><div class="section-title">Risk Alerts</div><button class="btn btn-secondary btn-sm" onclick="loadAlerts()">Refresh Alerts</button></div>
+    <div class="section-header">
+      <div>
+        <div class="section-title">🔔 Risk Alerts & Compliance Notifications</div>
+        <div class="section-sub">Real-time deterministic alerts triggered by suitability rules, concentration breaches, and loss thresholds</div>
+      </div>
+      <div class="flex gap-8">
+        <button class="btn btn-secondary btn-sm" onclick="markAllAlertsRead()">✓ Mark All Read</button>
+        <button class="btn btn-secondary btn-sm" onclick="loadAlerts()">🔄 Refresh Alerts</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:14px;padding:14px 18px">
+      <div class="flex gap-14 items-center wrap">
+        <div class="form-group mb0" style="min-width:200px">
+          <label style="font-size:11px;font-weight:600">Filter by Client</label>
+          <select id="alerts-cust-filter" onchange="filterAlerts()" style="padding:6px 12px;border:1.5px solid var(--line);border-radius:8px;font-size:12px;outline:none;background:#fff">
+            <option value="all">All Clients</option>
+          </select>
+        </div>
+        <div class="form-group mb0" style="min-width:140px">
+          <label style="font-size:11px;font-weight:600">Severity</label>
+          <select id="alerts-severity-filter" onchange="filterAlerts()" style="padding:6px 12px;border:1.5px solid var(--line);border-radius:8px;font-size:12px;outline:none;background:#fff">
+            <option value="all">All Severities</option>
+            <option value="HIGH">High (Mismatch)</option>
+            <option value="WARNING">Warning (Review)</option>
+            <option value="INFO">Info</option>
+          </select>
+        </div>
+        <div class="form-group mb0" style="min-width:140px">
+          <label style="font-size:11px;font-weight:600">Status</label>
+          <select id="alerts-status-filter" onchange="filterAlerts()" style="padding:6px 12px;border:1.5px solid var(--line);border-radius:8px;font-size:12px;outline:none;background:#fff">
+            <option value="unread">Unread Only</option>
+            <option value="all">All Alerts</option>
+          </select>
+        </div>
+        <div style="margin-left:auto;align-self:flex-end">
+          <span class="badge INFO" id="alerts-unread-summary" style="font-size:12px;padding:4px 12px">0 Unread Alerts</span>
+        </div>
+      </div>
+    </div>
+
     <div id="alerts-content"><div class="empty">No alerts yet.</div></div>
   </div>
   `;
@@ -920,6 +1388,65 @@ function buildCustomerPages() {
     <div class="section-header"><div><div class="section-title">Welcome, ${AUTH.user.name} 👋</div><div class="section-sub">Your personal investment understanding centre</div></div></div>
     <div class="disclaimer">FinVision helps you understand your investment — not make decisions for you. All figures are calculated mathematically. Past results are not predictions.</div>
     <div class="grid-4" id="cust-kpis"></div>
+
+    <!-- ── Interactive What-If Risk & Return Sandbox ── -->
+    <div class="quick-sim-banner">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-size:16px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px">
+            🎛️ Interactive Risk & Return Sandbox
+            <span class="badge INFO" style="font-size:11px">Live Simulation</span>
+          </div>
+          <div class="text-xs mut mt4">Adjust your desired amount and slide market scenarios to see exact returns, risk of loss, and a plain-English explanation.</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="navTo('cust-playground')">Open Full Playground →</button>
+      </div>
+
+      <div class="grid-2">
+        <div style="background:#fff;border:1px solid rgba(148,163,184,0.22);border-radius:18px;padding:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:12px;font-weight:700;color:var(--ink2)">💰 Desired Investment Amount</span>
+            <span id="dash-sim-amount-badge" class="slider-val-badge">₹10,00,000</span>
+          </div>
+          <div class="range-slider-wrap">
+            <input id="dash-sim-amount" type="range" class="range-slider" min="100000" max="10000000" step="50000" value="1000000" oninput="onDashSimAmountChange(this.value)">
+            <div class="slider-marks"><span>₹1 Lakh</span><span>₹25 Lakhs</span><span>₹50 Lakhs</span><span>₹1 Crore</span></div>
+          </div>
+          <div class="preset-chips">
+            <span class="preset-chip" onclick="setDashSimAmount(200000)">₹2L</span>
+            <span class="preset-chip" onclick="setDashSimAmount(500000)">₹5L</span>
+            <span class="preset-chip active" id="chip-dash-1000000" onclick="setDashSimAmount(1000000)">₹10L</span>
+            <span class="preset-chip" onclick="setDashSimAmount(2500000)">₹25L</span>
+            <span class="preset-chip" onclick="setDashSimAmount(5000000)">₹50L</span>
+          </div>
+        </div>
+
+        <div style="background:#fff;border:1px solid rgba(148,163,184,0.22);border-radius:18px;padding:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:12px;font-weight:700;color:var(--ink2)">📉 Market Move at Maturity</span>
+            <span id="dash-sim-move-badge" class="slider-val-badge" style="background:#fef3c7;color:#92400e">0.0% (Flat)</span>
+          </div>
+          <div class="range-slider-wrap">
+            <input id="dash-sim-move" type="range" class="range-slider scenario-slider" min="-60" max="40" step="1" value="0" oninput="onDashSimMoveChange(this.value)">
+            <div class="slider-marks"><span>-60% Crash</span><span>-30% Barrier</span><span>0% Flat</span><span>+20%</span><span>+40%</span></div>
+          </div>
+          <div class="preset-chips" style="margin-top:10px">
+            <button class="scenario-btn" onclick="setDashSimMove(-40)">💥 Crash (-40%)</button>
+            <button class="scenario-btn" onclick="setDashSimMove(-32)">⚠️ Breach (-32%)</button>
+            <button class="scenario-btn" onclick="setDashSimMove(-15)">🟡 Dip (-15%)</button>
+            <button class="scenario-btn active" id="scen-dash-0" onclick="setDashSimMove(0)">⚖️ Flat (0%)</button>
+            <button class="scenario-btn" onclick="setDashSimMove(15)">📈 Growth (+15%)</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Dashboard Quick Result Display -->
+      <div id="dash-sim-results" class="grid-4 mt14"></div>
+
+      <!-- Live Plain-Language Explanation in Dashboard -->
+      <div id="dash-sim-explanation" class="card mt14" style="background:rgba(255,255,255,0.95);border-color:rgba(37,99,235,0.25);margin-bottom:0"></div>
+    </div>
+
     <div class="grid-2 mt14">
       <div class="card">
         <div class="card-title">🛡️ Is this product right for me?</div>
@@ -943,6 +1470,181 @@ function buildCustomerPages() {
     <div class="card mt14">
       <div class="card-title">📝 Plain-Language Summary <span class="text-xs mut">— powered by FinVision AI</span></div>
       <div id="cust-explanation" class="text-sm" style="line-height:1.7">Loading your personalised summary…</div>
+    </div>
+  </div>
+
+  <!-- ── Full-Featured Customer Risk & Return Playground Page ── -->
+  <div id="page-cust-playground" class="page">
+    <div class="section-header">
+      <div>
+        <div class="section-title">🎛️ Interactive Risk & Return Playground</div>
+        <div class="section-sub">Play with your desired investment amount and simulate how your returns and capital protection behave across various market conditions.</div>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="resetPlayground()">Reset to Defaults</button>
+    </div>
+
+    <div class="disclaimer">
+      💡 <b>How to use:</b> Slide or enter any investment amount and drag the market movement slider to see immediate payouts, risk alerts, and a plain-language explanation below.
+    </div>
+
+    <div class="two-col" style="grid-template-columns: 420px 1fr; gap: 20px;">
+      <!-- Controls Column -->
+      <div>
+        <!-- Card 1: Investment Amount -->
+        <div class="play-card">
+          <div class="card-title">💰 1. Desired Investment Amount</div>
+          <div class="form-group">
+            <label>Amount in Rupees (₹)</label>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input type="number" id="play-notional-input" value="1000000" min="50000" max="50000000" step="50000" oninput="onPlayNotionalInputChange(this.value)">
+              <span id="play-notional-inr-words" class="slider-val-badge" style="white-space:nowrap">₹10 Lakhs</span>
+            </div>
+          </div>
+          <div class="range-slider-wrap">
+            <input type="range" id="play-notional-slider" class="range-slider" min="100000" max="10000000" step="50000" value="1000000" oninput="onPlayNotionalSliderChange(this.value)">
+            <div class="slider-marks"><span>₹1L</span><span>₹25L</span><span>₹50L</span><span>₹1Cr</span></div>
+          </div>
+          <div class="preset-chips">
+            <span class="preset-chip" onclick="setPlayNotional(100000)">₹1L</span>
+            <span class="preset-chip" onclick="setPlayNotional(200000)">₹2L</span>
+            <span class="preset-chip" onclick="setPlayNotional(500000)">₹5L</span>
+            <span class="preset-chip active" id="chip-play-1000000" onclick="setPlayNotional(1000000)">₹10L</span>
+            <span class="preset-chip" onclick="setPlayNotional(2500000)">₹25L</span>
+            <span class="preset-chip" onclick="setPlayNotional(5000000)">₹50L</span>
+            <span class="preset-chip" onclick="setPlayNotional(10000000)">₹1Cr</span>
+          </div>
+        </div>
+
+        <!-- Card 2: Market Scenario Slider -->
+        <div class="play-card mt14">
+          <div class="card-title">📉 2. Market Scenario (NIFTY 50 Move)</div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span class="text-xs mut">Underlying move at maturity</span>
+            <span id="play-move-badge" class="slider-val-badge" style="background:#fef3c7;color:#92400e">0.0% (Flat)</span>
+          </div>
+          <div class="range-slider-wrap">
+            <input type="range" id="play-move-slider" class="range-slider scenario-slider" min="-60" max="40" step="1" value="0" oninput="onPlayMoveSliderChange(this.value)">
+            <div class="slider-marks"><span>-60% Crash</span><span>-30% Barrier</span><span>0% Flat</span><span>+20%</span><span>+40%</span></div>
+          </div>
+          <div class="preset-chips" style="margin-top:10px">
+            <button class="scenario-btn" onclick="setPlayScenario(-40)">💥 Crash (-40%)</button>
+            <button class="scenario-btn" onclick="setPlayScenario(-32)">⚠️ Breach (-32%)</button>
+            <button class="scenario-btn" onclick="setPlayScenario(-28)">🛡️ Edge (-28%)</button>
+            <button class="scenario-btn" onclick="setPlayScenario(-15)">🟡 Dip (-15%)</button>
+            <button class="scenario-btn active" id="scen-play-0" onclick="setPlayScenario(0)">⚖️ Flat (0%)</button>
+            <button class="scenario-btn" onclick="setPlayScenario(15)">📈 Rise (+15%)</button>
+            <button class="scenario-btn" onclick="setPlayScenario(30)">🚀 Bull (+30%)</button>
+          </div>
+        </div>
+
+        <!-- Card 3: Product Parameters Levers -->
+        <div class="play-card mt14">
+          <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="togglePlayAdvanced()">
+            <div class="card-title" style="margin-bottom:0">⚙️ Product Levers <span class="text-xs mut">(Customise Note)</span></div>
+            <span id="play-adv-arrow" style="font-size:12px;color:var(--pri)">▼ Show</span>
+          </div>
+          <div id="play-adv-body" style="display:none;margin-top:14px;border-top:1px solid var(--line);padding-top:12px">
+            <div class="form-group">
+              <label>Product Archetype</label>
+              <select id="play-ptype" onchange="updatePlayground()">
+                <option value="ELN">Equity-Linked Note (ELN with Barrier)</option>
+                <option value="CPN">Capital Protected Note (CPN Floor)</option>
+                <option value="DCD">Dual Currency Deposit (DCD)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <div style="display:flex;justify-content:space-between">
+                <label>Safety Barrier Level</label>
+                <b id="play-barrier-val" style="color:var(--pri)">70%</b>
+              </div>
+              <input type="range" id="play-barrier" class="range-slider" min="50" max="90" step="5" value="70" oninput="$('play-barrier-val').textContent=this.value+'%';updatePlayground()">
+              <div class="slider-marks"><span>50% (High protection)</span><span>70%</span><span>90% (Low protection)</span></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Guaranteed Coupon %</label>
+                <input type="number" id="play-coupon" value="12" min="2" max="25" step="0.5" oninput="updatePlayground()">
+              </div>
+              <div class="form-group">
+                <label>Tenor (months)</label>
+                <select id="play-tenor" onchange="updatePlayground()">
+                  <option value="6">6 months</option>
+                  <option value="12" selected>12 months (1 yr)</option>
+                  <option value="24">24 months (2 yrs)</option>
+                  <option value="36">36 months (3 yrs)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visual Display Column -->
+      <div>
+        <!-- Hero Box -->
+        <div class="play-hero-box">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px">
+            <div>
+              <span style="font-size:12px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.7);font-weight:700">Estimated Maturity Payout</span>
+              <div id="play-hero-payout" style="font-size:36px;font-weight:800;letter-spacing:-1px;margin-top:4px">₹11,20,000</div>
+              <div id="play-hero-sub" style="font-size:14px;color:rgba(255,255,255,0.85);margin-top:2px">On initial investment of ₹10,00,000</div>
+            </div>
+            <div style="text-align:right">
+              <span id="play-hero-badge" class="badge SUITABLE" style="font-size:13px;padding:6px 14px">🟢 Barrier Intact</span>
+              <div id="play-hero-pnl" style="font-size:20px;font-weight:800;margin-top:8px;color:#34d399">+₹1,20,000 (+12.0%)</div>
+            </div>
+          </div>
+
+          <!-- Risk Meter Bar -->
+          <div style="margin-top:20px">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,0.8);font-weight:600">
+              <span>Severe Loss Zone</span>
+              <span>Buffer Cushion</span>
+              <span>Capital Safe & Earning</span>
+            </div>
+            <div class="risk-meter-bar">
+              <div id="play-meter-pin" class="risk-meter-pin" style="left:75%"></div>
+            </div>
+          </div>
+
+          <!-- Comparison vs FD -->
+          <div id="play-fd-comparison" style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.15);display:flex;justify-content:space-between;align-items:center;font-size:12px">
+          </div>
+        </div>
+
+        <!-- Breakdown Grid -->
+        <div class="grid-3 mt14">
+          <div class="sim-stat-tile">
+            <div class="label">Principal Returned</div>
+            <div id="play-tile-principal" class="val">₹10,00,000</div>
+            <div id="play-tile-principal-sub" class="text-xs mut mt4">100% Safe</div>
+          </div>
+          <div class="sim-stat-tile">
+            <div class="label">Income / Coupon</div>
+            <div id="play-tile-coupon" class="val" style="color:#0f766e">+₹1,20,000</div>
+            <div id="play-tile-coupon-sub" class="text-xs mut mt4">12% Fixed Coupon</div>
+          </div>
+          <div class="sim-stat-tile">
+            <div class="label">Downside Capital Risk</div>
+            <div id="play-tile-risk" class="val" style="color:#10b981">₹0</div>
+            <div id="play-tile-risk-sub" class="text-xs mut mt4">No capital reduction</div>
+          </div>
+        </div>
+
+        <!-- Customer Risk Appetite Alignment Card -->
+        <div id="play-cust-profile-card" class="card mt14" style="background:#ffffff;border-left:4px solid var(--pri)"></div>
+      </div>
+    </div>
+
+    <!-- Full Width Explanation Card Below -->
+    <div class="explain-card" id="play-explanation-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div class="card-title" style="margin-bottom:0">
+          🧠 Plain-Language Breakdown — Exactly What Happens to Your Money
+        </div>
+        <span class="badge INFO" style="font-size:11px">Mathematically Grounded</span>
+      </div>
+      <div id="play-explanation-steps"></div>
     </div>
   </div>
 
@@ -974,9 +1676,29 @@ function buildCustomerPages() {
       <div id="cust-payoff-chart" style="height:300px"></div>
     </div>
     <div class="card mt14">
-      <div class="card-title">Scenario Table — What happens at maturity?</div>
-      <div class="disclaimer" style="margin-bottom:8px">All amounts are based on your ₹10,00,000 investment (adjust notional in Product Analysis)</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:12px">
+        <div>
+          <div class="card-title" style="margin-bottom:2px">Scenario Table — What happens at maturity?</div>
+          <div class="text-xs mut">Adjust your desired investment amount to see exact Rupee figures across all market levels</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="text-xs fw6" style="color:var(--ink2)">Desired Amount:</span>
+          <span id="cust-payoff-amt-display" class="slider-val-badge">₹10,00,000</span>
+        </div>
+      </div>
+      <div class="range-slider-wrap" style="margin-bottom:12px">
+        <input id="cust-payoff-amt-slider" type="range" class="range-slider" min="100000" max="10000000" step="50000" value="1000000" oninput="onCustPayoffAmtChange(this.value)">
+        <div class="slider-marks"><span>₹1 Lakh</span><span>₹25 Lakhs</span><span>₹50 Lakhs</span><span>₹1 Crore</span></div>
+      </div>
+      <div class="preset-chips" style="margin-bottom:14px">
+        <span class="preset-chip" onclick="setPayoffAmt(200000)">₹2L</span>
+        <span class="preset-chip" onclick="setPayoffAmt(500000)">₹5L</span>
+        <span class="preset-chip active" id="chip-payoff-1000000" onclick="setPayoffAmt(1000000)">₹10L</span>
+        <span class="preset-chip" onclick="setPayoffAmt(2500000)">₹25L</span>
+        <span class="preset-chip" onclick="setPayoffAmt(5000000)">₹50L</span>
+      </div>
       <div id="cust-scenario-table"><div class="loading">Loading</div></div>
+      <div id="cust-payoff-explanation" class="card mt14" style="background:#f8fbff;border:1px solid rgba(37,99,235,0.18)"></div>
     </div>
   </div>
 
@@ -1600,54 +2322,131 @@ async function loadAuditTable() {
   </table>`;
 }
 
-// ══════════════ ALERTS ══════════════
-async function loadAlerts(customerId) {
-  const el = $('alerts-content');
-  if (!el) return;
-  const cid = customerId || SELECTED_CUSTOMER?.id || (AUTH?.user?.customer_id);
-  if (!cid) { el.innerHTML = '<div class="empty">No customer selected.</div>'; return; }
-  const r = await api(`/api/v1/customers/${cid}/alerts`).catch(()=>({alerts:[],unread_count:0}));
-  if (!r.alerts?.length) { el.innerHTML = '<div class="empty">No alerts at this time.</div>'; return; }
-  el.innerHTML = r.alerts.map(a=>`
-    <div class="alert-item ${a.severity}">
-      <div class="flex items-center gap-8">
-        <div class="alert-title">${a.title}</div>
-        <span class="badge ${a.severity}">${a.severity}</span>
-        ${!a.is_read ? '<span class="badge INFO text-xs">NEW</span>' : ''}
-      </div>
-      <div class="alert-msg mt4">${a.message}</div>
-      <div class="flex gap-8 mt4">
-        <span class="text-xs mut">Trigger: ${a.trigger_value} | Threshold: ${a.threshold}</span>
-        ${!a.is_read ? `<button class="btn btn-secondary btn-sm" onclick="markRead(${a.id},this)">Mark read</button>` : ''}
-      </div>
-      <div class="alert-action">${a.recommended_action}</div>
-    </div>`).join('');
-}
-
-async function markRead(id, btn) {
-  await api(`/api/v1/alerts/${id}/read`, {}, 'POST');
-  btn.closest('.alert-item').querySelector('.badge.INFO')?.remove();
-  btn.remove();
-  updateAlertBadge(SELECTED_CUSTOMER?.id || AUTH?.user?.customer_id);
-}
+// ══════════════ ALERTS & NOTIFICATIONS ══════════════
+let ALL_ALERTS = [];
 
 async function updateAlertBadge(customerId) {
-  if (!customerId) return;
-  const r = await api(`/api/v1/customers/${customerId}/alerts?unread_only=true`).catch(()=>({unread_count:0}));
+  const isRm = AUTH?.user?.role === 'rm';
+  const cid = isRm ? 'all' : (customerId || AUTH?.user?.customer_id || SELECTED_CUSTOMER?.id);
+  if (!cid) return;
+  const r = await api(`/api/v1/customers/${cid}/alerts?unread_only=true`).catch(() => ({unread_count: 0}));
+  const unread = r.unread_count || 0;
   const el = $('alert-count-badge');
   if (el) {
-    el.textContent = r.unread_count;
-    el.style.display = r.unread_count > 0 ? 'block' : 'none';
+    el.textContent = unread;
+    el.style.display = unread > 0 ? 'inline-block' : 'none';
+  }
+  const sideEl = $('nav-alerts-badge');
+  if (sideEl) {
+    sideEl.textContent = unread;
+    sideEl.style.display = unread > 0 ? 'inline-block' : 'none';
   }
 }
 
 function pollAlerts() {
-  const cid = SELECTED_CUSTOMER?.id || AUTH?.user?.customer_id;
-  if (cid) updateAlertBadge(cid);
+  updateAlertBadge();
   setInterval(() => {
-    const id = SELECTED_CUSTOMER?.id || AUTH?.user?.customer_id;
-    if (id) updateAlertBadge(id);
+    updateAlertBadge();
   }, 30000);
+}
+
+async function loadAlerts(customerId) {
+  const el = $('alerts-content');
+  if (!el) return;
+  el.innerHTML = '<div class="loading">Loading alerts...</div>';
+  const isRm = AUTH?.user?.role === 'rm';
+  const cid = isRm ? 'all' : (customerId || AUTH?.user?.customer_id || SELECTED_CUSTOMER?.id);
+  if (!cid) { el.innerHTML = '<div class="empty">No client selected.</div>'; return; }
+  
+  const r = await api(`/api/v1/customers/${cid}/alerts`).catch(() => ({alerts:[], unread_count:0}));
+  ALL_ALERTS = r.alerts || [];
+
+  // Populate client filter if RM
+  const filterSel = $('alerts-cust-filter');
+  if (filterSel && CUSTOMERS && CUSTOMERS.length) {
+    const curVal = filterSel.value;
+    filterSel.innerHTML = `<option value="all">All Clients (${ALL_ALERTS.filter(a => !a.is_read).length} unread)</option>` +
+      CUSTOMERS.map(c => {
+        const unreadCount = ALL_ALERTS.filter(a => a.customer_id === c.id && !a.is_read).length;
+        return `<option value="${c.id}">${c.name} (${c.id})${unreadCount > 0 ? ` — ${unreadCount} unread` : ''}</option>`;
+      }).join('');
+    if (curVal) filterSel.value = curVal;
+  }
+
+  filterAlerts();
+  updateAlertBadge();
+}
+
+function filterAlerts() {
+  const el = $('alerts-content');
+  if (!el) return;
+  const custVal = $('alerts-cust-filter')?.value || 'all';
+  const sevVal = $('alerts-severity-filter')?.value || 'all';
+  const statVal = $('alerts-status-filter')?.value || 'all';
+
+  const filtered = ALL_ALERTS.filter(a => {
+    const matchCust = custVal === 'all' || a.customer_id === custVal;
+    const matchSev = sevVal === 'all' || a.severity === sevVal;
+    const matchStat = statVal === 'all' || (statVal === 'unread' ? !a.is_read : true);
+    return matchCust && matchSev && matchStat;
+  });
+
+  const unreadTotal = ALL_ALERTS.filter(a => !a.is_read).length;
+  const summaryEl = $('alerts-unread-summary');
+  if (summaryEl) summaryEl.textContent = `${unreadTotal} Unread Alerts`;
+
+  if (!filtered.length) {
+    el.innerHTML = '<div class="empty">No alerts found matching the criteria.</div>';
+    return;
+  }
+
+  el.innerHTML = filtered.map(a => {
+    const c = CUSTOMERS.find(x => x.id === a.customer_id);
+    const cName = c ? `${c.name} (${c.id})` : (a.customer_id || 'System');
+    return `
+      <div class="alert-item ${a.severity}" style="background:#fff;border:1px solid var(--line);border-left:4px solid ${a.severity === 'HIGH' ? 'var(--bad)' : a.severity === 'WARNING' ? 'var(--rev)' : 'var(--pri)'};margin-bottom:12px;padding:14px 16px;border-radius:12px">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-8">
+            <span class="badge ${a.severity}">${a.severity}</span>
+            <span class="badge INFO" style="font-size:11px">👤 Client: ${cName}</span>
+            ${!a.is_read ? '<span class="badge" style="background:#ef4444;color:#fff;font-size:10px">NEW UNREAD</span>' : '<span class="badge" style="background:#f1f5f9;color:#64748b;font-size:10px">Read</span>'}
+          </div>
+          <span class="text-xs mut">${a.ts ? new Date(a.ts).toLocaleString('en-IN') : 'Recent'}</span>
+        </div>
+        <div class="alert-title mt8" style="font-size:15px;color:var(--ink)">${a.title}</div>
+        <div class="alert-msg mt4" style="font-size:13px;line-height:1.6">${a.message}</div>
+        <div class="flex gap-14 items-center mt8 text-xs mut" style="background:var(--bg);padding:8px 12px;border-radius:8px">
+          <span><b>Trigger:</b> ${a.trigger_value}</span>
+          <span>|</span>
+          <span><b>Threshold:</b> ${a.threshold}</span>
+        </div>
+        <div class="alert-action mt8" style="color:var(--ink2);font-weight:500">👉 Recommended Action: ${a.recommended_action}</div>
+        <div class="flex gap-8 mt14" style="justify-content:flex-end">
+          ${c ? `<button class="btn btn-secondary btn-sm" onclick="rmPickCustomer('${c.id}')">Assess Client →</button>` : ''}
+          ${!a.is_read ? `<button class="btn btn-primary btn-sm" onclick="markRead(${a.id}, this)">✓ Mark as Read</button>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function markRead(id, btn) {
+  await api(`/api/v1/alerts/${id}/read`, {}, 'POST');
+  const alertObj = ALL_ALERTS.find(a => a.id === id);
+  if (alertObj) alertObj.is_read = 1;
+  updateAlertBadge();
+  filterAlerts();
+}
+
+async function markAllAlertsRead() {
+  const custVal = $('alerts-cust-filter')?.value;
+  const param = (custVal && custVal !== 'all') ? `?customer_id=${custVal}` : '';
+  await api(`/api/v1/alerts/mark-all-read${param}`, {}, 'POST');
+  ALL_ALERTS.forEach(a => {
+    if (!custVal || custVal === 'all' || a.customer_id === custVal) a.is_read = 1;
+  });
+  updateAlertBadge();
+  filterAlerts();
 }
 
 // ══════════════ CUSTOMER PAGES ══════════════
@@ -1665,6 +2464,7 @@ async function loadCustomerDashboard() {
   // Kick off all customer analysis sections
   CUST_PRODUCT = CUST_PRODUCT || CUST_DEFAULT_PRODUCT;
   runCustDashboardAnalysis();
+  initDashboardQuickSim();
 }
 
 async function runCustDashboardAnalysis() {
@@ -1800,21 +2600,7 @@ async function loadCustPayoff() {
         legend:{orientation:'h',y:-0.2}, font:{family:'Inter,sans-serif',size:12}
       }, {displayModeBar:false});
     }
-    const sc = r.scenarios || [];
-    if ($('cust-scenario-table')) {
-      $('cust-scenario-table').innerHTML = `<table>
-        <tr><th>If NIFTY moves</th><th>Your money becomes</th><th>Gain / Loss %</th><th>Gain / Loss in ₹</th><th>Barrier status</th></tr>
-        ${sc.map(s=>`<tr>
-          <td><b>${s.move_pct>0?'+':''}${s.move_pct}%</b></td>
-          <td>${fmtInr(s.final_value)}</td>
-          <td class="${s.pnl_pct<0?'warn-text':'ok-text'}">${s.pnl_pct>0?'+':''}${s.pnl_pct}%</td>
-          <td class="${s.pnl<0?'warn-text':'ok-text'}">${s.pnl<0?'−':'+'}${fmtInr(Math.abs(s.pnl))}</td>
-          <td>${s.barrier_breached==null?'—':s.barrier_breached?'<span class="warn-text">Breached — loss amplified</span>':'<span class="ok-text">Safe</span>'}</td>
-        </tr>`).join('')}
-      </table>
-      <div class="text-xs mut mt8">"Barrier" is the safety cushion. If NIFTY falls below the ${(p.barrier_pct||70)}% level, your principal is no longer fully protected.</div>
-      `;
-    }
+    renderCustPayoffTable();
   } catch(e) {
     if($('cust-payoff-chart')) $('cust-payoff-chart').innerHTML=`<div class="warn-text">Error: ${e.message}</div>`;
   }
@@ -2052,6 +2838,1669 @@ async function custAsk() {
     $('bot-latest').id = '';
   }
   chat.scrollTop = chat.scrollHeight;
+}
+
+// ══════════════ INTERACTIVE RISK & RETURN PLAYGROUND ══════════════
+let PLAY_STATE = {
+  notional: 1000000,
+  movePct: 0,
+  barrierPct: 70,
+  couponPct: 12,
+  tenorMonths: 12,
+  strikePct: 100,
+  protectionPct: 90,
+  participationPct: 100,
+  productType: 'ELN'
+};
+
+let DASH_SIM_STATE = {
+  notional: 1000000,
+  movePct: 0
+};
+
+let CUST_PAYOFF_NOTIONAL = 1000000;
+
+function formatInrWords(amount) {
+  if (amount == null || isNaN(amount)) return '';
+  const num = Math.abs(amount);
+  if (num >= 10000000) {
+    const cr = num / 10000000;
+    return `₹${cr % 1 === 0 ? cr : cr.toFixed(2)} Crore${cr > 1 ? 's' : ''}`;
+  } else if (num >= 100000) {
+    const l = num / 100000;
+    return `₹${l % 1 === 0 ? l : l.toFixed(1)} Lakh${l > 1 ? 's' : ''}`;
+  } else if (num >= 1000) {
+    const k = num / 1000;
+    return `₹${k % 1 === 0 ? k : k.toFixed(0)}K`;
+  }
+  return fmtInr(amount);
+}
+
+function calculateSimulatorOutcome(params) {
+  const notional = +(params.notional || 1000000);
+  const movePct = +(params.movePct || 0);
+  const barrierPct = +(params.barrierPct || 70);
+  const couponPct = +(params.couponPct || 12);
+  const tenorMonths = +(params.tenorMonths || 12);
+  const strikePct = +(params.strikePct || 100);
+  const protectionPct = +(params.protectionPct || 90);
+  const participationPct = +(params.participationPct || 100);
+  const productType = params.productType || 'ELN';
+  const customer = params.customer || SELECTED_CUSTOMER;
+
+  const t = tenorMonths / 12.0;
+  const finalRet = movePct / 100.0;
+  const minRet = Math.min(finalRet, 0.0);
+  let finalValueFraction = 1.0;
+  let barrierBreached = false;
+  let couponInr = 0;
+  let capitalInr = notional;
+  let status = 'SUITABLE';
+  let statusTitle = 'Capital Protected & Safe';
+  let badgeClass = 'SUITABLE';
+
+  if (productType === 'ELN') {
+    const couponFraction = (couponPct / 100.0) * t;
+    couponInr = notional * couponFraction;
+    barrierBreached = (1.0 + minRet) < (barrierPct / 100.0);
+    const lossCase = barrierBreached && ((1.0 + finalRet) < (strikePct / 100.0));
+
+    if (lossCase) {
+      capitalInr = notional * (1.0 + finalRet);
+      finalValueFraction = (1.0 + finalRet) + couponFraction;
+      status = 'MISMATCH';
+      statusTitle = 'Barrier Breached — Capital at Risk';
+      badgeClass = 'MISMATCH';
+    } else {
+      capitalInr = notional;
+      finalValueFraction = 1.0 + couponFraction;
+      if (movePct < 0 && movePct >= (barrierPct - 100)) {
+        status = 'REVIEW';
+        statusTitle = 'Near Barrier Buffer';
+        badgeClass = 'REVIEW';
+      } else {
+        status = 'SUITABLE';
+        statusTitle = '100% Principal Safe + Full Coupon';
+        badgeClass = 'SUITABLE';
+      }
+    }
+  } else if (productType === 'CPN') {
+    const protFraction = protectionPct / 100.0;
+    const upside = Math.max(0.0, finalRet) * (participationPct / 100.0);
+    finalValueFraction = protFraction + upside;
+    capitalInr = notional * protFraction;
+    couponInr = notional * upside;
+    status = finalValueFraction >= 1.0 ? 'SUITABLE' : 'REVIEW';
+    statusTitle = finalValueFraction >= 1.0 ? 'Capital Growth' : `${protectionPct}% Floor Guaranteed`;
+    badgeClass = finalValueFraction >= 1.0 ? 'SUITABLE' : 'REVIEW';
+  } else if (productType === 'DCD') {
+    const interestFraction = (couponPct / 100.0) * t;
+    couponInr = notional * interestFraction;
+    const k = strikePct / 100.0;
+    if ((1.0 + finalRet) < k) {
+      finalValueFraction = ((1.0 + finalRet) / k) + interestFraction;
+      capitalInr = notional * ((1.0 + finalRet) / k);
+      status = 'REVIEW';
+      statusTitle = 'Converted to Alternate Currency';
+      badgeClass = 'REVIEW';
+    } else {
+      finalValueFraction = 1.0 + interestFraction;
+      capitalInr = notional;
+      status = 'SUITABLE';
+      statusTitle = 'Principal Safe + Interest Paid';
+      badgeClass = 'SUITABLE';
+    }
+  }
+
+  const finalValue = notional * finalValueFraction;
+  const pnl = finalValue - notional;
+  const pnlPct = (finalValueFraction - 1.0) * 100.0;
+  const lossPct = Math.max(0.0, -pnlPct);
+  const lossInr = Math.max(0.0, -pnl);
+
+  // Bank FD Comparison (standard 7% per annum)
+  const fdRate = 7.0;
+  const fdValue = notional * (1.0 + (fdRate / 100.0) * t);
+  const vsFdInr = finalValue - fdValue;
+
+  // Customer Tolerance Check
+  let custToleranceCheck = null;
+  if (customer) {
+    const lossTolerancePct = customer.loss_tolerance_pct || 10;
+    const maxLossBudget = (customer.portfolio_value || notional * 2) * (lossTolerancePct / 100.0);
+    const exceedsTolerance = lossPct > lossTolerancePct;
+    custToleranceCheck = {
+      customerName: customer.name,
+      riskAppetite: customer.risk_appetite,
+      lossTolerancePct,
+      maxLossBudget,
+      exceedsTolerance
+    };
+  }
+
+  return {
+    notional,
+    movePct,
+    barrierPct,
+    couponPct,
+    tenorMonths,
+    strikePct,
+    protectionPct,
+    participationPct,
+    productType,
+    finalValue,
+    pnl,
+    pnlPct,
+    lossPct,
+    lossInr,
+    couponInr,
+    capitalInr,
+    barrierBreached,
+    status,
+    statusTitle,
+    badgeClass,
+    fdValue,
+    vsFdInr,
+    custToleranceCheck
+  };
+}
+
+function generatePlaygroundExplanation(result, customer) {
+  const {
+    notional, movePct, barrierPct, couponPct, tenorMonths, productType,
+    finalValue, pnl, pnlPct, lossPct, lossInr, couponInr, capitalInr,
+    barrierBreached, status, custToleranceCheck
+  } = result;
+
+  const dropBuffer = 100 - barrierPct; // e.g. 100 - 70 = 30% drop allowed
+  const isBreached = barrierBreached;
+  const isLoss = pnl < 0;
+
+  let step1 = {};
+  let step2 = {};
+  let step3 = {};
+  let step4 = {};
+
+  if (productType === 'ELN') {
+    if (!isBreached) {
+      if (movePct >= 0) {
+        step1 = {
+          icon: '🛡️',
+          title: 'Principal 100% Protected (Market Rose or Flat)',
+          text: `The market moved by <b>${movePct >= 0 ? '+' : ''}${movePct.toFixed(1)}%</b>. Because the index stayed well above your <b>${barrierPct}% safety barrier</b> (which permits up to a <b>-${dropBuffer}% market drop</b>), your entire invested principal of <b>${fmtInr(notional)}</b> is returned to you 100% intact.`
+        };
+      } else {
+        step1 = {
+          icon: '🛡️',
+          title: 'Safety Barrier Shielded Your Capital (Market Dipped)',
+          text: `Even though the market declined by <b>${movePct.toFixed(1)}%</b>, it remained safely above your <b>${barrierPct}% protection barrier</b> (allowing up to <b>-${dropBuffer}% decline</b>). Your <b>${fmtInr(notional)}</b> principal is completely shielded from any capital loss.`
+        };
+      }
+      step2 = {
+        icon: '💵',
+        title: 'Full Guaranteed Coupon Credited',
+        text: `You earn your contractually agreed coupon of <b>${couponPct}% per annum</b> for the ${tenorMonths}-month tenor. That adds a guaranteed <b>+${fmtInr(couponInr)}</b> in income directly to your payout.`
+      };
+      step3 = {
+        icon: '🧮',
+        title: 'Step-by-Step Payout Reconciled',
+        text: `Initial Investment (<b>${fmtInr(notional)}</b>) + Guaranteed Coupon (<b>+${fmtInr(couponInr)}</b>) - Capital Reduction (<b>₹0</b>) = <b>Final Payout: ${fmtInr(finalValue)}</b> (Net Gain: <span class="ok-text"><b>+${fmtInr(pnl)}</b> / +${pnlPct.toFixed(2)}%</span>).`
+      };
+    } else {
+      step1 = {
+        icon: '⚠️',
+        title: 'Safety Barrier Breached — Capital Reduction Triggered',
+        text: `The market plunged by <b>${movePct.toFixed(1)}%</b>, breaching your <b>${barrierPct}% safety barrier</b> (the safety threshold was -${dropBuffer}%). The downside capital shield is now deactivated, and your returned principal falls in lockstep with the market to <b>${fmtInr(capitalInr)}</b>.`
+      };
+      step2 = {
+        icon: '💵',
+        title: 'Coupon Received to Partially Soften Loss',
+        text: `Despite the severe market drop, you still receive your full coupon of <b>${couponPct}% (+${fmtInr(couponInr)})</b>, which reduces your net loss from ₹${fmt(Math.abs(notional * movePct / 100))} down to <b>${fmtInr(lossInr)}</b>.`
+      };
+      step3 = {
+        icon: '🧮',
+        title: 'Step-by-Step Loss Calculation',
+        text: `Reduced Capital (<b>${fmtInr(capitalInr)}</b>) + Coupon Credited (<b>+${fmtInr(couponInr)}</b>) = <b>Final Payout: ${fmtInr(finalValue)}</b> (Net Loss: <span class="warn-text"><b>-${fmtInr(lossInr)}</b> / -${lossPct.toFixed(2)}%</span>).`
+      };
+    }
+  } else if (productType === 'CPN') {
+    step1 = {
+      icon: '🛡️',
+      title: 'Contractual Capital Floor Defended',
+      text: `This note features a <b>${result.protectionPct}% capital protection floor</b>. Even in severe crashes, the minimum capital returned cannot fall below <b>${fmtInr(capitalInr)}</b>.`
+    };
+    step2 = {
+      icon: '📈',
+      title: 'Market Participation',
+      text: movePct > 0
+        ? `You capture <b>${result.participationPct}%</b> of the market rally (+${movePct.toFixed(1)}%), generating <b>+${fmtInr(couponInr)}</b> in additional upside return.`
+        : `Since the market was flat or negative (${movePct.toFixed(1)}%), no upside participation is paid, but your capital floor remains defended.`
+    };
+    step3 = {
+      icon: '🧮',
+      title: 'Total Maturity Payout',
+      text: `Protected Principal (<b>${fmtInr(capitalInr)}</b>) + Participation Bonus (<b>+${fmtInr(couponInr)}</b>) = <b>Final Payout: ${fmtInr(finalValue)}</b>.`
+    };
+  } else if (productType === 'DCD') {
+    step1 = {
+      icon: '🔄',
+      title: 'Currency Conversion Evaluation',
+      text: movePct < 0
+        ? `The currency moved below strike level. Your deposit is converted into the alternate currency at the agreed strike rate, resulting in a market-adjusted value of <b>${fmtInr(capitalInr)}</b>.`
+        : `The underlying currency remained at or above strike level. Your original principal of <b>${fmtInr(notional)}</b> is returned in your base currency.`
+    };
+    step2 = {
+      icon: '💵',
+      title: 'High Premium Yield Paid',
+      text: `You receive the enhanced yield of <b>${couponPct}% per annum</b> amounting to <b>+${fmtInr(couponInr)}</b>.`
+    };
+    step3 = {
+      icon: '🧮',
+      title: 'Net Maturity Value',
+      text: `Principal/Converted Base (<b>${fmtInr(capitalInr)}</b>) + Yield (<b>+${fmtInr(couponInr)}</b>) = <b>Final Payout: ${fmtInr(finalValue)}</b>.`
+    };
+  }
+
+  // Step 4: Personal Profile Suitability
+  if (custToleranceCheck) {
+    const cName = customer ? customer.name : 'Investor';
+    const cRisk = (customer ? customer.risk_appetite : 'moderate').toUpperCase();
+    if (custToleranceCheck.exceedsTolerance) {
+      step4 = {
+        icon: '⚠️',
+        title: `Suitability Warning for ${cName} (${cRisk} Profile)`,
+        text: `In this scenario, your potential loss of <b>${fmtInr(lossInr)} (${lossPct.toFixed(1)}%)</b> EXCEEDS your stated loss tolerance of <b>${custToleranceCheck.lossTolerancePct}%</b> (max comfortable loss: ${fmtInr(custToleranceCheck.maxLossBudget)}). If you want lower downside risk, consider choosing a lower barrier (e.g. 60% instead of ${barrierPct}%) or reducing your ticket size from ${fmtInr(notional)}.`
+      };
+    } else {
+      step4 = {
+        icon: '✅',
+        title: `Suitability Fit for ${cName} (${cRisk} Profile)`,
+        text: `This outcome is fully within your safe risk budget. Your loss tolerance is <b>${custToleranceCheck.lossTolerancePct}%</b>, and under this scenario your net loss is <b>${lossPct.toFixed(1)}% (${fmtInr(lossInr)})</b>, leaving your broader wealth intact.`
+      };
+    }
+  } else {
+    step4 = {
+      icon: '💡',
+      title: 'Key Takeaway for Investors',
+      text: isLoss
+        ? `This scenario models an adverse market condition. Ensure that your overall asset allocation has adequate debt and cash reserves to comfortably absorb this potential loss.`
+        : `This product offers attractive fixed yield (${couponPct}% p.a.) as long as the market avoids drops steeper than -${dropBuffer}%.`
+    };
+  }
+
+  return [step1, step2, step3, step4];
+}
+
+// ── Dashboard Quick Sandbox ──
+function initDashboardQuickSim() {
+  if (!$('dash-sim-amount')) return;
+  updateDashSim();
+}
+
+function onDashSimAmountChange(val) {
+  DASH_SIM_STATE.notional = +val;
+  if ($('dash-sim-amount-badge')) $('dash-sim-amount-badge').textContent = formatInrWords(+val);
+  // Highlight chips
+  document.querySelectorAll('#page-cust-dashboard .preset-chip').forEach(c => c.classList.remove('active'));
+  const matchChip = $('chip-dash-' + val);
+  if (matchChip) matchChip.classList.add('active');
+  updateDashSim();
+}
+
+function setDashSimAmount(amt) {
+  DASH_SIM_STATE.notional = +amt;
+  if ($('dash-sim-amount')) $('dash-sim-amount').value = amt;
+  onDashSimAmountChange(amt);
+}
+
+function onDashSimMoveChange(val) {
+  DASH_SIM_STATE.movePct = +val;
+  const num = +val;
+  const badgeEl = $('dash-sim-move-badge');
+  if (badgeEl) {
+    badgeEl.textContent = `${num > 0 ? '+' : ''}${num.toFixed(1)}% (${num < -30 ? 'Breach' : num < 0 ? 'Dip' : num === 0 ? 'Flat' : 'Bull'})`;
+    badgeEl.style.background = num < -30 ? 'var(--bad-l)' : num < 0 ? 'var(--rev-l)' : '#ecfdf5';
+    badgeEl.style.color = num < -30 ? 'var(--bad)' : num < 0 ? 'var(--rev)' : '#047857';
+  }
+  // Clear preset active classes
+  document.querySelectorAll('#page-cust-dashboard .scenario-btn').forEach(b => b.classList.remove('active'));
+  updateDashSim();
+}
+
+function setDashSimMove(movePct) {
+  DASH_SIM_STATE.movePct = +movePct;
+  if ($('dash-sim-move')) $('dash-sim-move').value = movePct;
+  onDashSimMoveChange(movePct);
+  // Highlight button
+  document.querySelectorAll('#page-cust-dashboard .scenario-btn').forEach(b => b.classList.remove('active'));
+  const btn = $('scen-dash-' + movePct);
+  if (btn) btn.classList.add('active');
+}
+
+function updateDashSim() {
+  const c = SELECTED_CUSTOMER;
+  const res = calculateSimulatorOutcome({
+    notional: DASH_SIM_STATE.notional,
+    movePct: DASH_SIM_STATE.movePct,
+    customer: c
+  });
+
+  // Render 4 KPI tiles
+  const resultsEl = $('dash-sim-results');
+  if (resultsEl) {
+    const isGain = res.pnl >= 0;
+    resultsEl.innerHTML = `
+      <div class="sim-stat-tile">
+        <div class="label">Investment Amount</div>
+        <div class="val">${fmtInr(res.notional)}</div>
+        <div class="text-xs mut mt4">${formatInrWords(res.notional)}</div>
+      </div>
+      <div class="sim-stat-tile">
+        <div class="label">Estimated Payout</div>
+        <div class="val">${fmtInr(res.finalValue)}</div>
+        <div class="text-xs mut mt4">At 12-month maturity</div>
+      </div>
+      <div class="sim-stat-tile">
+        <div class="label">Net Gain / Loss</div>
+        <div class="val" style="color:${isGain ? '#0f766e' : '#b91c1c'}">
+          ${isGain ? '+' : '−'}${fmtInr(Math.abs(res.pnl))}
+        </div>
+        <div class="text-xs fw6 mt4" style="color:${isGain ? '#0f766e' : '#b91c1c'}">
+          ${isGain ? '+' : ''}${res.pnlPct.toFixed(1)}%
+        </div>
+      </div>
+      <div class="sim-stat-tile">
+        <div class="label">Protection Status</div>
+        <div class="val" style="font-size:16px;margin-top:6px">${res.statusTitle}</div>
+        <div class="text-xs mt4">${badge(res.badgeClass)}</div>
+      </div>
+    `;
+  }
+
+  // Render Explanation
+  const explEl = $('dash-sim-explanation');
+  if (explEl) {
+    const steps = generatePlaygroundExplanation(res, c);
+    explEl.innerHTML = `
+      <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:10px;display:flex;align-items:center;gap:6px">
+        🧠 What happens to your ${formatInrWords(res.notional)} in this scenario?
+      </div>
+      <div style="font-size:13px;line-height:1.65;color:var(--ink2)">
+        <p style="margin-bottom:8px">${steps[0].text}</p>
+        <p style="margin-bottom:8px">${steps[1].text}</p>
+        <div style="background:#f1f5f9;padding:10px 12px;border-radius:10px;margin-top:8px">
+          ${steps[2].text}
+        </div>
+        <div class="mt8 text-xs mut">
+          ${steps[3].text}
+        </div>
+      </div>
+    `;
+  }
+}
+
+// ── Full-Featured Playground Page ──
+function initCustomerPlayground() {
+  if (!$('play-notional-slider')) return;
+  const c = SELECTED_CUSTOMER;
+  if (c && c.portfolio_value) {
+    PLAY_STATE.notional = Math.min(1000000, c.portfolio_value * 0.1) || 1000000;
+    if ($('play-notional-slider')) $('play-notional-slider').value = PLAY_STATE.notional;
+    if ($('play-notional-input')) $('play-notional-input').value = PLAY_STATE.notional;
+  }
+  updatePlayground();
+}
+
+function onPlayNotionalInputChange(val) {
+  const num = Math.max(10000, +val);
+  PLAY_STATE.notional = num;
+  if ($('play-notional-slider')) $('play-notional-slider').value = Math.min(10000000, num);
+  if ($('play-notional-inr-words')) $('play-notional-inr-words').textContent = formatInrWords(num);
+  document.querySelectorAll('#page-cust-playground .preset-chip').forEach(c => c.classList.remove('active'));
+  const match = $('chip-play-' + num);
+  if (match) match.classList.add('active');
+  updatePlayground();
+}
+
+function onPlayNotionalSliderChange(val) {
+  const num = +val;
+  PLAY_STATE.notional = num;
+  if ($('play-notional-input')) $('play-notional-input').value = num;
+  if ($('play-notional-inr-words')) $('play-notional-inr-words').textContent = formatInrWords(num);
+  document.querySelectorAll('#page-cust-playground .preset-chip').forEach(c => c.classList.remove('active'));
+  const match = $('chip-play-' + num);
+  if (match) match.classList.add('active');
+  updatePlayground();
+}
+
+function setPlayNotional(amt) {
+  PLAY_STATE.notional = +amt;
+  if ($('play-notional-input')) $('play-notional-input').value = amt;
+  if ($('play-notional-slider')) $('play-notional-slider').value = amt;
+  onPlayNotionalInputChange(amt);
+}
+
+function onPlayMoveSliderChange(val) {
+  const num = +val;
+  PLAY_STATE.movePct = num;
+  const badgeEl = $('play-move-badge');
+  if (badgeEl) {
+    badgeEl.textContent = `${num > 0 ? '+' : ''}${num.toFixed(1)}% (${num < -30 ? 'Breach' : num < 0 ? 'Dip' : num === 0 ? 'Flat' : 'Bull'})`;
+    badgeEl.style.background = num < -30 ? 'var(--bad-l)' : num < 0 ? 'var(--rev-l)' : '#ecfdf5';
+    badgeEl.style.color = num < -30 ? 'var(--bad)' : num < 0 ? 'var(--rev)' : '#047857';
+  }
+  document.querySelectorAll('#page-cust-playground .scenario-btn').forEach(b => b.classList.remove('active'));
+  updatePlayground();
+}
+
+function setPlayScenario(movePct) {
+  PLAY_STATE.movePct = +movePct;
+  if ($('play-move-slider')) $('play-move-slider').value = movePct;
+  onPlayMoveSliderChange(movePct);
+  document.querySelectorAll('#page-cust-playground .scenario-btn').forEach(b => b.classList.remove('active'));
+  const btn = $('scen-play-' + movePct);
+  if (btn) btn.classList.add('active');
+}
+
+function togglePlayAdvanced() {
+  const body = $('play-adv-body');
+  const arr = $('play-adv-arrow');
+  if (body) {
+    const isHidden = body.style.display === 'none';
+    body.style.display = isHidden ? 'block' : 'none';
+    if (arr) arr.textContent = isHidden ? '▲ Hide' : '▼ Show';
+  }
+}
+
+function resetPlayground() {
+  PLAY_STATE = {
+    notional: 1000000,
+    movePct: 0,
+    barrierPct: 70,
+    couponPct: 12,
+    tenorMonths: 12,
+    strikePct: 100,
+    protectionPct: 90,
+    participationPct: 100,
+    productType: 'ELN'
+  };
+  if ($('play-notional-input')) $('play-notional-input').value = 1000000;
+  if ($('play-notional-slider')) $('play-notional-slider').value = 1000000;
+  if ($('play-move-slider')) $('play-move-slider').value = 0;
+  if ($('play-barrier')) $('play-barrier').value = 70;
+  if ($('play-barrier-val')) $('play-barrier-val').textContent = '70%';
+  if ($('play-coupon')) $('play-coupon').value = 12;
+  if ($('play-tenor')) $('play-tenor').value = '12';
+  if ($('play-ptype')) $('play-ptype').value = 'ELN';
+  onPlayNotionalInputChange(1000000);
+  onPlayMoveSliderChange(0);
+}
+
+function updatePlayground() {
+  if (!$('play-hero-payout')) return;
+  const c = SELECTED_CUSTOMER;
+  PLAY_STATE.barrierPct = +($('play-barrier')?.value || 70);
+  PLAY_STATE.couponPct = +($('play-coupon')?.value || 12);
+  PLAY_STATE.tenorMonths = +($('play-tenor')?.value || 12);
+  PLAY_STATE.productType = $('play-ptype')?.value || 'ELN';
+
+  const res = calculateSimulatorOutcome({
+    ...PLAY_STATE,
+    customer: c
+  });
+
+  const isGain = res.pnl >= 0;
+
+  // Hero Card
+  $('play-hero-payout').textContent = fmtInr(res.finalValue);
+  $('play-hero-sub').textContent = `On initial investment of ${fmtInr(res.notional)} (${formatInrWords(res.notional)})`;
+  $('play-hero-pnl').textContent = `${isGain ? '+' : '−'}${fmtInr(Math.abs(res.pnl))} (${isGain ? '+' : ''}${res.pnlPct.toFixed(1)}%)`;
+  $('play-hero-pnl').style.color = isGain ? '#34d399' : '#f87171';
+  $('play-hero-badge').textContent = res.statusTitle;
+  $('play-hero-badge').className = `badge ${res.badgeClass}`;
+
+  // Risk Meter Pin
+  const pinPos = Math.max(5, Math.min(95, ((res.movePct + 60) / 100) * 100));
+  const pinEl = $('play-meter-pin');
+  if (pinEl) pinEl.style.left = `${pinPos}%`;
+
+  // FD Comparison
+  const fdEl = $('play-fd-comparison');
+  if (fdEl) {
+    const isAheadOfFd = res.vsFdInr >= 0;
+    fdEl.innerHTML = `
+      <span>Compared to 7.0% Bank Fixed Deposit (${fmtInr(res.fdValue)}):</span>
+      <b style="color:${isAheadOfFd ? '#34d399' : '#f87171'}">
+        ${isAheadOfFd ? '+' : '−'}${fmtInr(Math.abs(res.vsFdInr))} ${isAheadOfFd ? 'Outperformance' : 'Lower'}
+      </b>
+    `;
+  }
+
+  // Breakdown grid
+  $('play-tile-principal').textContent = fmtInr(res.capitalInr);
+  $('play-tile-principal-sub').textContent = res.barrierBreached ? '⚠️ Barrier Breached' : '100% Safe';
+  $('play-tile-coupon').textContent = `+${fmtInr(res.couponInr)}`;
+  $('play-tile-coupon-sub').textContent = `${res.couponPct}% p.a. for ${res.tenorMonths}m`;
+  $('play-tile-risk').textContent = res.lossInr > 0 ? `-${fmtInr(res.lossInr)}` : '₹0';
+  $('play-tile-risk').style.color = res.lossInr > 0 ? 'var(--bad)' : 'var(--ok)';
+  $('play-tile-risk-sub').textContent = res.lossInr > 0 ? `-${res.lossPct.toFixed(1)}% capital reduction` : 'No capital deduction';
+
+  // Customer Profile Card
+  const profCard = $('play-cust-profile-card');
+  if (profCard && c) {
+    const check = res.custToleranceCheck;
+    profCard.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <b>${c.name}</b> &nbsp;|&nbsp; Risk Profile: <span class="badge INFO">${c.risk_appetite}</span>
+        </div>
+        <div class="text-xs mut">Stated Loss Tolerance: <b>${c.loss_tolerance_pct}%</b></div>
+      </div>
+      <div class="mt8 text-sm" style="line-height:1.6">
+        ${check && check.exceedsTolerance
+          ? `<span class="warn-text">⚠️ <b>Exceeds Risk Limit:</b> Your potential loss of <b>${fmtInr(res.lossInr)} (${res.lossPct.toFixed(1)}%)</b> in this scenario is higher than your ${c.loss_tolerance_pct}% risk threshold.</span>`
+          : `<span class="ok-text">✅ <b>Safe Risk Match:</b> This scenario outcome fits comfortably within your ${c.loss_tolerance_pct}% loss tolerance.</span>`
+        }
+      </div>
+    `;
+  }
+
+  // Explanation steps
+  const stepsEl = $('play-explanation-steps');
+  if (stepsEl) {
+    const steps = generatePlaygroundExplanation(res, c);
+    stepsEl.innerHTML = steps.map(s => `
+      <div class="explain-step">
+        <div class="explain-icon">${s.icon}</div>
+        <div class="explain-body">
+          <h4>${s.title}</h4>
+          <p>${s.text}</p>
+        </div>
+      </div>
+    `).join('');
+  }
+}
+
+// ── Payoff Scenario Table Amount Slider ──
+function onCustPayoffAmtChange(val) {
+  CUST_PAYOFF_NOTIONAL = +val;
+  if ($('cust-payoff-amt-display')) $('cust-payoff-amt-display').textContent = formatInrWords(+val);
+  document.querySelectorAll('#page-cust-payoff .preset-chip').forEach(c => c.classList.remove('active'));
+  const match = $('chip-payoff-' + val);
+  if (match) match.classList.add('active');
+  renderCustPayoffTable();
+}
+
+function setPayoffAmt(amt) {
+  CUST_PAYOFF_NOTIONAL = +amt;
+  if ($('cust-payoff-amt-slider')) $('cust-payoff-amt-slider').value = amt;
+  onCustPayoffAmtChange(amt);
+}
+
+function renderCustPayoffTable() {
+  const p = CUST_PRODUCT || CUST_DEFAULT_PRODUCT;
+  const notional = CUST_PAYOFF_NOTIONAL || 1000000;
+  const moves = [20, 10, 0, -10, -20, -28, -32, -40];
+  const rows = moves.map(m => {
+    const res = calculateSimulatorOutcome({
+      notional,
+      movePct: m,
+      barrierPct: p.barrier_pct || 70,
+      couponPct: p.coupon_pct || 12,
+      tenorMonths: p.tenor_months || 12,
+      productType: p.product_type || 'ELN'
+    });
+    return {
+      move_pct: m,
+      final_value: res.finalValue,
+      pnl: res.pnl,
+      pnl_pct: res.pnlPct,
+      barrier_breached: res.barrierBreached
+    };
+  });
+
+  if ($('cust-scenario-table')) {
+    $('cust-scenario-table').innerHTML = `<table>
+      <tr><th>If NIFTY moves</th><th>Your money becomes</th><th>Gain / Loss %</th><th>Gain / Loss in ₹</th><th>Barrier status</th></tr>
+      ${rows.map(s => `<tr>
+        <td><b>${s.move_pct > 0 ? '+' : ''}${s.move_pct}%</b></td>
+        <td>${fmtInr(s.final_value)}</td>
+        <td class="${s.pnl_pct < 0 ? 'warn-text' : 'ok-text'}">${s.pnl_pct > 0 ? '+' : ''}${s.pnl_pct.toFixed(1)}%</td>
+        <td class="${s.pnl < 0 ? 'warn-text' : 'ok-text'}">${s.pnl < 0 ? '−' : '+'}${fmtInr(Math.abs(s.pnl))}</td>
+        <td>${s.barrier_breached ? '<span class="warn-text">Breached — loss applied</span>' : '<span class="ok-text">Protected</span>'}</td>
+      </tr>`).join('')}
+    </table>
+    <div class="text-xs mut mt8">All calculations dynamically update based on your desired investment of ${formatInrWords(notional)} (${fmtInr(notional)}). Barrier is set at ${p.barrier_pct || 70}%.</div>
+    `;
+  }
+
+  // Explanation below payoff table
+  const payoffExplEl = $('cust-payoff-explanation');
+  if (payoffExplEl) {
+    const barrier = p.barrier_pct || 70;
+    const maxDrop = 100 - barrier;
+    payoffExplEl.innerHTML = `
+      <div style="font-weight:700;font-size:13px;color:var(--pri);margin-bottom:6px">
+        💡 How to read this table for ${formatInrWords(notional)}:
+      </div>
+      <div class="text-sm" style="line-height:1.65;color:var(--ink2)">
+        • <b>Above -${maxDrop}% market fall:</b> You get 100% of your ${fmtInr(notional)} back PLUS your ${(p.coupon_pct || 12)}% coupon (+${fmtInr(notional * (p.coupon_pct || 12) / 100)}). Total payout: <b>${fmtInr(notional * (1 + (p.coupon_pct || 12) / 100))}</b>.<br>
+        • <b>Below -${maxDrop}% market fall:</b> The safety barrier breaches. You receive your coupon, but absorb the market drop on your principal.
+      </div>
+    `;
+  }
+}
+
+// ══════════════ RM CUSTOMERS DIRECTORY ══════════════
+let RM_FILTERED_CUSTOMERS = [];
+
+async function loadRMCustomers() {
+  if (!CUSTOMERS || CUSTOMERS.length === 0) {
+    CUSTOMERS = await api('/api/v1/customers').catch(() => []);
+  }
+  RM_FILTERED_CUSTOMERS = [...CUSTOMERS];
+  renderRMCustomerKPIs();
+  renderRMCustomerTable(RM_FILTERED_CUSTOMERS);
+  
+  // Also refresh customer select dropdowns across the app
+  const rmSel = $('rm-sel-cust');
+  if (rmSel) {
+    const cur = rmSel.value;
+    rmSel.innerHTML = CUSTOMERS.map(c => `<option value="${c.id}">${c.id} — ${c.name} (${c.risk_appetite})</option>`).join('');
+    if (cur) rmSel.value = cur;
+  }
+  const simSel = $('sim-cust-sel');
+  if (simSel) {
+    const curSim = simSel.value;
+    simSel.innerHTML = '<option value="generic">— Generic Market Simulation (No Client) —</option>' +
+      CUSTOMERS.map(c => `<option value="${c.id}">${c.id} — ${c.name} (${c.risk_appetite}, ${c.loss_tolerance_pct}% loss tol)</option>`).join('');
+    if (curSim) simSel.value = curSim;
+  }
+}
+
+function renderRMCustomerKPIs() {
+  const el = $('rm-cust-kpis');
+  if (!el || !CUSTOMERS.length) return;
+  const totalAum = CUSTOMERS.reduce((s, c) => s + (c.portfolio_value || 0), 0);
+  const avgLossTol = (CUSTOMERS.reduce((s, c) => s + (c.loss_tolerance_pct || 0), 0) / CUSTOMERS.length).toFixed(1);
+  const hniCount = CUSTOMERS.filter(c => (c.segment || 'HNI') === 'HNI').length;
+  const uhniCount = CUSTOMERS.filter(c => (c.segment || 'HNI') === 'UHNI').length;
+
+  el.innerHTML = `
+    <div class="kpi">
+      <div class="kpi-label">Total Assigned Clients</div>
+      <div class="kpi-value">${CUSTOMERS.length}</div>
+      <div class="kpi-sub">${hniCount} HNI · ${uhniCount} UHNI</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Combined Client AUM</div>
+      <div class="kpi-value" style="color:var(--pri)">${fmtInr(totalAum)}</div>
+      <div class="kpi-sub">Across all asset classes</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Avg Loss Tolerance</div>
+      <div class="kpi-value" style="color:var(--ink2)">${avgLossTol}%</div>
+      <div class="kpi-sub">Mandate risk threshold</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Active Alerts</div>
+      <div class="kpi-value warn-text">${ALL_ALERTS.filter(a => !a.is_read).length}</div>
+      <div class="kpi-sub">Risk events requiring review</div>
+    </div>
+  `;
+}
+
+function filterRMCustomers() {
+  const q = ($('rm-cust-search')?.value || '').toLowerCase().trim();
+  const risk = $('rm-cust-risk-filter')?.value || 'all';
+
+  RM_FILTERED_CUSTOMERS = CUSTOMERS.filter(c => {
+    const matchQ = !q ||
+      c.name.toLowerCase().includes(q) ||
+      c.id.toLowerCase().includes(q) ||
+      (c.city || '').toLowerCase().includes(q) ||
+      (c.email || '').toLowerCase().includes(q) ||
+      (c.segment || '').toLowerCase().includes(q);
+    const matchRisk = (risk === 'all') || (c.risk_appetite === risk);
+    return matchQ && matchRisk;
+  });
+
+  renderRMCustomerTable(RM_FILTERED_CUSTOMERS);
+}
+
+function renderRMCustomerTable(list) {
+  const el = $('rm-cust-detail-table');
+  const countBadge = $('rm-cust-count-badge');
+  if (countBadge) countBadge.textContent = `${list.length} of ${CUSTOMERS.length} clients`;
+  if (!el) return;
+
+  if (!list.length) {
+    el.innerHTML = '<div class="empty">No customers found matching the search criteria.</div>';
+    return;
+  }
+
+  const riskBadge = r => {
+    if (r === 'conservative') return '<span class="badge SUITABLE">Conservative</span>';
+    if (r === 'moderate') return '<span class="badge REVIEW">Moderate</span>';
+    return '<span class="badge MISMATCH">Aggressive</span>';
+  };
+
+  el.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Customer</th>
+          <th>Segment & KYC</th>
+          <th>Risk Profile</th>
+          <th>Loss Tolerance</th>
+          <th>Tenor Horizon</th>
+          <th>Portfolio AUM</th>
+          <th>Key Exposure</th>
+          <th>City / Contact</th>
+          <th style="text-align:right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${list.map(c => {
+          const niftyExp = c.existing_exposures?.['NIFTY 50'] != null ? `${c.existing_exposures['NIFTY 50']}%` : '—';
+          return `
+          <tr>
+            <td>
+              <div style="font-weight:600;color:var(--ink)">${c.name}</div>
+              <div class="text-xs mut">ID: <b>${c.id}</b> · PAN: ${c.pan || 'ABCDE1234F'}</div>
+            </td>
+            <td>
+              <span class="badge INFO" style="font-size:10px;padding:1px 6px">${c.segment || 'HNI'}</span>
+              <div class="text-xs ok-text mt4">✓ ${c.kyc_status || 'Verified'}</div>
+            </td>
+            <td>${riskBadge(c.risk_appetite)}</td>
+            <td>
+              <span class="fw6 ${c.loss_tolerance_pct <= 10 ? 'ok-text' : c.loss_tolerance_pct <= 20 ? 'warn-text' : ''}" style="${c.loss_tolerance_pct > 20 ? 'color:var(--bad)' : ''}">
+                ${c.loss_tolerance_pct}%
+              </span>
+              <div class="text-xs mut">${fmtInr(c.portfolio_value * c.loss_tolerance_pct / 100)} max</div>
+            </td>
+            <td>
+              <div class="fw6">${c.horizon_months} mos</div>
+              <div class="text-xs mut">${(c.horizon_months/12).toFixed(1)} yrs</div>
+            </td>
+            <td>
+              <div class="fw6" style="color:var(--pri)">${fmtInr(c.portfolio_value)}</div>
+              <div class="text-xs mut">${c.holdings?.length || 0} holdings</div>
+            </td>
+            <td>
+              <div class="fw6">NIFTY: ${niftyExp}</div>
+              <div class="text-xs mut">Liq: ${c.liquidity_need || 'medium'}</div>
+            </td>
+            <td>
+              <div class="text-xs fw6">${c.city || '—'}</div>
+              <div class="text-xs mut">${c.email || '—'}</div>
+            </td>
+            <td style="text-align:right">
+              <div class="flex gap-8" style="justify-content:flex-end">
+                <button class="btn btn-secondary btn-sm" onclick="viewCustomerDossier('${c.id}')" title="View Full Dossier & Holdings">
+                  📁 Dossier
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="simulateForCustomer('${c.id}')" title="Open in Simulator">
+                  📈 Sim
+                </button>
+                <button class="btn btn-primary btn-sm" onclick="rmPickCustomer('${c.id}')" title="Configure & Assess Product">
+                  Assess →
+                </button>
+              </div>
+            </td>
+          </tr>
+          `;
+        }).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+function simulateForCustomer(id) {
+  const c = CUSTOMERS.find(x => x.id === id);
+  if (!c) return;
+  SELECTED_CUSTOMER = c;
+  navTo('simulator');
+  if ($('sim-cust-sel')) {
+    $('sim-cust-sel').value = c.id;
+    onSimCustomerChange();
+  }
+}
+
+function viewCustomerDossier(id) {
+  const c = CUSTOMERS.find(x => x.id === id);
+  const el = $('rm-cust-dossier');
+  if (!c || !el) return;
+
+  const holdings = c.holdings || [];
+  const exposures = c.existing_exposures || {};
+
+  el.style.display = 'block';
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  el.innerHTML = `
+    <div class="card" style="border:1.5px solid var(--pri);background:#fff;position:relative">
+      <div class="section-header" style="margin-bottom:12px">
+        <div>
+          <div class="section-title" style="display:flex;align-items:center;gap:8px">
+            📁 Client Dossier: ${c.name} (${c.id})
+            <span class="badge INFO">${c.segment || 'HNI'}</span>
+            <span class="badge SUITABLE">KYC Verified</span>
+          </div>
+          <div class="section-sub">Assigned RM: ${c.rm_id || 'RM001'} · Live Client Profile & Portfolio Breakdown</div>
+        </div>
+        <div class="flex gap-8">
+          <button class="btn btn-primary btn-sm" onclick="rmPickCustomer('${c.id}')">
+            🚀 Launch Assessment in Product Studio
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="$('rm-cust-dossier').style.display='none'">
+            ✕ Close
+          </button>
+        </div>
+      </div>
+
+      <div class="grid-3 mt14">
+        <!-- Personal & Regulatory -->
+        <div class="card" style="margin-bottom:0;background:var(--bg)">
+          <div class="card-title">👤 Identity & Contact</div>
+          <table>
+            <tr><td class="mut">Full Name</td><td><b>${c.name}</b></td></tr>
+            <tr><td class="mut">PAN Number</td><td><code>${c.pan || 'ABCDE1234F'}</code></td></tr>
+            <tr><td class="mut">Email</td><td>${c.email || '—'}</td></tr>
+            <tr><td class="mut">Phone</td><td>${c.phone || '—'}</td></tr>
+            <tr><td class="mut">City</td><td>${c.city || '—'}</td></tr>
+            <tr><td class="mut">Annual Income</td><td><b>${c.annual_income_inr ? fmtInr(c.annual_income_inr) : '—'}</b></td></tr>
+          </table>
+        </div>
+
+        <!-- Risk Profile -->
+        <div class="card" style="margin-bottom:0;background:var(--bg)">
+          <div class="card-title">🛡️ Risk & Suitability Mandate</div>
+          <table>
+            <tr><td class="mut">Risk Appetite</td><td><b>${c.risk_appetite.toUpperCase()}</b></td></tr>
+            <tr><td class="mut">Max Loss Tolerance</td><td><b class="warn-text">${c.loss_tolerance_pct}%</b> (${fmtInr(c.portfolio_value * c.loss_tolerance_pct / 100)})</td></tr>
+            <tr><td class="mut">Investment Horizon</td><td><b>${c.horizon_months} months</b> (${(c.horizon_months/12).toFixed(1)} yrs)</td></tr>
+            <tr><td class="mut">Liquidity Preference</td><td><b>${c.liquidity_need || 'medium'}</b></td></tr>
+            <tr><td class="mut">Total Portfolio AUM</td><td><b style="color:var(--pri)">${fmtInr(c.portfolio_value)}</b></td></tr>
+          </table>
+        </div>
+
+        <!-- Asset Allocation / Exposures -->
+        <div class="card" style="margin-bottom:0;background:var(--bg)">
+          <div class="card-title">📊 Key Asset Exposures</div>
+          <div style="padding:4px 0">
+            ${Object.entries(exposures).map(([asset, pct]) => `
+              <div class="flex items-center gap-8 mt8">
+                <span class="text-sm" style="flex:1">${asset}</span>
+                <div style="flex:2;height:10px;background:#e2e8f0;border-radius:5px;overflow:hidden">
+                  <div style="height:100%;width:${pct}%;background:${pct > 40 ? 'var(--bad)' : 'var(--pri)'};border-radius:5px"></div>
+                </div>
+                <span class="text-sm fw6" style="width:40px;text-align:right">${pct}%</span>
+              </div>
+            `).join('')}
+            ${Object.keys(exposures).length === 0 ? '<div class="text-xs mut">No concentrated exposures flagged.</div>' : ''}
+          </div>
+          <div class="text-xs mut mt14" style="line-height:1.5">
+            ⚠️ Allocating additional exposure to <b>${Object.keys(exposures)[0] || 'underlying'}</b> will trigger concentration mismatch rules if allocation exceeds threshold.
+          </div>
+        </div>
+      </div>
+
+      <!-- Holdings Table -->
+      <div class="card mt14" style="margin-bottom:0">
+        <div class="card-title">💼 Portfolio Holdings Breakdown (${holdings.length} assets)</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Asset Name</th>
+              <th>Asset Category</th>
+              <th>Underlying Market</th>
+              <th>Holding Value</th>
+              <th>% of Portfolio</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${holdings.map(h => {
+              const pct = ((h.value / c.portfolio_value) * 100).toFixed(1);
+              return `
+              <tr>
+                <td><b>${h.asset}</b></td>
+                <td><span class="badge INFO" style="font-size:10px">${h.type}</span></td>
+                <td class="text-xs mut">${h.underlying}</td>
+                <td><b>${fmtInr(h.value)}</b></td>
+                <td>
+                  <div class="flex items-center gap-8">
+                    <div style="width:60px;height:6px;background:var(--bg);border-radius:3px;overflow:hidden">
+                      <div style="width:${pct}%;height:100%;background:var(--pri)"></div>
+                    </div>
+                    <span class="text-xs fw6">${pct}%</span>
+                  </div>
+                </td>
+              </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function openAddCustomerModal() {
+  const m = $('modal-add-cust');
+  if (m) {
+    const nextId = 'C' + (100 + CUSTOMERS.length + 1);
+    if ($('add-cust-id')) $('add-cust-id').value = nextId;
+    m.style.display = 'flex';
+  }
+}
+
+function closeAddCustomerModal() {
+  const m = $('modal-add-cust');
+  if (m) m.style.display = 'none';
+}
+
+async function submitAddCustomer() {
+  const id = $('add-cust-id')?.value.trim();
+  const name = $('add-cust-name')?.value.trim();
+  const risk_appetite = $('add-cust-risk')?.value;
+  const loss_tolerance_pct = +($('add-cust-loss-tol')?.value || 15);
+  const horizon_months = +($('add-cust-horizon')?.value || 36);
+  const portfolio_value = +($('add-cust-portfolio')?.value || 10000000);
+  const segment = $('add-cust-segment')?.value || 'HNI';
+  const city = $('add-cust-city')?.value.trim() || 'Mumbai';
+  const email = $('add-cust-email')?.value.trim() || `${id.toLowerCase()}@finvision.demo`;
+  const phone = $('add-cust-phone')?.value.trim() || '+91-98765-00000';
+
+  if (!id || !name) {
+    alert('Please enter Client ID and Name');
+    return;
+  }
+
+  const newCust = {
+    id, name, risk_appetite, loss_tolerance_pct, horizon_months, portfolio_value,
+    segment, city, email, phone,
+    kyc_status: 'verified',
+    pan: 'ABCDE' + Math.floor(1000 + Math.random()*9000) + 'F',
+    rm_id: 'RM001',
+    existing_exposures: { 'NIFTY 50': 20 },
+    annual_income_inr: Math.round(portfolio_value * 0.25),
+    liquidity_need: 'medium',
+    holdings: [
+      { asset: `${name.split(' ')[0]} LargeCap Equity`, underlying: 'NIFTY 50', value: portfolio_value * 0.4, type: 'equity' },
+      { asset: 'Fixed Return Debentures', underlying: 'debt', value: portfolio_value * 0.35, type: 'debt' },
+      { asset: 'Liquid Reserve', underlying: 'cash', value: portfolio_value * 0.25, type: 'cash' }
+    ]
+  };
+
+  try {
+    await api('/api/v1/customers', newCust, 'POST');
+  } catch(e) {
+    // Save locally
+  }
+
+  const existingIdx = CUSTOMERS.findIndex(c => c.id === id);
+  if (existingIdx >= 0) CUSTOMERS[existingIdx] = newCust;
+  else CUSTOMERS.push(newCust);
+
+  closeAddCustomerModal();
+  loadRMCustomers();
+}
+
+// ══════════════ PRODUCTS CATALOGUE ══════════════
+const PRODUCTS = [
+  {
+    id: 'prod-eln-1',
+    name: 'NIFTY Linked Growth Plan',
+    category: 'Structured Products',
+    type: 'ELN',
+    risk: 'Moderate',
+    expected_return: '11.8%',
+    return_num: 11.8,
+    tenor: '18 months',
+    tenor_months: 18,
+    min_inv: '₹1L',
+    notional: 1000000,
+    underlying: 'NIFTY 50',
+    coupon_pct: 11.8,
+    barrier_pct: 70,
+    strike_pct: 100,
+    protection_pct: 90,
+    tag_class: 'structured',
+    description: 'Capital-efficient growth note linked to NIFTY 50. Pays 11.8% annual coupon with 70% soft downside protection barrier.',
+    mechanics: '100% principal returned plus 11.8% p.a. coupon if NIFTY remains above 70% of initial level at maturity.',
+    downside: 'If NIFTY breaches 70% (falls >30%), investor receives coupon but absorbs the market decline on principal.'
+  },
+  {
+    id: 'prod-cpn-1',
+    name: 'Capital Protected NIFTY Note',
+    category: 'Structured Products',
+    type: 'CPN',
+    risk: 'Conservative',
+    expected_return: '9.5%',
+    return_num: 9.5,
+    tenor: '3 years',
+    tenor_months: 36,
+    min_inv: '₹5L',
+    notional: 1000000,
+    underlying: 'NIFTY 50',
+    coupon_pct: 9.5,
+    barrier_pct: 100,
+    strike_pct: 100,
+    protection_pct: 100,
+    participation_pct: 85,
+    tag_class: 'structured',
+    description: '100% principal-guaranteed note with 85% participation in NIFTY 50 upside. Zero capital loss even in market crash.',
+    mechanics: 'Guarantees 100% capital preservation with 85% upside participation over a 3-year investment horizon.',
+    downside: 'Zero downside loss. If index is negative, 100% principal is returned with minimum floor.'
+  },
+  {
+    id: 'prod-dcd-1',
+    name: 'Dual Currency Yield Deposit',
+    category: 'Structured Products',
+    type: 'DCD',
+    risk: 'Aggressive',
+    expected_return: '13.5%',
+    return_num: 13.5,
+    tenor: '6 months',
+    tenor_months: 6,
+    min_inv: '₹10L',
+    notional: 1000000,
+    underlying: 'USDINR',
+    coupon_pct: 13.5,
+    barrier_pct: 85,
+    strike_pct: 100,
+    protection_pct: 85,
+    tag_class: 'structured',
+    description: 'High-yield short tenor deposit on USD/INR currency pair. Offers 13.5% annualized coupon with FX conversion boundary.',
+    mechanics: 'Earns 13.5% annualized interest. Principal returned in INR if USD/INR does not breach conversion strike.',
+    downside: 'If USD depreciates sharply past conversion strike, principal is converted into USD at the strike rate.'
+  },
+  {
+    id: 'prod-eq-1',
+    name: 'BlueChip Equity Fund',
+    category: 'Mutual Funds',
+    type: 'Mutual Funds',
+    risk: 'Growth',
+    expected_return: '14.2%',
+    return_num: 14.2,
+    tenor: '5 years',
+    tenor_months: 60,
+    min_inv: '₹5K',
+    notional: 500000,
+    underlying: 'NIFTY 50',
+    coupon_pct: 14.2,
+    barrier_pct: 60,
+    strike_pct: 100,
+    protection_pct: 0,
+    tag_class: 'equity',
+    description: 'Actively managed large-cap equity fund targeting long-term capital appreciation from India top 50 conglomerates.',
+    mechanics: 'Direct diversified equity holdings tracking large-cap growth and dividend reinvestment.',
+    downside: 'Full market risk with zero barrier protection. Subject to market volatility and cyclical drawdowns.'
+  },
+  {
+    id: 'prod-bond-1',
+    name: 'Income Builder Corporate Bond',
+    category: 'Bonds',
+    type: 'Bonds',
+    risk: 'Conservative',
+    expected_return: '8.4%',
+    return_num: 8.4,
+    tenor: '3 years',
+    tenor_months: 36,
+    min_inv: '₹25K',
+    notional: 500000,
+    underlying: 'Debt',
+    coupon_pct: 8.4,
+    barrier_pct: 100,
+    strike_pct: 100,
+    protection_pct: 100,
+    tag_class: 'fixed',
+    description: 'AAA-rated senior secured corporate debentures delivering steady semi-annual coupon cashflows with high credit safety.',
+    mechanics: 'Regular 8.4% semi-annual coupon payouts backed by AAA collateralized corporate balance sheets.',
+    downside: 'Credit risk of issuer. Capital protected unless credit default event occurs.'
+  },
+  {
+    id: 'prod-eln-2',
+    name: 'Alpha Accelerator Barrier Note',
+    category: 'Structured Products',
+    type: 'ELN',
+    risk: 'Aggressive',
+    expected_return: '16.5%',
+    return_num: 16.5,
+    tenor: '12 months',
+    tenor_months: 12,
+    min_inv: '₹15L',
+    notional: 1500000,
+    underlying: 'NIFTY 50',
+    coupon_pct: 16.5,
+    barrier_pct: 80,
+    strike_pct: 100,
+    protection_pct: 80,
+    tag_class: 'structured',
+    description: 'Aggressive short-tenor note offering premium 16.5% yield with tighter 80% safety barrier for high-conviction periods.',
+    mechanics: 'High 16.5% coupon paid at 12-month maturity if NIFTY stays above 80% (-20% buffer).',
+    downside: 'Tighter barrier: a fall greater than 20% breaches the protection barrier.'
+  }
+];
+
+function renderProducts(list) {
+  const prods = list || PRODUCTS;
+  const grid = $('product-list-grid');
+  if (!grid) return;
+  if (!prods.length) {
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1">No investment products found matching the criteria.</div>';
+    return;
+  }
+  grid.innerHTML = prods.map(p => {
+    const idx = PRODUCTS.findIndex(x => x.id === p.id);
+    return `
+      <div class="product-card">
+        <div>
+          <div class="top-row">
+            <h3 style="font-size:16px;font-weight:700;color:var(--ink)">${p.name}</h3>
+            <span class="tag ${p.tag_class}">${p.type}</span>
+          </div>
+          <div style="font-size:12px;color:var(--mut);margin-top:6px;line-height:1.4">${p.description}</div>
+          <div class="product-meta">
+            <div class="meta-box"><div class="label">Expected Return</div><div class="value" style="color:var(--ok)">${p.expected_return}</div></div>
+            <div class="meta-box"><div class="label">Risk</div><div class="value">${p.risk}</div></div>
+            <div class="meta-box"><div class="label">Tenor</div><div class="value">${p.tenor}</div></div>
+            <div class="meta-box"><div class="label">Min. Inv.</div><div class="value">${p.min_inv}</div></div>
+          </div>
+        </div>
+        <div class="product-actions">
+          <button class="btn btn-secondary btn-sm" onclick="viewProductDetails(${idx})">View Details</button>
+          <button class="btn btn-primary btn-sm" onclick="simulateProduct(${idx})">Simulate →</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function filterProducts() {
+  const risk = $('prod-filter-risk')?.value || 'all';
+  const amt = $('prod-filter-amount')?.value || 'all';
+  const tenor = $('prod-filter-tenor')?.value || 'all';
+  const ret = $('prod-filter-return')?.value || 'all';
+  const cat = $('prod-filter-category')?.value || 'all';
+
+  const filtered = PRODUCTS.filter(p => {
+    const matchRisk = risk === 'all' || p.risk.toLowerCase() === risk.toLowerCase();
+    const matchCat = cat === 'all' || p.category.toLowerCase().includes(cat.toLowerCase());
+
+    let matchAmt = true;
+    if (amt === '1-10') matchAmt = p.notional >= 100000 && p.notional <= 1000000;
+    else if (amt === '10-25') matchAmt = p.notional >= 1000000 && p.notional <= 2500000;
+    else if (amt === '25-50') matchAmt = p.notional >= 2500000 && p.notional <= 5000000;
+    else if (amt === '50+') matchAmt = p.notional >= 5000000;
+
+    let matchTenor = true;
+    if (tenor === '1-3') matchTenor = p.tenor_months >= 12 && p.tenor_months <= 36;
+    else if (tenor === '3-5') matchTenor = p.tenor_months > 36 && p.tenor_months <= 60;
+    else if (tenor === '5+') matchTenor = p.tenor_months > 60;
+
+    let matchRet = true;
+    if (ret === '6-10') matchRet = p.return_num >= 6 && p.return_num <= 10;
+    else if (ret === '10-14') matchRet = p.return_num > 10 && p.return_num <= 14;
+    else if (ret === '14+') matchRet = p.return_num > 14;
+
+    return matchRisk && matchCat && matchAmt && matchTenor && matchRet;
+  });
+
+  renderProducts(filtered);
+}
+
+function simulateProduct(idx) {
+  const p = PRODUCTS[idx];
+  if (!p) return;
+  closeProductModal();
+  navTo('simulator');
+
+  if ($('sim-ptype')) $('sim-ptype').value = (p.type === 'CPN' || p.type === 'DCD') ? p.type : 'ELN';
+  if ($('sim-underlying')) $('sim-underlying').value = p.underlying || 'NIFTY 50';
+  if ($('sim-notional')) $('sim-notional').value = p.notional || 1000000;
+  if ($('sim-tenor')) $('sim-tenor').value = p.tenor_months || 12;
+  if ($('sim-coupon')) $('sim-coupon').value = p.coupon_pct || 12;
+  if ($('sim-barrier')) $('sim-barrier').value = p.barrier_pct || 70;
+  if ($('sim-barrier-val')) $('sim-barrier-val').textContent = `${p.barrier_pct || 70}% (permits -${100 - (p.barrier_pct || 70)}% fall)`;
+  if ($('sim-prot')) $('sim-prot').value = p.protection_pct || 95;
+  if ($('sim-part')) $('sim-part').value = p.participation_pct || 100;
+
+  onSimTypeChange();
+  onSimNotionalInput(p.notional || 1000000);
+  runRMSimulation();
+}
+
+function viewProductDetails(idx) {
+  const p = PRODUCTS[idx];
+  if (!p) return;
+  const modal = $('modal-product-details');
+  const content = $('modal-product-content');
+  if (!modal || !content) return;
+
+  content.innerHTML = `
+    <div class="section-header" style="margin-bottom:14px">
+      <div>
+        <div class="section-title" style="display:flex;align-items:center;gap:10px">
+          ${p.name}
+          <span class="tag ${p.tag_class}">${p.type}</span>
+          <span class="badge ${p.risk === 'Conservative' ? 'SUITABLE' : p.risk === 'Moderate' ? 'REVIEW' : 'MISMATCH'}">${p.risk}</span>
+        </div>
+        <div class="section-sub">${p.category} · Underlying Asset: <b>${p.underlying}</b></div>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="closeProductModal()">✕</button>
+    </div>
+
+    <div style="font-size:14px;color:var(--ink2);line-height:1.6;margin-bottom:16px">${p.description}</div>
+
+    <div class="product-meta" style="margin-bottom:18px">
+      <div class="meta-box"><div class="label">Target Return</div><div class="value" style="color:var(--ok)">${p.expected_return} p.a.</div></div>
+      <div class="meta-box"><div class="label">Risk Profile</div><div class="value">${p.risk}</div></div>
+      <div class="meta-box"><div class="label">Investment Tenor</div><div class="value">${p.tenor}</div></div>
+      <div class="meta-box"><div class="label">Minimum Ticket</div><div class="value">${p.min_inv}</div></div>
+      <div class="meta-box"><div class="label">Coupon / Yield</div><div class="value">${p.coupon_pct}%</div></div>
+      <div class="meta-box"><div class="label">Safety Barrier / Floor</div><div class="value" style="color:var(--pri)">${p.barrier_pct ? p.barrier_pct + '%' : '100% Floor'}</div></div>
+    </div>
+
+    <div class="card" style="background:#f8fafc;margin-bottom:16px;border:1px solid var(--line);padding:14px 16px">
+      <div style="font-weight:700;font-size:13px;color:var(--pri);margin-bottom:6px">💡 Payoff & Return Mechanics:</div>
+      <div class="text-sm" style="line-height:1.65;color:var(--ink2)">${p.mechanics}</div>
+      <div style="font-weight:700;font-size:13px;color:var(--bad);margin:10px 0 6px">⚠️ Downside Risk Conditions:</div>
+      <div class="text-sm" style="line-height:1.65;color:var(--ink2)">${p.downside}</div>
+    </div>
+
+    <div class="flex gap-10" style="justify-content:flex-end">
+      <button class="btn btn-secondary" onclick="closeProductModal()">Close</button>
+      <button class="btn btn-secondary" onclick="assessProductInStudio(${idx})">⚖️ Open in Studio</button>
+      <button class="btn btn-primary" onclick="simulateProduct(${idx})">📈 Simulate in Engine →</button>
+    </div>
+  `;
+  modal.style.display = 'flex';
+}
+
+function closeProductModal() {
+  const modal = $('modal-product-details');
+  if (modal) modal.style.display = 'none';
+}
+
+function assessProductInStudio(idx) {
+  const p = PRODUCTS[idx];
+  if (!p) return;
+  closeProductModal();
+  navTo('rm-studio');
+  if ($('p-type')) $('p-type').value = (p.type === 'CPN' || p.type === 'DCD') ? p.type : 'ELN';
+  if ($('p-under')) $('p-under').value = p.underlying || 'NIFTY 50';
+  if ($('p-tenor')) $('p-tenor').value = p.tenor_months || 12;
+  if ($('p-coupon')) $('p-coupon').value = p.coupon_pct || 12;
+  if ($('p-notional')) $('p-notional').value = p.notional || 1000000;
+  if ($('p-barrier')) $('p-barrier').value = p.barrier_pct || 70;
+  if ($('bv')) $('bv').textContent = p.barrier_pct || 70;
+  onProductTypeChange();
+  livePayoff();
+}
+
+// ══════════════ RM SIMULATOR ENGINE ══════════════
+let RM_SIM_STATE = {
+  productType: 'ELN',
+  underlying: 'NIFTY 50',
+  notional: 1000000,
+  tenorMonths: 12,
+  couponPct: 12,
+  barrierPct: 70,
+  strikePct: 100,
+  protectionPct: 95,
+  participationPct: 100,
+  movePct: -10,
+  customerId: 'generic'
+};
+
+function initRMPlayground() {
+  const sel = $('sim-cust-sel');
+  if (sel && CUSTOMERS && CUSTOMERS.length) {
+    const curVal = sel.value;
+    sel.innerHTML = '<option value="generic">— Generic Market Simulation (No Client) —</option>' +
+      CUSTOMERS.map(c => `<option value="${c.id}">${c.id} — ${c.name} (${c.risk_appetite}, ${c.loss_tolerance_pct}% loss tol)</option>`).join('');
+    if (curVal && curVal !== 'generic') sel.value = curVal;
+  }
+  onSimTypeChange();
+  onSimCustomerChange();
+  runRMSimulation();
+}
+
+function onSimCustomerChange() {
+  const cid = $('sim-cust-sel')?.value;
+  RM_SIM_STATE.customerId = cid;
+  const infoEl = $('sim-cust-mandate-info');
+  if (!infoEl) return;
+  if (!cid || cid === 'generic') {
+    infoEl.innerHTML = 'Showing unconstrained market simulation. Select a client to verify outcome against their loss tolerance mandate.';
+  } else {
+    const c = CUSTOMERS.find(x => x.id === cid);
+    if (c) {
+      infoEl.innerHTML = `
+        Mandate: <b>${c.risk_appetite.toUpperCase()}</b> | Loss Tol: <b class="warn-text">${c.loss_tolerance_pct}%</b> | Horizon: <b>${c.horizon_months}m</b> | Portfolio: <b>${fmtInr(c.portfolio_value)}</b>
+      `;
+    }
+  }
+  runRMSimulation();
+}
+
+function onSimTypeChange() {
+  const t = $('sim-ptype')?.value || 'ELN';
+  RM_SIM_STATE.productType = t;
+  const elnDiv = $('sim-eln-fields');
+  const cpnDiv = $('sim-cpn-fields');
+  const couponLabel = $('sim-coupon-label');
+  if (elnDiv) elnDiv.style.display = t === 'ELN' ? 'block' : 'none';
+  if (cpnDiv) cpnDiv.style.display = t === 'CPN' ? 'block' : 'none';
+  if (couponLabel) couponLabel.textContent = t === 'DCD' ? 'Interest Rate (% p.a.)' : t === 'CPN' ? 'Guaranteed Coupon (%)' : 'Coupon / Yield (% p.a.)';
+}
+
+function onSimNotionalInput(val) {
+  const amt = Math.max(10000, +val);
+  RM_SIM_STATE.notional = amt;
+  if ($('sim-notional-words')) $('sim-notional-words').textContent = `${fmtInr(amt)} (${formatInrWords(amt)})`;
+  document.querySelectorAll('#page-simulator .preset-chip').forEach(c => c.classList.remove('active'));
+  const match = $('sim-chip-' + amt);
+  if (match) match.classList.add('active');
+  runRMSimulation();
+}
+
+function setSimNotional(amt) {
+  if ($('sim-notional')) $('sim-notional').value = amt;
+  onSimNotionalInput(amt);
+}
+
+function onSimBarrierSlider(val) {
+  const num = +val;
+  RM_SIM_STATE.barrierPct = num;
+  if ($('sim-barrier-val')) $('sim-barrier-val').textContent = `${num}% (permits -${100 - num}% fall)`;
+  runRMSimulation();
+}
+
+function onSimMoveSlider(val) {
+  const num = +val;
+  RM_SIM_STATE.movePct = num;
+  const badgeEl = $('sim-move-badge');
+  if (badgeEl) {
+    const isBreach = RM_SIM_STATE.productType === 'ELN' && num < (RM_SIM_STATE.barrierPct - 100);
+    badgeEl.textContent = `${num > 0 ? '+' : ''}${num}% (${isBreach ? 'Barrier Breach ⚠️' : num < -20 ? 'Severe Fall' : num < 0 ? 'Market Dip' : num === 0 ? 'Flat' : 'Bull Rally 🚀'})`;
+    badgeEl.style.background = isBreach ? 'var(--bad-l)' : num < 0 ? 'var(--rev-l)' : '#ecfdf5';
+    badgeEl.style.color = isBreach ? 'var(--bad)' : num < 0 ? 'var(--rev)' : '#047857';
+  }
+  document.querySelectorAll('#page-simulator .scenario-btn').forEach(b => b.classList.remove('active'));
+  const matchBtn = $('sim-scen-' + num);
+  if (matchBtn) matchBtn.classList.add('active');
+  runRMSimulation();
+}
+
+function setSimMove(pct) {
+  if ($('sim-move-slider')) $('sim-move-slider').value = pct;
+  onSimMoveSlider(pct);
+}
+
+function resetRMSimulator() {
+  RM_SIM_STATE = {
+    productType: 'ELN',
+    underlying: 'NIFTY 50',
+    notional: 1000000,
+    tenorMonths: 12,
+    couponPct: 12,
+    barrierPct: 70,
+    strikePct: 100,
+    protectionPct: 95,
+    participationPct: 100,
+    movePct: -10,
+    customerId: 'generic'
+  };
+  if ($('sim-cust-sel')) $('sim-cust-sel').value = 'generic';
+  if ($('sim-ptype')) $('sim-ptype').value = 'ELN';
+  if ($('sim-underlying')) $('sim-underlying').value = 'NIFTY 50';
+  if ($('sim-notional')) $('sim-notional').value = 1000000;
+  if ($('sim-tenor')) $('sim-tenor').value = 12;
+  if ($('sim-coupon')) $('sim-coupon').value = 12;
+  if ($('sim-barrier')) $('sim-barrier').value = 70;
+  if ($('sim-barrier-val')) $('sim-barrier-val').textContent = '70% (permits -30% fall)';
+  if ($('sim-move-slider')) $('sim-move-slider').value = -10;
+  onSimTypeChange();
+  onSimNotionalInput(1000000);
+  onSimMoveSlider(-10);
+  onSimCustomerChange();
+}
+
+function transferSimToStudio() {
+  navTo('rm-studio');
+  if ($('p-type')) $('p-type').value = RM_SIM_STATE.productType;
+  if ($('p-under')) $('p-under').value = RM_SIM_STATE.underlying;
+  if ($('p-notional')) $('p-notional').value = RM_SIM_STATE.notional;
+  if ($('p-tenor')) $('p-tenor').value = RM_SIM_STATE.tenorMonths;
+  if ($('p-coupon')) $('p-coupon').value = RM_SIM_STATE.couponPct;
+  if ($('p-barrier')) $('p-barrier').value = RM_SIM_STATE.barrierPct;
+  if ($('bv')) $('bv').textContent = RM_SIM_STATE.barrierPct;
+  if (RM_SIM_STATE.customerId && RM_SIM_STATE.customerId !== 'generic') {
+    if ($('rm-sel-cust')) $('rm-sel-cust').value = RM_SIM_STATE.customerId;
+    rmSelectCustomer();
+  }
+  onProductTypeChange();
+  livePayoff();
+}
+
+function runRMSimulation() {
+  if (!$('sim-hero-payout')) return;
+
+  const notional = +($('sim-notional')?.value || 1000000);
+  const tenorMonths = +($('sim-tenor')?.value || 12);
+  const couponPct = +($('sim-coupon')?.value || 12);
+  const barrierPct = +($('sim-barrier')?.value || 70);
+  const protPct = +($('sim-prot')?.value || 95);
+  const partPct = +($('sim-part')?.value || 100);
+  const movePct = +($('sim-move-slider')?.value || -10);
+  const ptype = $('sim-ptype')?.value || 'ELN';
+  const underlying = $('sim-underlying')?.value || 'NIFTY 50';
+
+  RM_SIM_STATE = {
+    ...RM_SIM_STATE,
+    notional, tenorMonths, couponPct, barrierPct,
+    protectionPct: protPct, participationPct: partPct,
+    movePct, productType: ptype, underlying
+  };
+
+  const targetCust = RM_SIM_STATE.customerId && RM_SIM_STATE.customerId !== 'generic'
+    ? CUSTOMERS.find(x => x.id === RM_SIM_STATE.customerId)
+    : null;
+
+  const res = calculateSimulatorOutcome({
+    ...RM_SIM_STATE,
+    customer: targetCust
+  });
+
+  const isGain = res.pnl >= 0;
+
+  // Hero box
+  $('sim-hero-payout').textContent = fmtInr(res.finalValue);
+  $('sim-hero-sub').textContent = `On initial capital of ${fmtInr(res.notional)} (${formatInrWords(res.notional)})`;
+  $('sim-hero-pnl').textContent = `${isGain ? '+' : '−'}${fmtInr(Math.abs(res.pnl))} (${isGain ? '+' : ''}${res.pnlPct.toFixed(1)}%)`;
+  $('sim-hero-pnl').style.color = isGain ? '#34d399' : '#f87171';
+  $('sim-hero-badge').textContent = res.statusTitle;
+  $('sim-hero-badge').className = `badge ${res.badgeClass}`;
+
+  // 4 Stats
+  if ($('sim-stat-initial')) $('sim-stat-initial').textContent = fmtInr(res.notional);
+  if ($('sim-stat-capital')) $('sim-stat-capital').textContent = fmtInr(res.capitalInr);
+  if ($('sim-stat-coupon')) $('sim-stat-coupon').textContent = `${fmtInr(res.couponInr)} (${(couponPct * (tenorMonths/12)).toFixed(1)}%)`;
+  if ($('sim-stat-drawdown')) {
+    const loss = res.notional - res.capitalInr;
+    $('sim-stat-drawdown').textContent = loss > 0 ? `-${fmtInr(loss)} (-${((loss/res.notional)*100).toFixed(1)}%)` : '₹0 (Safe)';
+    $('sim-stat-drawdown').style.color = loss > 0 ? 'var(--bad)' : 'var(--ok)';
+  }
+
+  // Mandate compliance card
+  const mandateEl = $('sim-mandate-card');
+  const mandateText = $('sim-mandate-text');
+  if (mandateEl && mandateText) {
+    if (targetCust) {
+      const lossPct = Math.max(0, -res.pnlPct);
+      const isBreached = lossPct > targetCust.loss_tolerance_pct;
+      mandateEl.style.display = 'block';
+      mandateEl.style.background = isBreached ? '#fef2f2' : '#f0fdf4';
+      mandateEl.style.borderColor = isBreached ? '#fecaca' : '#bbf7d0';
+      mandateText.innerHTML = isBreached
+        ? `❌ <b style="color:var(--bad)">Mandate Breach Warning:</b> Under this -${Math.abs(movePct)}% move, the modeled loss is <b>${lossPct.toFixed(1)}%</b>, which EXCEEDS ${targetCust.name}'s max loss tolerance of <b>${targetCust.loss_tolerance_pct}%</b>.`
+        : `✅ <b class="ok-text">Mandate Compliant:</b> Under this move, net outcome is <b>${res.pnlPct >= 0 ? '+' : ''}${res.pnlPct.toFixed(1)}%</b>, fully within ${targetCust.name}'s ${targetCust.loss_tolerance_pct}% tolerance limit.`;
+    } else {
+      mandateEl.style.display = 'block';
+      mandateEl.style.background = '#f8fafc';
+      mandateEl.style.borderColor = 'var(--line)';
+      mandateText.innerHTML = `ℹ️ <b>Market Scenario Info:</b> Barrier at ${barrierPct}%. Market falls up to ${100 - barrierPct}% are 100% capital protected with full coupon.`;
+    }
+  }
+
+  // Chart
+  renderSimPayoffChart(RM_SIM_STATE, res);
+
+  // Scenario Table
+  renderSimScenarioTable(RM_SIM_STATE, res);
+
+  // Narrative
+  renderSimNarrative(RM_SIM_STATE, res, targetCust);
+}
+
+function renderSimPayoffChart(state, currentRes) {
+  const chartEl = $('sim-payoff-chart');
+  if (!chartEl) return;
+
+  const points = [];
+  const moves = [-60, -50, -40, -30, -25, -20, -15, -10, -5, 0, 5, 10, 15, 20, 30, 40, 50, 60];
+  moves.forEach(m => {
+    const o = calculateSimulatorOutcome({ ...state, movePct: m });
+    points.push({ x: m, y: o.pnlPct });
+  });
+
+  if (typeof Plotly !== 'undefined') {
+    const x = points.map(p => p.x);
+    const y = points.map(p => p.y);
+    const barrierDrop = -(100 - state.barrierPct);
+
+    const traces = [
+      {
+        x, y, mode: 'lines', name: 'Payoff %',
+        line: { color: '#1d4ed8', width: 3 }
+      },
+      {
+        x, y: y.map(v => Math.min(v, 0)), mode: 'none', fill: 'tozeroy',
+        fillcolor: 'rgba(239, 68, 68, 0.15)', name: 'Capital Loss Zone'
+      },
+      {
+        x: [state.movePct], y: [currentRes.pnlPct], mode: 'markers+text',
+        name: 'Current Scenario',
+        text: [`${state.movePct}% (${currentRes.pnlPct > 0 ? '+' : ''}${currentRes.pnlPct.toFixed(1)}%)`],
+        textposition: 'top center',
+        marker: { size: 12, color: currentRes.pnl >= 0 ? '#10b981' : '#ef4444', line: { color: '#ffffff', width: 2 } }
+      }
+    ];
+
+    const shapes = state.productType === 'ELN' ? [{
+      type: 'line', x0: barrierDrop, x1: barrierDrop, y0: -60, y1: 40,
+      line: { color: '#ef4444', width: 1.5, dash: 'dot' }
+    }] : [];
+
+    Plotly.react('sim-payoff-chart', traces, {
+      margin: { t: 15, l: 45, r: 15, b: 35 },
+      paper_bgcolor: '#ffffff', plot_bgcolor: '#ffffff',
+      xaxis: { title: 'Underlying Market Movement (%)', gridcolor: '#f1f5f9', zerolinecolor: '#cbd5e1' },
+      yaxis: { title: 'Net Return (%)', gridcolor: '#f1f5f9', zerolinecolor: '#cbd5e1' },
+      shapes,
+      showlegend: false,
+      font: { family: 'Inter, system-ui, sans-serif', size: 11 }
+    }, { displayModeBar: false, responsive: true });
+  } else {
+    // Fallback SVG representation
+    chartEl.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--pri);font-weight:600">
+        Deterministic Payoff: At ${state.movePct}% move → Payout: ${fmtInr(currentRes.finalValue)} (${currentRes.pnlPct.toFixed(1)}%)
+      </div>
+    `;
+  }
+}
+
+function renderSimScenarioTable(state, currentRes) {
+  const el = $('sim-scenario-table');
+  if (!el) return;
+
+  const scenarios = [-50, -40, -30, -20, -10, 0, 15, 30];
+  const rows = scenarios.map(m => {
+    const o = calculateSimulatorOutcome({ ...state, movePct: m });
+    const isActive = Math.round(state.movePct) === m;
+    return `
+      <tr style="${isActive ? 'background:#e0f2fe;font-weight:700' : ''}">
+        <td><span class="badge ${m < 0 ? (m <= -30 ? 'MISMATCH' : 'REVIEW') : 'SUITABLE'}">${m > 0 ? '+' : ''}${m}%</span></td>
+        <td><b>${fmtInr(o.finalValue)}</b></td>
+        <td style="color:${o.pnl >= 0 ? 'var(--ok)' : 'var(--bad)'}">${o.pnl >= 0 ? '+' : '−'}${fmtInr(Math.abs(o.pnl))}</td>
+        <td style="color:${o.pnlPct >= 0 ? 'var(--ok)' : 'var(--bad)'}">${o.pnlPct >= 0 ? '+' : ''}${o.pnlPct.toFixed(1)}%</td>
+        <td>${fmtInr(o.capitalInr)}</td>
+        <td>${fmtInr(o.couponInr)}</td>
+        <td><span class="badge ${o.badgeClass}">${o.statusTitle}</span></td>
+      </tr>
+    `;
+  }).join('');
+
+  el.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Market Move</th>
+          <th>Total Maturity Payout</th>
+          <th>Net P&L (₹)</th>
+          <th>Net Return (%)</th>
+          <th>Principal Returned</th>
+          <th>Coupon Paid</th>
+          <th>Engine Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows}
+      </tbody>
+    </table>
+  `;
+}
+
+function renderSimNarrative(state, res, customer) {
+  const el = $('sim-narrative-explanation');
+  if (!el) return;
+
+  const barrier = state.barrierPct;
+  const maxDrop = 100 - barrier;
+  const notional = state.notional;
+  const coupon = state.couponPct;
+
+  let narrative = '';
+  if (state.productType === 'ELN') {
+    if (res.barrierBreached) {
+      narrative = `
+        Under this adverse market crash of <b>${state.movePct}%</b>, the underlying asset breaches the <b>${barrier}% barrier</b> (tolerance buffer was -${maxDrop}%).
+        As per deterministic payoff terms, the safety barrier knocks in: you receive the guaranteed coupon of <b>${fmtInr(res.couponInr)}</b>, but absorb the <b>${Math.abs(state.movePct)}% drop</b> on your principal.
+        Total proceeds returned: <b>${fmtInr(res.finalValue)}</b> (capital loss: <b style="color:var(--bad)">${fmtInr(res.lossInr)}</b>).
+      `;
+    } else {
+      narrative = `
+        At a market movement of <b>${state.movePct > 0 ? '+' : ''}${state.movePct}%</b>, the index remains safely above the <b>${barrier}% protection barrier</b> (-${maxDrop}% max buffer).
+        Your principal is <b>100% safeguarded</b>: you receive your full <b>${fmtInr(notional)}</b> capital PLUS <b>${fmtInr(res.couponInr)}</b> in coupon income (${coupon}% p.a.), generating a total return of <b class="ok-text">${fmtInr(res.finalValue)}</b> (+${res.pnlPct.toFixed(1)}%).
+      `;
+    }
+  } else if (state.productType === 'CPN') {
+    narrative = `
+      This Capital Protected Note guarantees <b>${state.protectionPct}% principal safety</b> (${fmtInr(notional * state.protectionPct / 100)} floor) with <b>${state.participationPct}% upside participation</b>.
+      At <b>${state.movePct > 0 ? '+' : ''}${state.movePct}% move</b>, your guaranteed return is <b class="${res.pnl >= 0 ? 'ok-text' : ''}">${fmtInr(res.finalValue)}</b>.
+    `;
+  } else {
+    narrative = `
+      This Dual Currency Deposit yields <b>${coupon}% annualized interest</b> (${fmtInr(res.couponInr)}).
+      At <b>${state.movePct > 0 ? '+' : ''}${state.movePct}%</b> FX shift, your maturity payout is <b>${fmtInr(res.finalValue)}</b>.
+    `;
+  }
+
+  el.innerHTML = narrative;
 }
 
 // ══════════════ INIT ══════════════

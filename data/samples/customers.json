@@ -1,11 +1,14 @@
 [
   {
-    "id": "C101", "name": "Rahul Gupta",
+    "id": "C101",
+    "name": "Rahul Gupta",
     "risk_appetite": "conservative",
     "loss_tolerance_pct": 5,
     "horizon_months": 24,
     "portfolio_value": 10000000,
-    "existing_exposures": {"NIFTY 50": 45},
+    "existing_exposures": {
+      "NIFTY 50": 45
+    },
     "annual_income_inr": 2000000,
     "liquidity_need": "medium",
     "rm_id": "RM001",
@@ -16,18 +19,36 @@
     "kyc_status": "verified",
     "segment": "HNI",
     "holdings": [
-      {"asset": "NIFTY 50 Mutual Fund", "underlying": "NIFTY 50", "value": 4500000, "type": "equity"},
-      {"asset": "Fixed Deposit", "underlying": "debt", "value": 3000000, "type": "debt"},
-      {"asset": "Cash / Liquid Fund", "underlying": "cash", "value": 2500000, "type": "cash"}
+      {
+        "asset": "NIFTY 50 Mutual Fund",
+        "underlying": "NIFTY 50",
+        "value": 4500000,
+        "type": "equity"
+      },
+      {
+        "asset": "Fixed Deposit",
+        "underlying": "debt",
+        "value": 3000000,
+        "type": "debt"
+      },
+      {
+        "asset": "Cash / Liquid Fund",
+        "underlying": "cash",
+        "value": 2500000,
+        "type": "cash"
+      }
     ]
   },
   {
-    "id": "C102", "name": "Anita Singh",
+    "id": "C102",
+    "name": "Anita Singh",
     "risk_appetite": "moderate",
     "loss_tolerance_pct": 15,
     "horizon_months": 36,
     "portfolio_value": 25000000,
-    "existing_exposures": {"NIFTY 50": 20},
+    "existing_exposures": {
+      "NIFTY 50": 20
+    },
     "annual_income_inr": 5000000,
     "liquidity_need": "low",
     "rm_id": "RM001",
@@ -38,19 +59,43 @@
     "kyc_status": "verified",
     "segment": "HNI",
     "holdings": [
-      {"asset": "NIFTY 50 ETF", "underlying": "NIFTY 50", "value": 5000000, "type": "equity"},
-      {"asset": "Corporate Bonds", "underlying": "debt", "value": 10000000, "type": "debt"},
-      {"asset": "Gold ETF", "underlying": "gold", "value": 5000000, "type": "gold"},
-      {"asset": "Cash", "underlying": "cash", "value": 5000000, "type": "cash"}
+      {
+        "asset": "NIFTY 50 ETF",
+        "underlying": "NIFTY 50",
+        "value": 5000000,
+        "type": "equity"
+      },
+      {
+        "asset": "Corporate Bonds",
+        "underlying": "debt",
+        "value": 10000000,
+        "type": "debt"
+      },
+      {
+        "asset": "Gold ETF",
+        "underlying": "gold",
+        "value": 5000000,
+        "type": "gold"
+      },
+      {
+        "asset": "Cash",
+        "underlying": "cash",
+        "value": 5000000,
+        "type": "cash"
+      }
     ]
   },
   {
-    "id": "C103", "name": "Vikram Patel",
+    "id": "C103",
+    "name": "Vikram Patel",
     "risk_appetite": "aggressive",
     "loss_tolerance_pct": 30,
     "horizon_months": 60,
     "portfolio_value": 50000000,
-    "existing_exposures": {"NIFTY 50": 30, "USDINR": 5},
+    "existing_exposures": {
+      "NIFTY 50": 30,
+      "USDINR": 5
+    },
     "annual_income_inr": 12000000,
     "liquidity_need": "low",
     "rm_id": "RM002",
@@ -61,11 +106,208 @@
     "kyc_status": "verified",
     "segment": "UHNI",
     "holdings": [
-      {"asset": "NIFTY 50 Index Fund", "underlying": "NIFTY 50", "value": 15000000, "type": "equity"},
-      {"asset": "USDINR Forward", "underlying": "USDINR", "value": 2500000, "type": "fx"},
-      {"asset": "Private Equity", "underlying": "equity_other", "value": 20000000, "type": "equity"},
-      {"asset": "Real Estate Fund", "underlying": "debt", "value": 7500000, "type": "debt"},
-      {"asset": "Cash", "underlying": "cash", "value": 5000000, "type": "cash"}
+      {
+        "asset": "NIFTY 50 Index Fund",
+        "underlying": "NIFTY 50",
+        "value": 15000000,
+        "type": "equity"
+      },
+      {
+        "asset": "USDINR Forward",
+        "underlying": "USDINR",
+        "value": 2500000,
+        "type": "fx"
+      },
+      {
+        "asset": "Private Equity",
+        "underlying": "equity_other",
+        "value": 20000000,
+        "type": "equity"
+      },
+      {
+        "asset": "Real Estate Fund",
+        "underlying": "debt",
+        "value": 7500000,
+        "type": "debt"
+      },
+      {
+        "asset": "Cash",
+        "underlying": "cash",
+        "value": 5000000,
+        "type": "cash"
+      }
     ]
+  },
+  {
+    "id": "C104",
+    "name": "Dr. Sunita Rao",
+    "risk_appetite": "moderate",
+    "loss_tolerance_pct": 12,
+    "horizon_months": 48,
+    "portfolio_value": 18000000,
+    "existing_exposures": {
+      "NIFTY 50": 25,
+      "Gold": 15
+    },
+    "annual_income_inr": 4500000,
+    "liquidity_need": "medium",
+    "rm_id": "RM001",
+    "email": "sunita.rao@finvision.demo",
+    "phone": "+91-98765-43213",
+    "city": "Hyderabad",
+    "pan": "ABCDE1237F",
+    "kyc_status": "verified",
+    "segment": "HNI",
+    "holdings": [
+      {
+        "asset": "Large & Mid Cap Equity Fund",
+        "underlying": "NIFTY 50",
+        "value": 4500000,
+        "type": "equity"
+      },
+      {
+        "asset": "Sovereign Gold Bonds",
+        "underlying": "Gold",
+        "value": 2700000,
+        "type": "gold"
+      },
+      {
+        "asset": "Target Maturity Debt Fund",
+        "underlying": "debt",
+        "value": 7200000,
+        "type": "debt"
+      },
+      {
+        "asset": "Liquid Funds",
+        "underlying": "cash",
+        "value": 3600000,
+        "type": "cash"
+      }
+    ]
+  },
+  {
+    "id": "C105",
+    "name": "Kabir Malhotra",
+    "risk_appetite": "aggressive",
+    "loss_tolerance_pct": 25,
+    "horizon_months": 36,
+    "portfolio_value": 32000000,
+    "existing_exposures": {
+      "NIFTY 50": 35,
+      "USDINR": 10
+    },
+    "annual_income_inr": 9000000,
+    "liquidity_need": "low",
+    "rm_id": "RM001",
+    "email": "kabir.m@finvision.demo",
+    "phone": "+91-98765-43214",
+    "city": "Pune",
+    "pan": "ABCDE1238F",
+    "kyc_status": "verified",
+    "segment": "UHNI",
+    "holdings": [
+      {
+        "asset": "NIFTY Alpha 50 Index Fund",
+        "underlying": "NIFTY 50",
+        "value": 11200000,
+        "type": "equity"
+      },
+      {
+        "asset": "USDINR Hedged Notes",
+        "underlying": "USDINR",
+        "value": 3200000,
+        "type": "fx"
+      },
+      {
+        "asset": "Venture Debt & High Yield",
+        "underlying": "debt",
+        "value": 9600000,
+        "type": "debt"
+      },
+      {
+        "asset": "Liquid Cash Reserve",
+        "underlying": "cash",
+        "value": 8000000,
+        "type": "cash"
+      }
+    ]
+  },
+  {
+    "id": "C106",
+    "name": "Meera Deshmukh",
+    "risk_appetite": "conservative",
+    "loss_tolerance_pct": 8,
+    "horizon_months": 18,
+    "portfolio_value": 7500000,
+    "existing_exposures": {
+      "NIFTY 50": 10
+    },
+    "annual_income_inr": 1800000,
+    "liquidity_need": "high",
+    "rm_id": "RM001",
+    "email": "meera.d@finvision.demo",
+    "phone": "+91-98765-43215",
+    "city": "Mumbai",
+    "pan": "ABCDE1239F",
+    "kyc_status": "verified",
+    "segment": "Affluent",
+    "holdings": [
+      {
+        "asset": "Conservative Hybrid Fund",
+        "underlying": "NIFTY 50",
+        "value": 750000,
+        "type": "equity"
+      },
+      {
+        "asset": "Banking & PSU Debt Fund",
+        "underlying": "debt",
+        "value": 4500000,
+        "type": "debt"
+      },
+      {
+        "asset": "Bank Term Deposit & Savings",
+        "underlying": "cash",
+        "value": 2250000,
+        "type": "cash"
+      }
+    ]
+  },
+  {
+    "id": "C107",
+    "name": "Rajiv Sharma",
+    "risk_appetite": "moderate",
+    "loss_tolerance_pct": 15.0,
+    "horizon_months": 36,
+    "portfolio_value": 15000000.0,
+    "existing_exposures": {},
+    "annual_income_inr": null,
+    "liquidity_need": "medium",
+    "rm_id": null,
+    "email": null,
+    "phone": null,
+    "city": "Mumbai",
+    "pan": null,
+    "kyc_status": "verified",
+    "segment": "HNI",
+    "holdings": []
+  },
+  {
+    "id": "C108",
+    "name": "Rajiv Sharma",
+    "risk_appetite": "moderate",
+    "loss_tolerance_pct": 15.0,
+    "horizon_months": 36,
+    "portfolio_value": 15000000.0,
+    "existing_exposures": {},
+    "annual_income_inr": null,
+    "liquidity_need": "medium",
+    "rm_id": null,
+    "email": null,
+    "phone": null,
+    "city": "Mumbai",
+    "pan": null,
+    "kyc_status": "verified",
+    "segment": "HNI",
+    "holdings": []
   }
 ]

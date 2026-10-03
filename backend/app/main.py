@@ -15,7 +15,7 @@ from .engines.twin import find_twin
 from .extraction.term_sheet import extract_product, file_to_text
 from .rag.store import get_kb
 from .schemas import (
-    AssessmentRequest, CopilotRequest, ExplainRequest, LoginRequest,
+    AssessmentRequest, CopilotRequest, CustomerProfile, ExplainRequest, LoginRequest,
     PortfolioImpactRequest, ProductSpec, ScenarioRequest,
     TextRequest, RMNoteRequest,
 )
@@ -113,6 +113,21 @@ def customers():
     return [c.model_dump() for c in load_customers()]
 
 
+@app.post("/api/v1/customers")
+def create_customer(c: CustomerProfile):
+    import json
+    path = config.DATA_DIR / "samples" / "customers.json"
+    raw = json.loads(path.read_text(encoding="utf-8")) if path.exists() else []
+    if not c.id:
+        c.id = f"C{len(raw) + 101}"
+    for existing in raw:
+        if existing.get("id") == c.id:
+            raise HTTPException(400, f"Customer ID {c.id} already exists")
+    raw.append(c.model_dump())
+    path.write_text(json.dumps(raw, indent=2), encoding="utf-8")
+    return c.model_dump()
+
+
 @app.get("/api/v1/customers/{customer_id}")
 def customer_get(customer_id: str):
     c = find_customer(customer_id)
@@ -147,6 +162,12 @@ def customer_alerts(customer_id: str, unread_only: bool = False):
 @app.post("/api/v1/alerts/{alert_id}/read")
 def mark_alert_read(alert_id: int):
     alert_store.mark_read(alert_id)
+    return {"ok": True}
+
+
+@app.post("/api/v1/alerts/mark-all-read")
+def mark_all_alerts_read(customer_id: Optional[str] = None):
+    alert_store.mark_all_read(customer_id)
     return {"ok": True}
 
 
