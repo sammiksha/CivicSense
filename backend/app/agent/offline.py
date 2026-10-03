@@ -104,9 +104,29 @@ def offline_copilot(s: Session, message: str, mode: str = "client") -> tuple[str
         ), trace
 
     # ─────────────────────────────────────────────────────────────
-    # 2. GREETINGS & GENERAL ASSISTANT IDENTITY
+    # 2. DATE, TIME & MARKET HOURS
     # ─────────────────────────────────────────────────────────────
-    if re.search(r"^(hi|hello|hey|greetings|who are you|help|what can you do)", m):
+    if re.search(r"\b(current time|what time|time is it|time now|todays? date|what date|date today|current date|today is|date)\b", m) and not re.search(r"\b(barrier|coupon|tenor|product|maturity)\b", m):
+        import datetime
+        now = datetime.datetime.now()
+        dt_str = now.strftime("%A, %d %B %Y")
+        tm_str = now.strftime("%I:%M %p")
+        weekday = now.weekday()
+        is_market_day = weekday < 5
+        market_status = "🟢 Market session active" if is_market_day and (9 <= now.hour < 15 or (now.hour == 15 and now.minute <= 30)) else "⚪ Indian markets (NSE/BSE) are currently closed"
+
+        return (
+            f"🕒 **Current Date & Time**\n\n"
+            f"• **Date**: **{dt_str}**\n"
+            f"• **Time**: **{tm_str}**\n"
+            f"• **Market Status**: {market_status} *(Regular Trading: 9:15 AM – 3:30 PM IST, Mon–Fri)*\n\n"
+            f"Let me know if you would like to analyze market movements or check product scenarios!"
+        ), trace
+
+    # ─────────────────────────────────────────────────────────────
+    # 3. GREETINGS & GENERAL CONVERSATIONAL RESPONSES
+    # ─────────────────────────────────────────────────────────────
+    if re.search(r"^(hi|hello|hey|greetings|who are you|help|what can you do)\b", m):
         cust_name = c.name if c else "Investor"
         return (
             f"Hello {cust_name}! 👋 I am your **FinVision AI Guide**.\n\n"
@@ -118,6 +138,16 @@ def offline_copilot(s: Session, message: str, mode: str = "client") -> tuple[str
             "• **'How much could I lose in Rupees?'** — View worst-case scenarios in real ₹ Lakhs.\n"
             "• **'Is this product safe for me?'** — Check suitability against your risk tolerance.\n\n"
             "What would you like to explore today?"
+        ), trace
+
+    if re.search(r"\b(thank you|thanks|great|awesome|helpful)\b", m):
+        return (
+            "You're very welcome! 😊 I am always here to help you understand your investments and protect your wealth. Feel free to ask any other questions anytime!"
+        ), trace
+
+    if re.search(r"\b(how are you|how are u)\b", m):
+        return (
+            "I'm doing great, thank you! Ready to help you explore your portfolio, understand structured products, or run stress test scenarios. How can I assist you today?"
         ), trace
 
     # ─────────────────────────────────────────────────────────────
