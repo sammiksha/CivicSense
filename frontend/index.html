@@ -866,8 +866,6 @@ const RM_NAV = [
   {id:'home', icon:'🏠', label:'Home & Dashboard'},
   {id:'simulator', icon:'📈', label:'Simulator'},
   {id:'risk', icon:'🛡️', label:'Risk & Suitability'},
-  {id:'market', icon:'📊', label:'Market'},
-  {id:'portfolio', icon:'📁', label:'Portfolio'},
   {id:'rm-customers', icon:'👥', label:'Customers'},
   {id:'rm-studio', icon:'🏗', label:'Product Studio'},
   {id:'rm-analysis', icon:'📊', label:'Assessment'},
@@ -975,6 +973,22 @@ function buildRMPages() {
 
     <!-- Executive KPI Cards -->
     <div class="grid-4 mt14" id="rm-kpis"></div>
+
+    <!-- 📊 Live Market Overview & Asset Regimes -->
+    <div class="card mt14" style="background:linear-gradient(135deg,#f8fafc 0%,#f1f5f9 100%);border:1px solid var(--line)">
+      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+        <span>📊 Live Market Overview & Asset Regimes</span>
+        <span class="badge INFO" style="font-size:10px">Real-time Feed</span>
+      </div>
+      <div class="market-grid" style="margin-top:10px">
+        <div class="market-tile"><div class="market-header"><span>NIFTY 50</span><span class="trend up">+1.42%</span></div><div class="market-value">24,890</div><div class="spark-mini up"></div></div>
+        <div class="market-tile"><div class="market-header"><span>SENSEX</span><span class="trend up">+0.93%</span></div><div class="market-value">81,500</div><div class="spark-mini up"></div></div>
+        <div class="market-tile"><div class="market-header"><span>S&P 500</span><span class="trend up">+0.67%</span></div><div class="market-value">5,430</div><div class="spark-mini up"></div></div>
+        <div class="market-tile"><div class="market-header"><span>NASDAQ</span><span class="trend down">-0.28%</span></div><div class="market-value">17,120</div><div class="spark-mini down"></div></div>
+        <div class="market-tile"><div class="market-header"><span>Gold</span><span class="trend up">+0.88%</span></div><div class="market-value">₹7,220</div><div class="spark-mini up"></div></div>
+        <div class="market-tile"><div class="market-header"><span>USD/INR</span><span class="trend down">-0.12%</span></div><div class="market-value">83.40</div><div class="spark-mini down"></div></div>
+      </div>
+    </div>
 
     <!-- ★ Featured / Recommended Products Widget -->
     <div class="card mt14" style="background:linear-gradient(135deg,#f0f7ff 0%,#fafbff 100%);border:1.5px solid #bfdbfe">
@@ -1269,33 +1283,9 @@ function buildRMPages() {
     </div>
   </div>
 
-  <div id="page-market" class="page">
-    <div class="section-header"><div class="section-title">Market Overview</div></div>
-    <div class="market-grid">
-      <div class="market-tile"><div class="market-header"><span>NIFTY 50</span><span class="trend up">+1.42%</span></div><div class="market-value">24,890</div><div class="spark-mini up"></div></div>
-      <div class="market-tile"><div class="market-header"><span>SENSEX</span><span class="trend up">+0.93%</span></div><div class="market-value">81,500</div><div class="spark-mini up"></div></div>
-      <div class="market-tile"><div class="market-header"><span>S&P 500</span><span class="trend up">+0.67%</span></div><div class="market-value">5,430</div><div class="spark-mini up"></div></div>
-      <div class="market-tile"><div class="market-header"><span>NASDAQ</span><span class="trend down">-0.28%</span></div><div class="market-value">17,120</div><div class="spark-mini down"></div></div>
-      <div class="market-tile"><div class="market-header"><span>Gold</span><span class="trend up">+0.88%</span></div><div class="market-value">₹7,220</div><div class="spark-mini up"></div></div>
-      <div class="market-tile"><div class="market-header"><span>USD/INR</span><span class="trend down">-0.12%</span></div><div class="market-value">83.40</div><div class="spark-mini down"></div></div>
-    </div>
-  </div>
 
-  <div id="page-portfolio" class="page">
-    <div class="section-header"><div class="section-title">Portfolio</div></div>
-    <div class="portfolio-hero">
-      <div class="card"><div class="card-title">Overall Performance</div>
-        <div class="kpi-value">₹12,48,000</div>
-        <div class="text-sm mut mt8">Portfolio value • Updated 10 min ago</div>
-        <div class="chart-graph" style="height:160px; margin-top:14px"><div class="sparkline" style="clip-path:polygon(0% 75%, 15% 64%, 30% 68%, 44% 42%, 57% 20%, 70% 28%, 82% 16%, 100% 8%, 100% 100%, 0% 100%)"></div></div>
-      </div>
-      <div class="card donut-wrap"><div class="donut"><div class="donut-center">68%</div></div></div>
-    </div>
-    <div class="grid-2 mt14">
-      <div class="card"><div class="card-title">Holdings</div><table><tr><th>Asset</th><th>Weight</th><th>P/L</th></tr><tr><td>Equity</td><td>38%</td><td class="ok-text">+₹1.2L</td></tr><tr><td>Bonds</td><td>22%</td><td class="ok-text">+₹42K</td></tr><tr><td>Mutual Funds</td><td>25%</td><td class="ok-text">+₹68K</td></tr><tr><td>Structured Products</td><td>11%</td><td class="warn-text">-₹18K</td></tr></table></div>
-      <div class="card"><div class="card-title">Risk Exposure</div><table><tr><th>Metric</th><th>Value</th></tr><tr><td>Portfolio Volatility</td><td>11.4%</td></tr><tr><td>Drawdown</td><td>14.2%</td></tr><tr><td>Risk Grade</td><td class="ok-text">Moderate</td></tr><tr><td>Liquidity</td><td>Strong</td></tr></table></div>
-    </div>
-  </div>
+
+
 
 
 
