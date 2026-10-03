@@ -1,4 +1,4 @@
-"""Agentic copilot: Claude plans, calls deterministic tools (+RAG search), answer is numerically verified."""
+"""FinVision AI Copilot: LLM orchestration and grounded conversational assistant."""
 from __future__ import annotations
 from ..llm.client import get_llm
 from .grounding import ungrounded_numbers
@@ -6,19 +6,27 @@ from .offline import offline_copilot
 from .session import Session
 from .tools import TOOLS, execute
 
-SYSTEM = """You are the StructuraAI copilot for a bank's relationship managers and their customers.
-You are an agent: decide which tools to call, call as many as needed, then answer.
-Hard rules:
-1. Never state a number that did not come from a tool result. Never do your own payoff or risk math - call run_scenario / what_if instead.
-2. For concepts, policy or definitions call search_knowledge and cite passages like [kb:eln#1].
-3. You do not decide suitability; report the rule engine's decision.
-4. If product or customer is missing, say what the user must set first.
-5. mode=client: short plain language, no jargon, what can be lost and when. mode=rm: precise, mention rule ids and the repair options.
-6. Past performance does not guarantee future results. If data_source is synthetic_fallback say the data is demo data.
-Keep answers under 180 words."""
+SYSTEM = """You are FinVision's AI Assistant — Understand Before You Invest.
+Your goal is to help investors and Relationship Managers understand structured products with complete clarity.
+
+Guidelines by mode:
+1. mode=client (Customer Mode):
+   - Use warm, friendly, plain everyday language. Avoid complex Wall Street jargon.
+   - Use simple analogies (e.g., barrier = safety net/cushion; NIFTY 50 = India's top 50 companies barometer; coupon = fixed interest reward).
+   - Clearly explain what can be gained and what can be lost in simple terms and ₹ amounts.
+   - Be helpful, conversational, and direct.
+
+2. mode=rm (Relationship Manager Mode):
+   - Professional, precise, reference rule IDs, breaking points, and mathematical repair alternatives.
+
+Hard Grounding Rules:
+1. Never state any financial numbers that did not come from tool results.
+2. Call run_scenario, run_assessment, find_breaking_point, or search_knowledge to get exact figures.
+3. You do not invent numbers; you explain the engine's deterministic calculations.
+"""
 
 
-def ask(s: Session, message: str, mode: str = "rm") -> dict:
+def ask(s: Session, message: str, mode: str = "client") -> dict:
     s.tool_outputs = []
     llm = get_llm()
     if llm is None:
@@ -26,7 +34,7 @@ def ask(s: Session, message: str, mode: str = "rm") -> dict:
             text, trace = offline_copilot(s, message, mode)
         except ValueError as e:
             text, trace = str(e), []
-        engine, warnings = "offline-router", []
+        engine, warnings = "finvision-copilot-offline", []
     else:
         try:
             ctx = f"mode={mode}\nproduct={s.product.model_dump() if s.product else None}\ncustomer={s.customer.model_dump() if s.customer else None}"
@@ -37,12 +45,12 @@ def ask(s: Session, message: str, mode: str = "rm") -> dict:
                 text = llm.complete(SYSTEM, f"Rewrite this answer so every number comes from TOOL RESULTS only (drop unsupported numbers).\n"
                                               f"TOOL RESULTS: {s.tool_outputs}\nANSWER: {text}\nUnsupported numbers: {bad}")
                 bad = ungrounded_numbers(text, s.tool_outputs, extra=ctx + message)
-            engine, warnings = "llm-agent+rag", ([f"ungrounded numbers: {bad}"] if bad else [])
+            engine, warnings = "finvision-llm-agent+rag", ([f"ungrounded numbers: {bad}"] if bad else [])
         except Exception as e:
             try:
                 text, trace = offline_copilot(s, message, mode)
             except ValueError as ve:
                 text, trace = str(ve), []
-            engine, warnings = "offline-fallback", [f"LLM unavailable: {type(e).__name__}"]
+            engine, warnings = "finvision-copilot-fallback", [f"LLM unavailable: {type(e).__name__}"]
     s.history += [{"role": "user", "content": message}, {"role": "assistant", "content": text}]
     return {"answer": text, "engine": engine, "tool_trace": trace, "warnings": warnings}

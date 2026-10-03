@@ -615,13 +615,30 @@ function buildCustomerPages() {
   </div>
 
   <div id="page-cust-copilot" class="page">
-    <div class="section-header"><div class="section-title">AI Assistant</div></div>
+    <div class="section-header">
+      <div>
+        <div class="section-title">FinVision AI Assistant</div>
+        <div class="section-sub">Understand your investment in plain, simple language — no confusing Wall Street jargon.</div>
+      </div>
+    </div>
     <div class="card">
-      <div class="card-title">Ask About Your Investment</div>
-      <div class="disclaimer">The AI assistant explains verified calculation results. It does not provide financial advice or generate its own numbers.</div>
-      <div class="chat-box" id="cust-chat"></div>
+      <div class="flex gap-8 items-center wrap mb8" style="font-size:12px;color:var(--mut)">
+        <span>Suggested Questions:</span>
+        <button class="btn btn-secondary btn-sm" onclick="custAskPrompt('What is NIFTY 50?')">💡 What is NIFTY 50?</button>
+        <button class="btn btn-secondary btn-sm" onclick="custAskPrompt('How does the barrier cushion protect me?')">🛡️ How does the barrier protect me?</button>
+        <button class="btn btn-secondary btn-sm" onclick="custAskPrompt('What happens if NIFTY falls 25%?')">📉 What if NIFTY falls 25%?</button>
+        <button class="btn btn-secondary btn-sm" onclick="custAskPrompt('How much could I lose in rupees?')">💰 How much could I lose in ₹?</button>
+        <button class="btn btn-secondary btn-sm" onclick="custAskPrompt('Is this product suitable for me?')">📋 Is this suitable for me?</button>
+      </div>
+      <div class="chat-box" id="cust-chat" style="height:320px">
+        <div class="chat-msg bot">
+          👋 <b>Hello! I am your FinVision AI Guide.</b><br><br>
+          I am here to explain structured products in plain, simple everyday language before you invest.<br><br>
+          Click any of the suggested question buttons above, or ask me anything like <i>"Can I lose my principal?"</i>, <i>"What is a coupon?"</i>, or <i>"What if the market drops 35%?"</i>.
+        </div>
+      </div>
       <div class="chat-input-row">
-        <input id="cust-q" placeholder="e.g. What if NIFTY falls 35%? / How much could I lose in rupees?" onkeydown="if(event.key==='Enter')custAsk()">
+        <input id="cust-q" placeholder="Ask anything in plain language... e.g. What if NIFTY falls 35%?" onkeydown="if(event.key==='Enter')custAsk()">
         <button class="btn btn-primary" onclick="custAsk()">Ask</button>
       </div>
     </div>
@@ -1234,22 +1251,36 @@ function loadCustomerPortfolio() {
 }
 
 // ══════════════ CUSTOMER COPILOT ══════════════
+function custAskPrompt(prompt) {
+  const inp = $('cust-q');
+  if (inp) inp.value = prompt;
+  custAsk();
+}
+
+function formatChatMsg(text) {
+  if (!text) return '';
+  let clean = text.replace(/\[kb:[^\]]+\]/g, '');
+  clean = clean.replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>');
+  clean = clean.replace(/\*([^*]+)\*/g, '<i>$1</i>');
+  clean = clean.replace(/\n\n/g, '<br><br>');
+  clean = clean.replace(/\n• /g, '<br>• ');
+  clean = clean.replace(/\n/g, '<br>');
+  return clean;
+}
+
 async function custAsk() {
   const q = $('cust-q').value.trim();
   if (!q) return;
   $('cust-q').value = '';
   const chat = $('cust-chat');
   chat.innerHTML += `<div class="chat-msg user">${q}</div>`;
-  chat.innerHTML += `<div class="chat-msg bot" id="bot-latest">Thinking...</div>`;
+  chat.innerHTML += `<div class="chat-msg bot" id="bot-latest"><span class="loading" style="padding:0">Thinking...</span></div>`;
   chat.scrollTop = chat.scrollHeight;
   try {
-    const cid = SELECTED_CUSTOMER?.id || AUTH?.user?.customer_id;
-    const r = await api('/api/v1/copilot', {session_id: 'cust-'+AUTH?.user?.id, message: q, mode: 'client', customer_id: cid});
-    $('bot-latest').innerHTML = r.answer;
+    const cid = SELECTED_CUSTOMER?.id || AUTH?.user?.customer_id || 'C101';
+    const r = await api('/api/v1/copilot', {session_id: 'cust-'+(AUTH?.user?.id || 'guest'), message: q, mode: 'client', customer_id: cid});
+    $('bot-latest').innerHTML = formatChatMsg(r.answer);
     $('bot-latest').id = '';
-    if (r.tool_trace?.length) {
-      chat.innerHTML += `<div class="chat-msg tool-trace">Tools: ${r.tool_trace.map(t=>t.tool).join(' → ')}</div>`;
-    }
   } catch(e) {
     $('bot-latest').innerHTML = `<span class="warn-text">Error: ${e.message}</span>`;
     $('bot-latest').id = '';
