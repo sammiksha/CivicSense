@@ -526,12 +526,12 @@ def report_pdf(audit_id: int):
 
 @app.get("/plotly.min.js")
 def plotly_js():
-    return FileResponse(config.FRONTEND_DIR / "plotly.min.js")
+    return FileResponse(config.FRONTEND_DIR / "plotly.min.js", headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0", "Pragma": "no-cache", "Expires": "0"})
 
 
 @app.get("/")
 def index():
-    return FileResponse(config.FRONTEND_DIR / "index.html")
+    return FileResponse(config.FRONTEND_DIR / "index.html", headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0", "Pragma": "no-cache", "Expires": "0"})
 
 
 @app.get("/{path:path}")
@@ -539,5 +539,5 @@ def spa_fallback(path: str):
     """Serve index.html for all frontend routes (SPA)."""
     p = config.FRONTEND_DIR / path
     if p.exists() and p.is_file():
-        return FileResponse(p)
-    return FileResponse(config.FRONTEND_DIR / "index.html")
+        return FileResponse(p, headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0", "Pragma": "no-cache", "Expires": "0"})
+    return FileResponse(config.FRONTEND_DIR / "index.html", headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0", "Pragma": "no-cache", "Expires": "0"})
