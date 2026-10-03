@@ -309,5 +309,43 @@
     "kyc_status": "verified",
     "segment": "HNI",
     "holdings": []
+  },
+  {
+    "id": "C109",
+    "name": "Rajiv Sharma",
+    "risk_appetite": "moderate",
+    "loss_tolerance_pct": 15.0,
+    "horizon_months": 36,
+    "portfolio_value": 15000000.0,
+    "existing_exposures": {},
+    "annual_income_inr": null,
+    "liquidity_need": "medium",
+    "rm_id": null,
+    "email": null,
+    "phone": null,
+    "city": "Mumbai",
+    "pan": null,
+    "kyc_status": "verified",
+    "segment": "HNI",
+    "holdings": []
+  },
+  {
+    "id": "C110",
+    "name": "Rajiv Sharma",
+    "risk_appetite": "moderate",
+    "loss_tolerance_pct": 15.0,
+    "horizon_months": 36,
+    "portfolio_value": 15000000.0,
+    "existing_exposures": {},
+    "annual_income_inr": null,
+    "liquidity_need": "medium",
+    "rm_id": null,
+    "email": null,
+    "phone": null,
+    "city": "Mumbai",
+    "pan": null,
+    "kyc_status": "verified",
+    "segment": "HNI",
+    "holdings": []
   }
 ]
