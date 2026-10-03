@@ -768,7 +768,10 @@ function livePayoff() {
       const r = await api('/api/v1/payoff', {product: prod()});
       if (typeof Plotly !== 'undefined') drawPayoff(r.curve);
       renderScenarios(r.scenarios);
-    } catch(e) {}
+    } catch(e) {
+      const el = $('payoff-chart');
+      if (el) el.innerHTML = `<div class="warn-text text-sm" style="padding:16px">Chart error: ${e.message}</div>`;
+    }
   }, 150);
 }
 
@@ -804,7 +807,7 @@ function renderScenarios(rows) {
 // ══════════════ EXTRACT ══════════════
 async function extractProduct() {
   const msg = $('ex-msg');
-  msg.textContent = 'Extracting...';
+  msg.textContent = 'Extracting…';
   try {
     let r;
     const f = $('ts-file')?.files[0];
@@ -816,20 +819,45 @@ async function extractProduct() {
       r = await api('/api/v1/product/extract-text', {text: $('ts-nl').value});
     }
     const t = r.terms || {};
+
+    // 1. Set product type first so onProductTypeChange shows the right fields
+    if (t.product_type && $('p-type')) $('p-type').value = t.product_type;
+    onProductTypeChange(); // show/hide barrier, protection, participation
+
+    // 2. Fill remaining fields
     const m = {
-      'p-type':'product_type','p-under':'underlying','p-tenor':'tenor_months',
+      'p-under':'underlying','p-tenor':'tenor_months',
       'p-coupon':'coupon_pct','p-barrier':'barrier_pct','p-strike':'strike_pct',
       'p-notional':'notional','p-prot':'protection_pct','p-part':'participation_pct'
     };
-    for (const k in m) { if (t[m[k]] != null && $(k)) { $(k).value = t[m[k]]; if(k==='p-barrier') $('bv').textContent=t[m[k]]; }}
-    msg.innerHTML = `<b>${r.method}</b>: ${r.valid ? '✓ valid — please confirm values' : '⚠ needs confirmation: ' + (r.needs_confirmation||[]).concat(r.errors||[]).join(', ')}`;
+    for (const k in m) {
+      if (t[m[k]] != null && $(k)) {
+        $(k).value = t[m[k]];
+        if (k === 'p-barrier' && $('bv')) $('bv').textContent = t[m[k]];
+      }
+    }
+
+    msg.innerHTML = `<b>${r.method}</b>: ${
+      r.valid
+        ? '✓ Extracted — chart and scenarios updated below'
+        : '⚠ Needs confirmation: ' + (r.needs_confirmation||[]).concat(r.errors||[]).join(', ')
+    }`;
+
+    // 3. Redraw payoff chart with new product
     livePayoff();
+    // Auto-scroll so user can see the updated chart immediately
+    setTimeout(() => $('payoff-chart')?.scrollIntoView({behavior:'smooth',block:'nearest'}), 300);
+
+    // 4. Sync CUST_PRODUCT so customer portal pages reflect the extracted product
+    CUST_PRODUCT = prod();
+
   } catch(e) { msg.textContent = 'Error: ' + e.message; }
 }
 
 // ══════════════ PRODUCT ACTIONS ══════════════
 function applyProductConfig() {
   const p = prod();
+  CUST_PRODUCT = p;  // keep customer portal in sync
   livePayoff();
   const msg = $('ex-msg');
   if (msg) msg.innerHTML = `<span class="ok-text">✓ Applied ${p.product_type} (${p.underlying}, ${p.tenor_months}m, notional ${fmtInr(p.notional)})</span>`;
@@ -884,6 +912,8 @@ async function runAssessment() {
     const r = await api('/api/v1/assessment', {product: prod(), customer_id: SELECTED_CUSTOMER.id, mode: 'rm'});
     LAST_ASSESSMENT = r;
     LAST_AUDIT_ID = r.audit_id;
+    // Sync CUST_PRODUCT so customer portal uses the same product the RM just assessed
+    CUST_PRODUCT = prod();
 
     if (resultEl) resultEl.innerHTML = `
       <div class="flex items-center gap-8 mb0">${badge(r.status)} <span class="text-sm mut">Audit #${r.audit_id}</span></div>
