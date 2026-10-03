@@ -1,0 +1,2627 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FinVision — Understand Before You Invest</title>
+<meta name="description" content="FinVision: Explainable structured-product suitability platform. Understand structured financial products before you invest.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script>
+(function(){
+  function loadScript(src,cb){var s=document.createElement('script');s.src=src;s.onload=cb;s.onerror=function(){if(cb)cb();};document.head.appendChild(s);}
+  loadScript('/plotly.min.js',function(){
+    if(typeof Plotly==='undefined')loadScript('https://cdn.plot.ly/plotly-2.35.2.min.js',function(){window._plotlyReady=true;document.dispatchEvent(new Event('plotlyready'))});
+    else{window._plotlyReady=true;document.dispatchEvent(new Event('plotlyready'));}
+  });
+})();
+</script>
+<style>
+:root {
+  --bg: #f0f2f7;
+  --card: #ffffff;
+  --ink: #0f172a;
+  --ink2: #334155;
+  --mut: #64748b;
+  --line: #e2e8f0;
+  --pri: #1e40af;
+  --pri-d: #1e3a8a;
+  --pri-l: #dbeafe;
+  --ok: #15803d;
+  --ok-l: #dcfce7;
+  --rev: #b45309;
+  --rev-l: #fef3c7;
+  --bad: #b91c1c;
+  --bad-l: #fee2e2;
+  --nav-w: 220px;
+  --header-h: 56px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5}
+
+/* ── Login ── */
+#login-screen {
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#1e3a8a 0%,#1e40af 50%,#1d4ed8 100%);
+}
+.login-box {
+  background:#fff;border-radius:16px;padding:40px;width:100%;max-width:440px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.25);
+}
+.login-logo { text-align:center;margin-bottom:28px }
+.login-logo .logo-name { font-size:26px;font-weight:700;color:var(--pri);letter-spacing:-0.5px }
+.login-logo .logo-tagline { font-size:13px;color:var(--mut);margin-top:4px }
+.login-tabs { display:flex;gap:8px;margin-bottom:24px }
+.login-tab { flex:1;padding:9px;border-radius:8px;border:2px solid var(--line);background:#fff;cursor:pointer;font:500 13px 'Inter',sans-serif;color:var(--mut);transition:.15s }
+.login-tab.active { border-color:var(--pri);color:var(--pri);background:var(--pri-l) }
+.login-field label { display:block;font-size:12px;font-weight:500;color:var(--ink2);margin-bottom:5px }
+.login-field input { width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;font:inherit;font-size:14px;outline:none;transition:.15s }
+.login-field input:focus { border-color:var(--pri) }
+.login-field { margin-bottom:14px }
+.btn-login { width:100%;padding:12px;background:var(--pri);color:#fff;border:0;border-radius:8px;font:600 14px 'Inter',sans-serif;cursor:pointer;margin-top:6px;transition:.15s }
+.btn-login:hover { background:var(--pri-d) }
+.demo-creds { background:#f8faff;border-radius:8px;padding:12px;margin-top:16px;font-size:12px }
+.demo-creds b { color:var(--pri);display:block;margin-bottom:6px }
+.demo-creds span { color:var(--mut) }
+.login-err { color:var(--bad);font-size:12px;margin-top:8px;display:none }
+
+/* ── App Shell ── */
+#app-shell { display:none;min-height:100vh }
+.top-bar {
+  position:fixed;top:0;left:0;right:0;height:var(--header-h);z-index:100;
+  background:#fff;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;padding:0 20px;gap:16px;
+}
+.top-logo { font-size:17px;font-weight:700;color:var(--pri);letter-spacing:-0.3px;flex:0 0 auto }
+.top-logo span { font-weight:300;color:var(--mut);font-size:12px;display:block;line-height:1 }
+.top-bar-right { margin-left:auto;display:flex;align-items:center;gap:12px }
+.top-user { font-size:13px;color:var(--ink2);display:flex;align-items:center;gap:8px }
+.role-badge { font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;background:var(--pri-l);color:var(--pri) }
+.role-badge.customer { background:#f0fdf4;color:var(--ok) }
+.btn-icon { background:none;border:1px solid var(--line);border-radius:6px;cursor:pointer;padding:6px 10px;font-size:12px;color:var(--mut);display:flex;align-items:center;gap:4px }
+.btn-icon:hover { background:var(--bg) }
+.alert-bell { position:relative;cursor:pointer;background:none;border:1px solid var(--line);border-radius:6px;padding:6px 10px }
+.alert-count { position:absolute;top:-6px;right:-6px;background:var(--bad);color:#fff;border-radius:10px;font-size:10px;font-weight:700;padding:1px 5px;min-width:16px;text-align:center }
+
+/* ── Nav Sidebar ── */
+.sidebar {
+  position:fixed;top:var(--header-h);left:0;bottom:0;width:var(--nav-w);
+  background:#fff;border-right:1px solid var(--line);overflow-y:auto;z-index:50;padding:12px 0;
+}
+.nav-section-label { font-size:10px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.8px;padding:10px 16px 4px }
+.nav-item { display:flex;align-items:center;gap:10px;padding:8px 16px;cursor:pointer;color:var(--ink2);border-radius:0;transition:.1s;font-size:13px;border-left:3px solid transparent }
+.nav-item:hover { background:var(--bg);color:var(--pri) }
+.nav-item.active { background:var(--pri-l);color:var(--pri);font-weight:500;border-left-color:var(--pri) }
+.nav-item .nav-icon { width:16px;text-align:center;font-size:14px }
+
+/* ── Main Content ── */
+.main-content { margin-left:var(--nav-w);margin-top:var(--header-h);padding:20px;min-height:calc(100vh - var(--header-h)) }
+
+/* ── Cards ── */
+.card { background:#fff;border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:14px }
+.card-title { font-size:13px;font-weight:600;color:var(--ink);margin-bottom:14px;display:flex;align-items:center;gap:8px }
+.card-title .badge-sm { font-size:10px;font-weight:500;padding:2px 6px;border-radius:4px }
+.grid-2 { display:grid;grid-template-columns:1fr 1fr;gap:14px }
+.grid-3 { display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px }
+.grid-4 { display:grid;grid-template-columns:repeat(4,1fr);gap:12px }
+
+/* ── KPI Cards ── */
+.kpi { background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px 18px }
+.kpi-label { font-size:11px;color:var(--mut);font-weight:500;text-transform:uppercase;letter-spacing:.5px }
+.kpi-value { font-size:24px;font-weight:700;color:var(--ink);margin-top:4px;letter-spacing:-0.5px }
+.kpi-sub { font-size:12px;color:var(--mut);margin-top:2px }
+
+/* ── Status Badges ── */
+.badge { display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600 }
+.badge.SUITABLE { background:var(--ok-l);color:var(--ok) }
+.badge.REVIEW { background:var(--rev-l);color:var(--rev) }
+.badge.MISMATCH { background:var(--bad-l);color:var(--bad) }
+.badge.INFO { background:#eff6ff;color:#1d4ed8 }
+.badge.WARNING { background:var(--rev-l);color:var(--rev) }
+.badge.HIGH { background:var(--bad-l);color:var(--bad) }
+
+/* ── Tables ── */
+table { width:100%;border-collapse:collapse }
+th,td { padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);font-size:13px }
+th { font-size:11px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;background:var(--bg) }
+tr:last-child td { border-bottom:0 }
+tr:hover td { background:#fafbff }
+
+/* ── Forms ── */
+.form-group { margin-bottom:12px }
+.form-group label { display:block;font-size:12px;font-weight:500;color:var(--ink2);margin-bottom:5px }
+.form-group input,.form-group select,.form-group textarea {
+  width:100%;padding:8px 10px;border:1.5px solid var(--line);border-radius:6px;font:inherit;font-size:13px;outline:none;transition:.15s
+}
+.form-group input:focus,.form-group select:focus { border-color:var(--pri) }
+.form-group textarea { resize:vertical;min-height:60px }
+.form-row { display:grid;grid-template-columns:1fr 1fr;gap:10px }
+
+/* ── Buttons ── */
+.btn { padding:8px 16px;border-radius:6px;border:0;cursor:pointer;font:500 13px 'Inter',sans-serif;transition:.15s;display:inline-flex;align-items:center;gap:6px }
+.btn-primary { background:var(--pri);color:#fff }
+.btn-primary:hover { background:var(--pri-d) }
+.btn-secondary { background:var(--bg);color:var(--ink2);border:1px solid var(--line) }
+.btn-secondary:hover { background:var(--line) }
+.btn-sm { padding:5px 10px;font-size:12px }
+.btn-full { width:100%;justify-content:center }
+.btn-danger { background:var(--bad-l);color:var(--bad) }
+
+/* ── Alerts ── */
+.alert-item { border-left:3px solid;border-radius:6px;padding:10px 12px;margin-bottom:8px;font-size:13px }
+.alert-item.HIGH { border-color:var(--bad);background:var(--bad-l) }
+.alert-item.WARNING { border-color:var(--rev);background:var(--rev-l) }
+.alert-item.INFO { border-color:var(--pri);background:#eff6ff }
+.alert-title { font-weight:600;margin-bottom:3px }
+.alert-msg { color:var(--ink2);font-size:12px }
+.alert-action { font-size:11px;color:var(--mut);margin-top:4px;font-style:italic }
+
+/* ── Ladder ── */
+.ladder-row { display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid var(--line) }
+.ladder-shock { width:50px;font-size:12px;font-weight:500;color:var(--ink2) }
+.ladder-bar-wrap { flex:1;height:14px;background:var(--bg);border-radius:3px;overflow:hidden }
+.ladder-bar { height:100%;border-radius:3px;transition:.3s }
+.ladder-loss { width:60px;font-size:12px;color:var(--mut);text-align:right }
+.ladder-status { width:80px;text-align:right }
+
+/* ── Chat ── */
+.chat-box { height:240px;overflow-y:auto;border:1px solid var(--line);border-radius:6px;padding:10px;background:#fafbff;margin-bottom:8px;display:flex;flex-direction:column;gap:8px }
+.chat-msg { max-width:85%;padding:8px 12px;border-radius:8px;font-size:13px;line-height:1.5 }
+.chat-msg.user { background:var(--pri);color:#fff;align-self:flex-end;border-radius:8px 8px 2px 8px }
+.chat-msg.bot { background:#fff;border:1px solid var(--line);align-self:flex-start;border-radius:8px 8px 8px 2px }
+.chat-msg.tool-trace { font-size:11px;color:var(--mut);background:transparent;border:0;padding:0 }
+.chat-input-row { display:flex;gap:6px }
+.chat-input-row input { flex:1;padding:8px 10px;border:1.5px solid var(--line);border-radius:6px;font:inherit;font-size:13px;outline:none }
+.chat-input-row input:focus { border-color:var(--pri) }
+
+
+/* ── Loading/Empty states ── */
+.loading { text-align:center;padding:40px;color:var(--mut);font-size:13px }
+.loading::after { content:'';display:inline-block;width:16px;height:16px;border:2px solid var(--line);border-top-color:var(--pri);border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-left:8px }
+@keyframes spin { to { transform:rotate(360deg) } }
+.empty { text-align:center;padding:40px;color:var(--mut);font-size:13px }
+
+/* ── Disclaimer bar ── */
+.disclaimer { background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:8px 12px;font-size:11px;color:#92400e;margin-bottom:12px }
+
+/* ── Misc ── */
+.mut { color:var(--mut) }
+.text-sm { font-size:12px }
+.text-xs { font-size:11px }
+.fw6 { font-weight:600 }
+.mt4 { margin-top:4px }
+.mt8 { margin-top:8px }
+.mt14 { margin-top:14px }
+.flex { display:flex }
+.items-center { align-items:center }
+.gap-8 { gap:8px }
+.gap-14 { gap:14px }
+.mb0 { margin-bottom:0 }
+.page { display:none }
+.page.active { display:block }
+.two-col { display:grid;grid-template-columns:340px 1fr;gap:14px }
+@media(max-width:900px){.two-col,.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}.sidebar{display:none}.main-content{margin-left:0}}
+
+/* ── Highlight for warnings ── */
+.warn-text { color:var(--bad);font-weight:500 }
+.ok-text { color:var(--ok);font-weight:500 }
+.info-text { color:var(--pri);font-weight:500 }
+
+/* ── Section headers ── */
+.section-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:16px }
+.section-title { font-size:18px;font-weight:600;color:var(--ink) }
+.section-sub { font-size:13px;color:var(--mut);margin-top:2px }
+
+/* ── Regime grid ── */
+.regime-card { border-radius:8px;padding:12px;border:1px solid var(--line) }
+.regime-card.bull { background:#f0fdf4 }
+.regime-card.normal { background:#f0f9ff }
+.regime-card.mild { background:#fefce8 }
+.regime-card.severe { background:#fff7ed }
+.regime-card.crash { background:#fff1f2 }
+
+/* ── Simulator Styling ── */
+.sim-range-wrap { position:relative;margin:10px 0 6px }
+.sim-range { width:100%;height:8px;border-radius:4px;outline:none;background:#e2e8f0;-webkit-appearance:none;cursor:pointer }
+.sim-range::-webkit-slider-thumb { -webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--pri);cursor:pointer;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.2);transition:.15s }
+.sim-range::-webkit-slider-thumb:hover { transform:scale(1.15);background:var(--pri-d) }
+.sim-chip-btn { padding:5px 12px;border-radius:16px;border:1px solid var(--line);background:#fff;font-size:11px;font-weight:500;cursor:pointer;transition:.15s;color:var(--ink2) }
+.sim-chip-btn:hover { background:var(--pri-l);border-color:var(--pri);color:var(--pri) }
+.sim-chip-btn.active { background:var(--pri);border-color:var(--pri);color:#fff }
+.sim-spectrum-bar { height:18px;border-radius:9px;background:linear-gradient(to right, #ef4444 0%, #ef4444 30%, #f59e0b 30%, #3b82f6 60%, #10b981 60%, #10b981 100%);position:relative;margin:16px 0 10px;box-shadow:inset 0 1px 3px rgba(0,0,0,0.15) }
+.sim-spectrum-pin { position:absolute;top:-6px;bottom:-6px;width:4px;background:#0f172a;border-radius:2px;box-shadow:0 0 6px rgba(0,0,0,0.5);transform:translateX(-50%);transition:left .1s ease }
+.sim-spectrum-pin::after { content:'▼';position:absolute;top:-14px;left:-4px;font-size:10px;color:#0f172a }
+.sim-outcome-hero { border-radius:12px;padding:18px;margin-bottom:14px;transition:background .2s }
+.sim-outcome-hero.safe { background:linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);border:1.5px solid #86efac }
+.sim-outcome-hero.breached { background:linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);border:1.5px solid #fca5a5 }
+.sim-expl-card { background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:12px }
+.sim-expl-title { font-size:13px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px;margin-bottom:8px }
+.sim-compare-table th { background:#f8fafc;font-size:11px;font-weight:600;padding:8px }
+.sim-compare-table td { font-size:12px;padding:8px }
+.sim-compare-table tr.highlight { background:#f0fdf4;font-weight:600 }
+</style>
+</head>
+<body>
+
+<!-- ══════════════ LOGIN ══════════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="logo-name">FinVision</div>
+      <div class="logo-tagline">Understand Before You Invest</div>
+    </div>
+    <div class="login-tabs">
+      <button class="login-tab active" id="tab-rm" onclick="switchLoginTab('rm')">Relationship Manager</button>
+      <button class="login-tab" id="tab-customer" onclick="switchLoginTab('customer')">Customer</button>
+    </div>
+    <div class="login-field">
+      <label>Email</label>
+      <input type="email" id="login-email" placeholder="Enter your email" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="login-field">
+      <label>Password</label>
+      <input type="password" id="login-password" placeholder="Enter your password" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div id="login-err" class="login-err">Invalid credentials. Please try again.</div>
+    <button class="btn-login" onclick="doLogin()">Sign In</button>
+    <div class="demo-creds" id="demo-creds-rm">
+      <b>Demo credentials (RM)</b>
+      <span>Email: rm@finvision.demo<br>Password: RM@123</span>
+    </div>
+    <div class="demo-creds" id="demo-creds-customer" style="display:none">
+      <b>Demo credentials (Customer)</b>
+      <span>Email: customer@finvision.demo<br>Password: Customer@123</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ APP SHELL ══════════════ -->
+<div id="app-shell">
+  <!-- Top bar -->
+  <div class="top-bar">
+    <div class="top-logo">FinVision <span>Understand Before You Invest</span></div>
+    <div class="top-bar-right">
+      <button class="alert-bell btn-icon" onclick="navTo('alerts')">
+        🔔 <span id="alert-count-badge" class="alert-count" style="display:none">0</span>
+      </button>
+      <div class="top-user">
+        <span id="top-user-name">—</span>
+        <span id="top-role-badge" class="role-badge">—</span>
+      </div>
+      <button class="btn-icon" onclick="doLogout()">Sign Out</button>
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <!-- filled by JS based on role -->
+  </div>
+
+  <!-- Main content -->
+  <div class="main-content" id="main-content">
+    <!-- pages injected by JS -->
+  </div>
+</div>
+
+<script>
+'use strict';
+// ══════════════ GLOBALS ══════════════
+let AUTH = null; // {token, user}
+let CUSTOMERS = [];
+let SELECTED_CUSTOMER = null;
+let LAST_ASSESSMENT = null;
+let LAST_AUDIT_ID = null;
+let SESSION_CHAT_HISTORY = [];
+let LAST_CUST_QUERY = '';
+
+const $ = id => document.getElementById(id);
+const api = async (p, b, method) => {
+  const opts = { headers: {'Content-Type': 'application/json'} };
+  if (AUTH) opts.headers['Authorization'] = 'Bearer ' + AUTH.token;
+  if (b !== undefined) { opts.method = method || 'POST'; opts.body = JSON.stringify(b); }
+  const r = await fetch(p, opts);
+  if (!r.ok) { const t = await r.text(); throw new Error(t); }
+  return r.json();
+};
+const fmt = x => x == null ? 'n/a' : (+x).toLocaleString('en-IN', {maximumFractionDigits: 2});
+const fmtInr = x => x == null ? 'n/a' : '₹' + Math.abs(Math.round(x)).toLocaleString('en-IN');
+const badge = s => `<span class="badge ${s}">${s}</span>`;
+const prod = () => {
+  const t = $('p-type')?.value || 'ELN';
+  const o = {
+    product_type: t,
+    underlying: $('p-under')?.value || 'NIFTY 50',
+    tenor_months: +($('p-tenor')?.value || 12),
+    coupon_pct: +($('p-coupon')?.value || 12),
+    strike_pct: +($('p-strike')?.value || 100),
+    notional: +($('p-notional')?.value || 1000000),
+    protection_pct: +($('p-prot')?.value || 90),
+    participation_pct: +($('p-part')?.value || 100),
+  };
+  if (t === 'ELN' || t === 'DCD') o.barrier_pct = +($('p-barrier')?.value || 70);
+  return o;
+};
+
+// ══════════════ AUTH ══════════════
+function switchLoginTab(role) {
+  ['rm','customer'].forEach(r => {
+    $('tab-'+r).classList.toggle('active', r === role);
+    $('demo-creds-'+r).style.display = r === role ? 'block' : 'none';
+  });
+  if (role === 'rm') { $('login-email').value = 'rm@finvision.demo'; $('login-password').value = 'RM@123'; }
+  else { $('login-email').value = 'customer@finvision.demo'; $('login-password').value = 'Customer@123'; }
+}
+
+async function doLogin() {
+  $('login-err').style.display = 'none';
+  try {
+    const res = await api('/api/auth/login', {email: $('login-email').value.trim(), password: $('login-password').value});
+    AUTH = res;
+    localStorage.setItem('fv_token', res.token);
+    localStorage.setItem('fv_user', JSON.stringify(res.user));
+    await bootApp();
+  } catch(e) {
+    $('login-err').style.display = 'block';
+  }
+}
+
+async function doLogout() {
+  if (AUTH) await api('/api/auth/logout', {}).catch(()=>{});
+  AUTH = null;
+  localStorage.removeItem('fv_token');
+  localStorage.removeItem('fv_user');
+  $('login-screen').style.display = 'flex';
+  $('app-shell').style.display = 'none';
+}
+
+// ══════════════ BOOT ══════════════
+async function bootApp() {
+  $('login-screen').style.display = 'none';
+  $('app-shell').style.display = 'block';
+  const u = AUTH.user;
+  $('top-user-name').textContent = u.name;
+  $('top-role-badge').textContent = u.role === 'rm' ? 'RM' : 'Customer';
+  $('top-role-badge').className = 'role-badge' + (u.role === 'customer' ? ' customer' : '');
+
+  CUSTOMERS = await api('/api/v1/customers');
+
+  if (u.role === 'rm') {
+    buildSidebar('rm');
+    buildRMPages();
+    navTo('rm-dashboard');
+    loadRMDashboard();
+  } else {
+    buildSidebar('customer');
+    buildCustomerPages();
+    SELECTED_CUSTOMER = CUSTOMERS.find(c => c.id === u.customer_id) || CUSTOMERS[0];
+    navTo('cust-dashboard');
+    loadCustomerDashboard();
+  }
+  pollAlerts();
+}
+
+async function tryAutoLogin() {
+  const token = localStorage.getItem('fv_token');
+  const user = localStorage.getItem('fv_user');
+  if (!token || !user) return;
+  AUTH = { token, user: JSON.parse(user) };
+  try {
+    await api('/api/auth/me');
+    await bootApp();
+  } catch(e) {
+    AUTH = null;
+    localStorage.removeItem('fv_token');
+    localStorage.removeItem('fv_user');
+  }
+}
+
+// ══════════════ SIDEBAR ══════════════
+const RM_NAV = [
+  {id:'rm-dashboard', icon:'⬛', label:'Dashboard'},
+  {id:'rm-customers', icon:'👥', label:'Customers'},
+  {id:'rm-studio', icon:'🏗', label:'Product Studio'},
+  {id:'rm-analysis', icon:'📊', label:'Assessment'},
+  {id:'rm-stress', icon:'⚡', label:'Stress & Regime'},
+  {id:'rm-portfolio', icon:'📁', label:'Portfolio Impact'},
+  {id:'rm-repair', icon:'🔧', label:'Repair'},
+  {id:'rm-notes', icon:'📄', label:'RM Notes'},
+  {id:'rm-audit', icon:'🔍', label:'Audit Trail'},
+  {id:'alerts', icon:'🔔', label:'Risk Alerts'},
+];
+const CUST_NAV = [
+  {id:'cust-dashboard', icon:'🏠', label:'Dashboard'},
+  {id:'cust-simulator', icon:'🎛️', label:'Risk & Return Playground'},
+  {id:'cust-profile', icon:'👤', label:'My Profile'},
+  {id:'cust-portfolio', icon:'📁', label:'My Portfolio'},
+  {id:'cust-analysis', icon:'📊', label:'Product Analysis'},
+  {id:'cust-payoff', icon:'📈', label:'Payoff & Scenarios'},
+  {id:'cust-stress', icon:'⚡', label:'Stress Analysis'},
+  {id:'cust-impact', icon:'💸', label:'Portfolio Impact'},
+  {id:'alerts', icon:'🔔', label:'Risk Alerts'},
+  {id:'cust-copilot', icon:'💬', label:'AI Assistant'},
+];
+
+function buildSidebar(role) {
+  const nav = role === 'rm' ? RM_NAV : CUST_NAV;
+  $('sidebar').innerHTML = nav.map(n =>
+    `<div class="nav-item" id="nav-${n.id}" onclick="navTo('${n.id}')">
+      <span class="nav-icon">${n.icon}</span>${n.label}
+    </div>`
+  ).join('');
+}
+
+function navTo(id) {
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  const ni = $('nav-'+id);
+  if (ni) ni.classList.add('active');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const pg = $('page-'+id);
+  if (pg) pg.classList.add('active');
+  if (id === 'rm-customers') loadRMCustomers();
+  if (id === 'cust-simulator') loadSimulatorPage();
+  if (id === 'alerts') loadAlerts();
+  if (id === 'rm-audit') loadAuditTable();
+  if (id === 'cust-portfolio') loadCustomerPortfolio();
+  if (id === 'cust-profile') loadCustomerProfile();
+  // Customer analysis pages — load on first visit
+  if (id === 'cust-analysis') runCustAnalysis();
+  if (id === 'cust-payoff') loadCustPayoff();
+  if (id === 'cust-stress') loadCustStress();
+  if (id === 'cust-impact') loadCustPortfolioImpact();
+}
+
+// ══════════════ PAGE BUILDERS ══════════════
+function buildRMPages() {
+  $('main-content').innerHTML = `
+  <div id="page-rm-dashboard" class="page">
+    <div class="section-header"><div><div class="section-title">RM Dashboard</div><div class="section-sub">Welcome back, ${AUTH.user.name}</div></div></div>
+    <div class="disclaimer">FinVision provides decision support, not investment advice. Historical results are not predictions. RM owns the final decision.</div>
+    <div class="grid-4" id="rm-kpis"></div>
+    <div class="card mt14"><div class="card-title">Customer Overview</div><div id="rm-cust-table"></div></div>
+  </div>
+
+  <div id="page-rm-customers" class="page">
+    <div class="section-header">
+      <div>
+        <div class="section-title">Client Portfolio Directory</div>
+        <div class="section-sub">Manage client risk mandates, asset allocations, exposures, and suitability dossiers</div>
+      </div>
+      <div class="flex gap-8">
+        <input type="text" id="rm-cust-search" placeholder="🔍 Search name, ID, city, email..." oninput="filterRMCustomers()" style="padding:7px 12px;border:1.5px solid var(--line);border-radius:6px;font-size:13px;width:240px;outline:none">
+        <select id="rm-cust-risk-filter" onchange="filterRMCustomers()" style="padding:7px 10px;border:1.5px solid var(--line);border-radius:6px;font-size:13px;outline:none">
+          <option value="all">All Risk Profiles</option>
+          <option value="conservative">Conservative</option>
+          <option value="moderate">Moderate</option>
+          <option value="aggressive">Aggressive</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid-3 mt14" id="rm-cust-kpis" style="margin-bottom:14px"></div>
+    <div class="card">
+      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+        <span>Assigned Client Portfolios</span>
+        <span class="badge INFO" id="rm-cust-count-badge" style="font-size:11px"></span>
+      </div>
+      <div id="rm-cust-detail-table"></div>
+    </div>
+    <div id="rm-cust-dossier" style="display:none" class="mt14"></div>
+  </div>
+
+  <div id="page-rm-studio" class="page">
+    <div class="section-header"><div class="section-title">Product Studio</div></div>
+    <div class="two-col">
+      <div>
+        <div class="card">
+          <div class="card-title">Customer</div>
+          <div class="form-group"><label>Select Customer</label>
+            <select id="rm-sel-cust" onchange="rmSelectCustomer()"></select>
+          </div>
+          <div id="rm-cust-info" class="text-sm mut mt8"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Product Configuration</div>
+          <div class="form-group"><label>Product Type</label>
+            <select id="p-type" onchange="onProductTypeChange();livePayoff()">
+              <option>ELN</option><option>DCD</option><option>CPN</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Underlying</label>
+            <select id="p-under" onchange="livePayoff()"><option>NIFTY 50</option><option>USDINR</option></select>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Tenor (months)</label><input id="p-tenor" type="number" value="12" min="1" max="120" onchange="livePayoff()"></div>
+            <div class="form-group"><label>Coupon / Interest %</label><input id="p-coupon" type="number" value="12" min="0" onchange="livePayoff()"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Strike %</label><input id="p-strike" type="number" value="100" onchange="livePayoff()"></div>
+            <div class="form-group"><label>Notional (₹)</label><input id="p-notional" type="number" value="1000000" onchange="livePayoff()"></div>
+          </div>
+          <div id="eln-fields">
+            <div class="form-group"><label>Barrier %: <b id="bv">70</b></label>
+              <input id="p-barrier" type="range" min="30" max="95" value="70" oninput="$('bv').textContent=this.value;livePayoff()">
+            </div>
+          </div>
+          <div id="cpn-fields" style="display:none">
+            <div class="form-row">
+              <div class="form-group"><label>Protection %</label><input id="p-prot" type="number" value="90" min="0" max="100" onchange="livePayoff()"></div>
+              <div class="form-group"><label>Participation %</label><input id="p-part" type="number" value="100" min="0" max="500" onchange="livePayoff()"></div>
+            </div>
+          </div>
+          <div class="form-group mt8"><label>Upload Term Sheet (PDF/TXT)</label><input type="file" id="ts-file" accept=".pdf,.txt"></div>
+          <div class="form-group"><label>...or describe in plain language</label><textarea id="ts-nl" rows="2" placeholder="One-year NIFTY note, 12% coupon, 70% barrier, 10 lakh"></textarea></div>
+          <div class="flex gap-8 wrap mt8">
+            <button class="btn btn-secondary btn-sm" onclick="extractProduct()">Extract & Validate</button>
+            <button class="btn btn-secondary btn-sm" onclick="applyProductConfig()">Apply Product</button>
+            <button class="btn btn-secondary btn-sm" onclick="saveProductConfig()">Save</button>
+            <button class="btn btn-secondary btn-sm" onclick="resetProductConfig()">Reset</button>
+            <button class="btn btn-secondary btn-sm" onclick="scrollToPayoff()">View Payoff</button>
+            <button class="btn btn-secondary btn-sm" onclick="scrollToScenarios()">View Scenarios</button>
+          </div>
+          <div id="ex-msg" class="text-sm mut mt8"></div>
+          <button class="btn btn-primary btn-full mt14" onclick="runAssessment()">Run Analysis & Full Assessment</button>
+        </div>
+      </div>
+      <div>
+        <div class="card"><div class="card-title">Payoff at Maturity <span class="text-xs mut">(drag barrier to update)</span></div>
+          <div id="payoff-chart" style="height:280px"></div>
+          <div id="payoff-scenarios" class="mt8"></div>
+        </div>
+        <div class="card" id="studio-result-card" style="display:none">
+          <div class="card-title">Assessment Result</div>
+          <div id="studio-result"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="page-rm-analysis" class="page">
+    <div class="section-header"><div class="section-title">Assessment Detail</div></div>
+    <div id="rm-analysis-content"><div class="empty">Run an assessment from Product Studio first.</div></div>
+  </div>
+
+  <div id="page-rm-stress" class="page">
+    <div class="section-header"><div class="section-title">Stress & Regime Analysis</div></div>
+    <div id="rm-stress-content"><div class="empty">Run an assessment first.</div></div>
+  </div>
+
+  <div id="page-rm-portfolio" class="page">
+    <div class="section-header"><div class="section-title">Portfolio Impact</div></div>
+    <div id="rm-portfolio-content"><div class="empty">Run an assessment first.</div></div>
+  </div>
+
+  <div id="page-rm-repair" class="page">
+    <div class="section-header"><div class="section-title">Suitability Repair</div></div>
+    <div id="rm-repair-content"><div class="empty">Run an assessment first.</div></div>
+  </div>
+
+  <div id="page-rm-notes" class="page">
+    <div class="section-header"><div class="section-title">RM Justification Note</div></div>
+    <div id="rm-notes-content"><div class="empty">Run an assessment first.</div></div>
+  </div>
+
+  <div id="page-rm-audit" class="page">
+    <div class="section-header"><div class="section-title">Audit Trail</div></div>
+    <div class="card"><div id="audit-table"></div></div>
+  </div>
+
+  <div id="page-alerts" class="page">
+    <div class="section-header"><div class="section-title">Risk Alerts</div><button class="btn btn-secondary btn-sm" onclick="loadAlerts()">Refresh Alerts</button></div>
+    <div id="alerts-content"><div class="empty">No alerts yet.</div></div>
+  </div>
+  `;
+
+  // Populate customer selects
+  const sel = $('rm-sel-cust');
+  CUSTOMERS.forEach(c => { const o = document.createElement('option'); o.value=c.id; o.textContent=`${c.id} — ${c.name} (${c.risk_appetite})`; sel.appendChild(o); });
+  SELECTED_CUSTOMER = CUSTOMERS[0];
+  updateRMCustInfo();
+  setTimeout(() => { if(window._plotlyReady) livePayoff(); else document.addEventListener('plotlyready', livePayoff, {once:true}); }, 200);
+}
+
+// ── Default product for customer analysis (ELN 12% coupon, 70% barrier, 10L)
+const CUST_DEFAULT_PRODUCT = {product_type:'ELN',underlying:'NIFTY 50',tenor_months:12,coupon_pct:12,barrier_pct:70,strike_pct:100,notional:1000000,protection_pct:90,participation_pct:100};
+let CUST_PRODUCT = null; // set when RM runs assessment or from defaults
+
+function buildCustomerPages() {
+  const c = SELECTED_CUSTOMER || {};
+  $('main-content').innerHTML = `
+  <div id="page-cust-dashboard" class="page">
+    <div class="section-header"><div><div class="section-title">Welcome, ${AUTH.user.name} 👋</div><div class="section-sub">Your personal investment understanding centre</div></div></div>
+    <div class="disclaimer">FinVision helps you understand your investment — not make decisions for you. All figures are calculated mathematically. Past results are not predictions.</div>
+    <div class="grid-4" id="cust-kpis"></div>
+    <div class="grid-2 mt14">
+      <div class="card">
+        <div class="card-title">🛡️ Is this product right for me?</div>
+        <div id="cust-suitability-summary"><div class="loading">Checking suitability</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">⚠️ When could I lose money?</div>
+        <div id="cust-breaking-point"><div class="loading">Calculating</div></div>
+      </div>
+    </div>
+    <div class="grid-2 mt14">
+      <div class="card">
+        <div class="card-title">💸 How much could I lose in ₹?</div>
+        <div id="cust-rupee-summary"><div class="loading">Calculating</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📊 Quick Scenarios</div>
+        <div id="cust-quick-scenarios"><div class="loading">Loading</div></div>
+      </div>
+    </div>
+    <div class="card mt14">
+      <div class="card-title">📝 Plain-Language Summary <span class="text-xs mut">— powered by FinVision AI</span></div>
+      <div id="cust-explanation" class="text-sm" style="line-height:1.7">Loading your personalised summary…</div>
+    </div>
+  </div>
+
+  <div id="page-cust-profile" class="page">
+    <div class="section-header"><div class="section-title">My Profile</div></div>
+    <div id="cust-profile-content"></div>
+  </div>
+
+  <div id="page-cust-portfolio" class="page">
+    <div class="section-header"><div class="section-title">My Portfolio</div></div>
+    <div id="cust-portfolio-content"></div>
+  </div>
+
+  <div id="page-cust-analysis" class="page">
+    <div class="section-header">
+      <div><div class="section-title">Product Analysis</div><div class="section-sub">Full suitability breakdown for your investment — in plain English</div></div>
+      <button class="btn btn-primary btn-sm" onclick="runCustAnalysis()">Refresh Analysis</button>
+    </div>
+    <div id="cust-analysis-content"><div class="loading">Loading analysis</div></div>
+  </div>
+
+  <div id="page-cust-simulator" class="page">
+    <div id="cust-simulator-content"></div>
+  </div>
+
+  <div id="page-cust-payoff" class="page">
+    <div class="section-header">
+      <div><div class="section-title">📈 Payoff & Scenarios</div><div class="section-sub">See exactly how much you earn or lose at different market levels</div></div>
+      <button class="btn btn-primary btn-sm" onclick="navTo('cust-simulator')">🎛️ Open What-If Playground →</button>
+    </div>
+    <div class="disclaimer">These are mathematically calculated outcomes based on your product terms. Not predictions.</div>
+    <div class="card">
+      <div class="card-title">How your investment performs at different NIFTY levels</div>
+      <div id="cust-payoff-chart" style="height:300px"></div>
+    </div>
+    <div class="card mt14">
+      <div class="card-title">Scenario Table — What happens at maturity?</div>
+      <div class="disclaimer" style="margin-bottom:8px">All amounts are based on your ₹10,00,000 investment (adjust notional in Product Analysis)</div>
+      <div id="cust-scenario-table"><div class="loading">Loading</div></div>
+    </div>
+  </div>
+
+  <div id="page-cust-stress" class="page">
+    <div class="section-header">
+      <div><div class="section-title">⚡ Stress Analysis</div><div class="section-sub">What happens during different market conditions — from good times to worst-case crashes</div></div>
+    </div>
+    <div class="disclaimer">Historical data is used for illustration only. These are not predictions of future performance.</div>
+    <div id="cust-stress-content"><div class="loading">Running stress analysis</div></div>
+  </div>
+
+  <div id="page-cust-impact" class="page">
+    <div class="section-header">
+      <div><div class="section-title">💸 Portfolio Impact</div><div class="section-sub">How does adding this product change your overall financial picture?</div></div>
+    </div>
+    <div id="cust-impact-content"><div class="loading">Calculating portfolio impact</div></div>
+  </div>
+
+  <div id="page-alerts" class="page">
+    <div class="section-header"><div class="section-title">🔔 Risk Alerts</div><button class="btn btn-secondary btn-sm" onclick="loadAlerts()">Refresh Alerts</button></div>
+    <div id="alerts-content"><div class="empty">No alerts.</div></div>
+  </div>
+
+  <div id="page-cust-copilot" class="page">
+    <div class="section-header">
+      <div>
+        <div class="section-title">FinVision AI Assistant</div>
+        <div class="section-sub">Ask me about your product, portfolio, scenarios and risk.</div>
+      </div>
+      <div class="flex gap-8">
+        <button class="btn btn-secondary btn-sm" onclick="clearCustChat()">Clear Chat</button>
+        <button class="btn btn-secondary btn-sm" onclick="retryCustLastQuestion()">Retry</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="flex gap-8 items-center wrap mb8" style="font-size:12px;color:var(--mut)">
+        <span>Suggested Questions:</span>
+        <button class="btn btn-secondary btn-sm" onclick="custAskPrompt('What happens if NIFTY falls 35%?')">📉 What if NIFTY falls 35%?</button>
+        <button class="btn btn-secondary btn-sm" onclick="custAskPrompt('Why is this product marked Review?')">⚠️ Why Review?</button>
+        <button class="btn btn-secondary btn-sm" onclick="custAskPrompt('How much money could I lose in rupees?')">💰 How much in ₹?</button>
+        <button class="btn btn-secondary btn-sm" onclick="custAskPrompt('Can I lose my principal investment?')">🛡️ Can I lose principal?</button>
+        <button class="btn btn-secondary btn-sm" onclick="custAskPrompt('Is this product suitable for my risk profile?')">📋 Is this suitable?</button>
+        <button class="btn btn-secondary btn-sm" onclick="custAskPrompt('What if the market crashes like in 2020?')">⚡ 2020 Crash</button>
+        <button class="btn btn-secondary btn-sm" onclick="custAskPrompt('Explain my portfolio impact in simple words')">📁 Portfolio impact?</button>
+      </div>
+      <div class="chat-box" id="cust-chat" style="height:340px">
+        <div class="chat-msg bot">
+          👋 <b>Hello! I am your FinVision AI Assistant.</b><br><br>
+          I can explain how your structured investments work in plain, everyday English with no confusing financial jargon.<br><br>
+          Feel free to click any suggested question above or type your question below.
+        </div>
+      </div>
+      <div class="chat-input-row">
+        <input id="cust-q" placeholder="Ask me anything in plain English... (e.g. What happens if NIFTY falls 35%?)" onkeydown="if(event.key==='Enter')custAsk()">
+        <button class="btn btn-primary" onclick="custAsk()">Send</button>
+      </div>
+    </div>
+  </div>
+  `;
+  loadCustomerProfile();
+  loadCustomerPortfolio();
+}
+
+// ══════════════ RM DASHBOARD ══════════════
+async function loadRMDashboard() {
+  const audits = await api('/api/v1/audit?n=50').catch(()=>[]);
+  const total = CUSTOMERS.length;
+  const review = audits.filter(a => a.decision === 'REVIEW').length;
+  const mismatch = audits.filter(a => a.decision === 'MISMATCH').length;
+  $('rm-kpis').innerHTML = `
+    <div class="kpi" onclick="navTo('rm-customers')" style="cursor:pointer" title="View Client Portfolio Directory"><div class="kpi-label">Total Customers ↗</div><div class="kpi-value">${total}</div></div>
+    <div class="kpi"><div class="kpi-label">Total Assessments</div><div class="kpi-value">${audits.length}</div></div>
+    <div class="kpi"><div class="kpi-label">Under Review</div><div class="kpi-value warn-text">${review}</div></div>
+    <div class="kpi"><div class="kpi-label">Mismatch</div><div class="kpi-value" style="color:var(--bad)">${mismatch}</div></div>
+  `;
+  $('rm-cust-table').innerHTML = `<table>
+    <tr><th>Customer</th><th>Risk Profile</th><th>Portfolio</th><th>Segment</th><th>Actions</th></tr>
+    ${CUSTOMERS.map(c => `<tr>
+      <td><b>${c.id}</b> — ${c.name}</td>
+      <td>${c.risk_appetite}</td>
+      <td>${fmtInr(c.portfolio_value)}</td>
+      <td>${c.segment || 'HNI'}</td>
+      <td><button class="btn btn-secondary btn-sm" onclick="rmPickCustomer('${c.id}')">Select & Assess</button></td>
+    </tr>`).join('')}
+  </table>`;
+  loadAuditTable();
+}
+
+function rmPickCustomer(id) {
+  const sel = $('rm-sel-cust');
+  if (sel) sel.value = id;
+  SELECTED_CUSTOMER = CUSTOMERS.find(c => c.id === id);
+  updateRMCustInfo();
+  navTo('rm-studio');
+}
+
+function rmSelectCustomer() {
+  SELECTED_CUSTOMER = CUSTOMERS.find(c => c.id === $('rm-sel-cust').value);
+  updateRMCustInfo();
+}
+
+function updateRMCustInfo() {
+  const c = SELECTED_CUSTOMER;
+  if (!c || !$('rm-cust-info')) return;
+  $('rm-cust-info').innerHTML = `
+    <div class="flex gap-8 items-center"><span>${c.name}</span> <span class="badge INFO">${c.risk_appetite}</span></div>
+    <div class="mt4">Loss tol: <b>${c.loss_tolerance_pct}%</b> | Horizon: <b>${c.horizon_months}m</b> | Portfolio: <b>${fmtInr(c.portfolio_value)}</b></div>
+    <div class="mt4">NIFTY exposure: <b>${c.existing_exposures?.['NIFTY 50'] || 0}%</b></div>
+  `;
+}
+
+// ══════════════ RM CUSTOMERS DIRECTORY ══════════════
+let RM_FILTERED_CUSTOMERS = [];
+
+async function loadRMCustomers() {
+  if (!CUSTOMERS || CUSTOMERS.length === 0) {
+    CUSTOMERS = await api('/api/v1/customers').catch(() => []);
+  }
+  RM_FILTERED_CUSTOMERS = [...CUSTOMERS];
+  renderRMCustomerKPIs();
+  renderRMCustomerTable(RM_FILTERED_CUSTOMERS);
+}
+
+function renderRMCustomerKPIs() {
+  const el = $('rm-cust-kpis');
+  if (!el || !CUSTOMERS.length) return;
+  const totalAum = CUSTOMERS.reduce((s, c) => s + (c.portfolio_value || 0), 0);
+  const avgLossTol = (CUSTOMERS.reduce((s, c) => s + (c.loss_tolerance_pct || 0), 0) / CUSTOMERS.length).toFixed(1);
+  const hniCount = CUSTOMERS.filter(c => (c.segment || 'HNI') === 'HNI').length;
+  const uhniCount = CUSTOMERS.filter(c => (c.segment || 'HNI') === 'UHNI').length;
+
+  el.innerHTML = `
+    <div class="kpi">
+      <div class="kpi-label">Total Assigned Clients</div>
+      <div class="kpi-value">${CUSTOMERS.length}</div>
+      <div class="kpi-sub">${hniCount} HNI · ${uhniCount} UHNI</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Combined Client AUM</div>
+      <div class="kpi-value" style="color:var(--pri)">${fmtInr(totalAum)}</div>
+      <div class="kpi-sub">Across all asset classes</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Avg Loss Tolerance</div>
+      <div class="kpi-value" style="color:var(--ink2)">${avgLossTol}%</div>
+      <div class="kpi-sub">Mandate risk threshold</div>
+    </div>
+  `;
+}
+
+function filterRMCustomers() {
+  const q = ($('rm-cust-search')?.value || '').toLowerCase().trim();
+  const risk = $('rm-cust-risk-filter')?.value || 'all';
+
+  RM_FILTERED_CUSTOMERS = CUSTOMERS.filter(c => {
+    const matchQ = !q ||
+      c.name.toLowerCase().includes(q) ||
+      c.id.toLowerCase().includes(q) ||
+      (c.city || '').toLowerCase().includes(q) ||
+      (c.email || '').toLowerCase().includes(q) ||
+      (c.segment || '').toLowerCase().includes(q);
+    const matchRisk = (risk === 'all') || (c.risk_appetite === risk);
+    return matchQ && matchRisk;
+  });
+
+  renderRMCustomerTable(RM_FILTERED_CUSTOMERS);
+}
+
+function renderRMCustomerTable(list) {
+  const el = $('rm-cust-detail-table');
+  const countBadge = $('rm-cust-count-badge');
+  if (countBadge) countBadge.textContent = `${list.length} of ${CUSTOMERS.length} clients`;
+  if (!el) return;
+
+  if (!list.length) {
+    el.innerHTML = '<div class="empty">No customers found matching the search criteria.</div>';
+    return;
+  }
+
+  const riskBadge = r => {
+    if (r === 'conservative') return '<span class="badge SUITABLE">Conservative</span>';
+    if (r === 'moderate') return '<span class="badge REVIEW">Moderate</span>';
+    return '<span class="badge MISMATCH">Aggressive</span>';
+  };
+
+  el.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Customer</th>
+          <th>Segment & KYC</th>
+          <th>Risk Profile</th>
+          <th>Loss Tolerance</th>
+          <th>Tenor Horizon</th>
+          <th>Portfolio AUM</th>
+          <th>Key Exposure</th>
+          <th>City / Contact</th>
+          <th style="text-align:right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${list.map(c => {
+          const niftyExp = c.existing_exposures?.['NIFTY 50'] != null ? `${c.existing_exposures['NIFTY 50']}%` : '—';
+          return `
+          <tr>
+            <td>
+              <div style="font-weight:600;color:var(--ink)">${c.name}</div>
+              <div class="text-xs mut">ID: <b>${c.id}</b> · PAN: ${c.pan || '—'}</div>
+            </td>
+            <td>
+              <span class="badge INFO" style="font-size:10px;padding:1px 6px">${c.segment || 'HNI'}</span>
+              <div class="text-xs ok-text mt4">✓ ${c.kyc_status || 'Verified'}</div>
+            </td>
+            <td>${riskBadge(c.risk_appetite)}</td>
+            <td>
+              <span class="fw6 ${c.loss_tolerance_pct <= 10 ? 'ok-text' : c.loss_tolerance_pct <= 20 ? 'warn-text' : ''}" style="${c.loss_tolerance_pct > 20 ? 'color:var(--bad)' : ''}">
+                ${c.loss_tolerance_pct}%
+              </span>
+              <div class="text-xs mut">${fmtInr(c.portfolio_value * c.loss_tolerance_pct / 100)} max</div>
+            </td>
+            <td>
+              <div class="fw6">${c.horizon_months} mos</div>
+              <div class="text-xs mut">${(c.horizon_months/12).toFixed(1)} yrs</div>
+            </td>
+            <td>
+              <div class="fw6" style="color:var(--pri)">${fmtInr(c.portfolio_value)}</div>
+              <div class="text-xs mut">${c.holdings?.length || 0} holdings</div>
+            </td>
+            <td>
+              <div class="fw6">NIFTY: ${niftyExp}</div>
+              <div class="text-xs mut">Liq: ${c.liquidity_need || 'medium'}</div>
+            </td>
+            <td>
+              <div class="text-xs fw6">${c.city || '—'}</div>
+              <div class="text-xs mut">${c.email || '—'}</div>
+            </td>
+            <td style="text-align:right">
+              <div class="flex gap-8" style="justify-content:flex-end">
+                <button class="btn btn-secondary btn-sm" onclick="viewCustomerDossier('${c.id}')" title="View Full Dossier & Holdings">
+                  📁 Dossier
+                </button>
+                <button class="btn btn-primary btn-sm" onclick="rmPickCustomer('${c.id}')" title="Configure & Assess Product">
+                  Assess →
+                </button>
+              </div>
+            </td>
+          </tr>
+          `;
+        }).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+function viewCustomerDossier(id) {
+  const c = CUSTOMERS.find(x => x.id === id);
+  const el = $('rm-cust-dossier');
+  if (!c || !el) return;
+
+  const holdings = c.holdings || [];
+  const exposures = c.existing_exposures || {};
+
+  el.style.display = 'block';
+  el.innerHTML = `
+    <div class="card" style="border:1.5px solid var(--pri);background:#fff;position:relative">
+      <div class="section-header" style="margin-bottom:12px">
+        <div>
+          <div class="section-title" style="display:flex;align-items:center;gap:8px">
+            📁 Client Dossier: ${c.name} (${c.id})
+            <span class="badge INFO">${c.segment || 'HNI'}</span>
+            <span class="badge SUITABLE">KYC Verified</span>
+          </div>
+          <div class="section-sub">Assigned RM: ${c.rm_id || 'RM001'} · Live Client Profile & Portfolio Breakdown</div>
+        </div>
+        <div class="flex gap-8">
+          <button class="btn btn-primary btn-sm" onclick="rmPickCustomer('${c.id}')">
+            🚀 Launch Assessment in Product Studio
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="$('rm-cust-dossier').style.display='none'">
+            ✕ Close
+          </button>
+        </div>
+      </div>
+
+      <div class="grid-3 mt14">
+        <!-- Personal & Regulatory -->
+        <div class="card" style="margin-bottom:0;background:var(--bg)">
+          <div class="card-title">👤 Identity & Contact</div>
+          <table>
+            <tr><td class="mut">Full Name</td><td><b>${c.name}</b></td></tr>
+            <tr><td class="mut">PAN Number</td><td><code>${c.pan || '—'}</code></td></tr>
+            <tr><td class="mut">Email</td><td>${c.email || '—'}</td></tr>
+            <tr><td class="mut">Phone</td><td>${c.phone || '—'}</td></tr>
+            <tr><td class="mut">City</td><td>${c.city || '—'}</td></tr>
+            <tr><td class="mut">Annual Income</td><td><b>${c.annual_income_inr ? fmtInr(c.annual_income_inr) : '—'}</b></td></tr>
+          </table>
+        </div>
+
+        <!-- Risk Profile -->
+        <div class="card" style="margin-bottom:0;background:var(--bg)">
+          <div class="card-title">🛡️ Risk & Suitability Mandate</div>
+          <table>
+            <tr><td class="mut">Risk Appetite</td><td><b>${c.risk_appetite.toUpperCase()}</b></td></tr>
+            <tr><td class="mut">Max Loss Tolerance</td><td><b class="warn-text">${c.loss_tolerance_pct}%</b> (${fmtInr(c.portfolio_value * c.loss_tolerance_pct / 100)})</td></tr>
+            <tr><td class="mut">Investment Horizon</td><td><b>${c.horizon_months} months</b> (${(c.horizon_months/12).toFixed(1)} yrs)</td></tr>
+            <tr><td class="mut">Liquidity Preference</td><td><b>${c.liquidity_need || 'medium'}</b></td></tr>
+            <tr><td class="mut">Total Portfolio AUM</td><td><b style="color:var(--pri)">${fmtInr(c.portfolio_value)}</b></td></tr>
+          </table>
+        </div>
+
+        <!-- Asset Allocation / Exposures -->
+        <div class="card" style="margin-bottom:0;background:var(--bg)">
+          <div class="card-title">📊 Key Asset Exposures</div>
+          <div style="padding:4px 0">
+            ${Object.entries(exposures).map(([asset, pct]) => `
+              <div class="flex items-center gap-8 mt8">
+                <span class="text-sm" style="flex:1">${asset}</span>
+                <div style="flex:2;height:10px;background:#e2e8f0;border-radius:5px;overflow:hidden">
+                  <div style="height:100%;width:${pct}%;background:${pct > 40 ? 'var(--bad)' : 'var(--pri)'};border-radius:5px"></div>
+                </div>
+                <span class="text-sm fw6" style="width:40px;text-align:right">${pct}%</span>
+              </div>
+            `).join('')}
+            ${Object.keys(exposures).length === 0 ? '<div class="text-xs mut">No concentrated exposures flagged.</div>' : ''}
+          </div>
+          <div class="text-xs mut mt14" style="line-height:1.5">
+            ⚠️ Allocating additional exposure to <b>${Object.keys(exposures)[0] || 'underlying'}</b> will trigger concentration mismatch rules if allocation exceeds threshold.
+          </div>
+        </div>
+      </div>
+
+      <!-- Holdings Table -->
+      <div class="card mt14" style="margin-bottom:0">
+        <div class="card-title">💼 Portfolio Holdings Breakdown (${holdings.length} assets)</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Asset Name</th>
+              <th>Asset Category</th>
+              <th>Underlying Market</th>
+              <th>Holding Value</th>
+              <th>% of Portfolio</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${holdings.map(h => {
+              const pct = ((h.value / c.portfolio_value) * 100).toFixed(1);
+              return `
+              <tr>
+                <td><b>${h.asset}</b></td>
+                <td><span class="badge INFO" style="font-size:10px">${h.type}</span></td>
+                <td class="text-xs mut">${h.underlying}</td>
+                <td><b>${fmtInr(h.value)}</b></td>
+                <td>
+                  <div class="flex items-center gap-8">
+                    <div style="width:60px;height:6px;background:var(--bg);border-radius:3px;overflow:hidden">
+                      <div style="width:${pct}%;height:100%;background:var(--pri)"></div>
+                    </div>
+                    <span class="text-xs fw6">${pct}%</span>
+                  </div>
+                </td>
+              </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  // Scroll to dossier smoothly
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ══════════════ PRODUCT TYPE ══════════════
+function onProductTypeChange() {
+  const t = $('p-type').value;
+  $('eln-fields').style.display = (t === 'ELN' || t === 'DCD') ? 'block' : 'none';
+  $('cpn-fields').style.display = t === 'CPN' ? 'block' : 'none';
+}
+
+// ══════════════ LIVE PAYOFF ══════════════
+let _liveT;
+function livePayoff() {
+  clearTimeout(_liveT);
+  _liveT = setTimeout(async () => {
+    try {
+      const r = await api('/api/v1/payoff', {product: prod()});
+      if (typeof Plotly !== 'undefined') drawPayoff(r.curve);
+      renderScenarios(r.scenarios);
+    } catch(e) {
+      const el = $('payoff-chart');
+      if (el) el.innerHTML = `<div class="warn-text text-sm" style="padding:16px">Chart error: ${e.message}</div>`;
+    }
+  }, 150);
+}
+
+function drawPayoff(c) {
+  const x = c.map(p => p.move_pct), y = c.map(p => p.return_pct);
+  Plotly.react('payoff-chart', [
+    {x, y, mode:'lines', name:'Return %', line:{color:'#1e40af', width:2}},
+    {x, y:y.map(v=>Math.min(v,0)), fill:'tozeroy', mode:'none', fillcolor:'rgba(185,28,28,.15)', name:'Loss zone'}
+  ], {
+    margin:{t:10,l:45,r:10,b:40},
+    paper_bgcolor:'#fff', plot_bgcolor:'#fff',
+    xaxis:{title:'Underlying move at maturity (%)', gridcolor:'#f0f2f7'},
+    yaxis:{title:'Return on principal (%)', gridcolor:'#f0f2f7'},
+    legend:{orientation:'h',y:-0.2},
+    font:{family:'Inter,sans-serif',size:12}
+  }, {displayModeBar:false});
+}
+
+function renderScenarios(rows) {
+  const el = $('payoff-scenarios');
+  if (!el || !rows) return;
+  el.innerHTML = `<table>
+    <tr><th>Move</th><th>Final Value</th><th>P&L %</th><th>Barrier</th></tr>
+    ${rows.map(r => `<tr>
+      <td>${r.move_pct > 0 ? '+' : ''}${r.move_pct}%</td>
+      <td>${fmtInr(r.final_value)}</td>
+      <td class="${r.pnl_pct < 0 ? 'warn-text' : 'ok-text'}">${r.pnl_pct}%</td>
+      <td>${r.barrier_breached == null ? '—' : r.barrier_breached ? '<span class="warn-text">Yes</span>' : 'No'}</td>
+    </tr>`).join('')}
+  </table>`;
+}
+
+// ══════════════ EXTRACT ══════════════
+async function extractProduct() {
+  const msg = $('ex-msg');
+  msg.textContent = 'Extracting…';
+  try {
+    let r;
+    const f = $('ts-file')?.files[0];
+    if (f) {
+      const fd = new FormData(); fd.append('file', f);
+      const res = await fetch('/api/v1/product/extract-file', {method:'POST', body:fd, headers:{Authorization:'Bearer '+AUTH?.token}});
+      r = await res.json();
+    } else {
+      r = await api('/api/v1/product/extract-text', {text: $('ts-nl').value});
+    }
+    const t = r.terms || {};
+
+    // 1. Set product type first so onProductTypeChange shows the right fields
+    if (t.product_type && $('p-type')) $('p-type').value = t.product_type;
+    onProductTypeChange(); // show/hide barrier, protection, participation
+
+    // 2. Fill remaining fields
+    const m = {
+      'p-under':'underlying','p-tenor':'tenor_months',
+      'p-coupon':'coupon_pct','p-barrier':'barrier_pct','p-strike':'strike_pct',
+      'p-notional':'notional','p-prot':'protection_pct','p-part':'participation_pct'
+    };
+    for (const k in m) {
+      if (t[m[k]] != null && $(k)) {
+        $(k).value = t[m[k]];
+        if (k === 'p-barrier' && $('bv')) $('bv').textContent = t[m[k]];
+      }
+    }
+
+    msg.innerHTML = `<b>${r.method}</b>: ${
+      r.valid
+        ? '✓ Extracted — chart and scenarios updated below'
+        : '⚠ Needs confirmation: ' + (r.needs_confirmation||[]).concat(r.errors||[]).join(', ')
+    }`;
+
+    // 3. Redraw payoff chart with new product
+    livePayoff();
+    // Auto-scroll so user can see the updated chart immediately
+    setTimeout(() => $('payoff-chart')?.scrollIntoView({behavior:'smooth',block:'nearest'}), 300);
+
+    // 4. Sync CUST_PRODUCT so customer portal pages reflect the extracted product
+    CUST_PRODUCT = prod();
+
+  } catch(e) { msg.textContent = 'Error: ' + e.message; }
+}
+
+// ══════════════ PRODUCT ACTIONS ══════════════
+function applyProductConfig() {
+  const p = prod();
+  CUST_PRODUCT = p;  // keep customer portal in sync
+  livePayoff();
+  const msg = $('ex-msg');
+  if (msg) msg.innerHTML = `<span class="ok-text">✓ Applied ${p.product_type} (${p.underlying}, ${p.tenor_months}m, notional ${fmtInr(p.notional)})</span>`;
+  if (LAST_ASSESSMENT && SELECTED_CUSTOMER) {
+    runAssessment();
+  }
+}
+
+function saveProductConfig() {
+  const p = prod();
+  localStorage.setItem('fv_saved_prod', JSON.stringify(p));
+  const msg = $('ex-msg');
+  if (msg) msg.innerHTML = `<span class="ok-text">✓ Saved product configuration locally.</span>`;
+  setTimeout(() => { if (msg) msg.innerHTML = ''; }, 3000);
+}
+
+function resetProductConfig() {
+  $('p-type').value = 'ELN';
+  $('p-under').value = 'NIFTY 50';
+  $('p-tenor').value = '12';
+  $('p-coupon').value = '12';
+  $('p-strike').value = '100';
+  $('p-notional').value = '1000000';
+  if ($('p-barrier')) $('p-barrier').value = '70';
+  if ($('bv')) $('bv').textContent = '70';
+  if ($('p-prot')) $('p-prot').value = '90';
+  if ($('p-part')) $('p-part').value = '100';
+  onProductTypeChange();
+  livePayoff();
+  const msg = $('ex-msg');
+  if (msg) msg.innerHTML = `<span class="mut">Configuration reset to defaults.</span>`;
+  setTimeout(() => { if (msg) msg.innerHTML = ''; }, 2500);
+}
+
+function scrollToPayoff() {
+  $('payoff-chart')?.scrollIntoView({behavior: 'smooth', block: 'center'});
+}
+
+function scrollToScenarios() {
+  $('payoff-scenarios')?.scrollIntoView({behavior: 'smooth', block: 'center'});
+}
+
+// ══════════════ ASSESSMENT ══════════════
+async function runAssessment() {
+  if (!SELECTED_CUSTOMER) { alert('Please select a customer first.'); return; }
+  const resultCard = $('studio-result-card');
+  const resultEl = $('studio-result');
+  if (resultCard) resultCard.style.display = 'block';
+  if (resultEl) resultEl.innerHTML = '<div class="loading">Running assessment</div>';
+
+  try {
+    const r = await api('/api/v1/assessment', {product: prod(), customer_id: SELECTED_CUSTOMER.id, mode: 'rm'});
+    LAST_ASSESSMENT = r;
+    LAST_AUDIT_ID = r.audit_id;
+    // Sync CUST_PRODUCT so customer portal uses the same product the RM just assessed
+    CUST_PRODUCT = prod();
+
+    if (resultEl) resultEl.innerHTML = `
+      <div class="flex items-center gap-8 mb0">${badge(r.status)} <span class="text-sm mut">Audit #${r.audit_id}</span></div>
+      <div class="mt8 text-sm">${r.flags.map(f=>`<div>⚠ ${f.message}</div>`).join('')}</div>
+      <div class="mt8 text-sm mut">Data: ${r.result.data_source} | ${r.result.data_window.join(' → ')}</div>
+      <button class="btn btn-secondary btn-sm mt8" onclick="navTo('rm-analysis');renderRMAnalysis()">View Full Analysis →</button>
+    `;
+    renderRMAnalysis();
+    renderStress();
+    renderPortfolioImpact();
+    renderRepair();
+    loadRMNote();
+    updateAlertBadge(SELECTED_CUSTOMER.id);
+  } catch(e) {
+    if (resultEl) resultEl.innerHTML = `<div class="warn-text">Error: ${e.message}</div>`;
+  }
+}
+
+// ══════════════ FULL ANALYSIS VIEW ══════════════
+function renderRMAnalysis() {
+  const el = $('rm-analysis-content');
+  if (!el || !LAST_ASSESSMENT) return;
+  const r = LAST_ASSESSMENT, a = r.result, m = a.metrics, bp = a.breaking_point, h = m.historical;
+  el.innerHTML = `
+  <div class="disclaimer">Historical replay shows past rolling windows. Not a prediction. ${a.data_source === 'synthetic_fallback' ? '<b class="warn-text">DEMO DATA — run scripts/fetch_market_data.py for real history.</b>' : ''}</div>
+  <div class="grid-4">
+    <div class="kpi"><div class="kpi-label">Decision</div><div class="kpi-value">${badge(a.decision)}</div></div>
+    <div class="kpi"><div class="kpi-label">Tail Loss</div><div class="kpi-value warn-text">${m.tail_loss_pct}%</div><div class="kpi-sub">${fmtInr(a.product.notional * m.tail_loss_pct / 100)}</div></div>
+    <div class="kpi"><div class="kpi-label">Suitable Until</div><div class="kpi-value">${bp.suitable_until_pct != null ? bp.suitable_until_pct+'%' : 'n/a'}</div></div>
+    <div class="kpi"><div class="kpi-label">Audit #</div><div class="kpi-value">${r.audit_id}</div></div>
+  </div>
+
+  <div class="grid-2 mt14">
+    <div class="card">
+      <div class="card-title">Suitability Rules</div>
+      <table><tr><th>Rule</th><th>Status</th><th>Details</th></tr>
+      ${a.rules.map(x=>`<tr><td>${x.rule_id}</td><td>${badge(x.status)}</td><td class="text-xs">${x.message}</td></tr>`).join('')}
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">Breaking Point</div>
+      <div class="flex gap-8 mt4">
+        <div class="kpi" style="flex:1;padding:10px"><div class="kpi-label ok-text">Suitable until</div><div class="kpi-value ok-text">${bp.suitable_until_pct != null ? bp.suitable_until_pct+'%' : 'n/a'}</div></div>
+        <div class="kpi" style="flex:1;padding:10px"><div class="kpi-label" style="color:var(--rev)">Review from</div><div class="kpi-value" style="color:var(--rev)">${bp.review_from_pct != null ? bp.review_from_pct+'%' : 'n/a'}</div></div>
+        <div class="kpi" style="flex:1;padding:10px"><div class="kpi-label warn-text">Mismatch from</div><div class="kpi-value warn-text">${bp.mismatch_from_pct != null ? bp.mismatch_from_pct+'%' : 'n/a'}</div></div>
+      </div>
+      <div class="mt8 text-sm mut">Stress ladder (0% to -60%)</div>
+      <div class="mt4">
+        ${bp.ladder.filter((_,i)=>i%5===0).map(l=>`<div class="ladder-row">
+          <span class="ladder-shock">${l.shock_pct}%</span>
+          <div class="ladder-bar-wrap"><div class="ladder-bar" style="width:${Math.min(100,l.loss_pct/60*100)}%;background:${l.loss_rule==='SUITABLE'?'var(--ok)':l.loss_rule==='REVIEW'?'var(--rev)':'var(--bad)'}"></div></div>
+          <span class="ladder-loss">${l.loss_pct}%</span>
+          <span class="ladder-status">${badge(l.loss_rule)}</span>
+        </div>`).join('')}
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2 mt14">
+    <div class="card">
+      <div class="card-title">Historical Replay <span class="text-xs mut">(${h.n_windows} rolling windows)</span></div>
+      <div class="flex gap-8 mt4">
+        <div class="kpi" style="flex:1;padding:10px"><div class="kpi-label ok-text">Best</div><div class="kpi-value ok-text">${h.best_pct}%</div></div>
+        <div class="kpi" style="flex:1;padding:10px"><div class="kpi-label">Avg</div><div class="kpi-value">${h.avg_pct}%</div></div>
+        <div class="kpi" style="flex:1;padding:10px"><div class="kpi-label warn-text">Worst</div><div class="kpi-value warn-text">${h.worst_pct}%</div></div>
+        <div class="kpi" style="flex:1;padding:10px"><div class="kpi-label">Loss-making</div><div class="kpi-value">${h.pct_windows_loss}%</div></div>
+      </div>
+      <div class="text-sm mut mt8">Worst window: ${h.worst_window.join(' → ')}</div>
+      <div id="hist-chart" style="height:160px;margin-top:8px"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Scenario Table</div>
+      ${renderScenariosHtml(a.scenarios)}
+    </div>
+  </div>
+
+  <div class="card mt14">
+    <div class="card-title">AI Explanation
+      <select id="expl-mode" style="width:auto;font:inherit;border:1px solid var(--line);border-radius:4px;padding:2px 6px;font-size:12px" onchange="reExplain()">
+        <option value="rm">RM Mode</option><option value="client">Client Mode</option>
+      </select>
+      <a href="/api/v1/report/${r.audit_id}" target="_blank" class="btn btn-secondary btn-sm" style="margin-left:8px">Client PDF</a>
+    </div>
+    <div id="expl-text" class="text-sm">${(r.explanation?.text||'').replace(/\n/g,'<br>')}</div>
+    <div class="text-xs mut mt8">Engine: ${r.explanation?.engine} | Sources: ${(r.explanation?.sources||[]).join(', ')}</div>
+  </div>
+
+  <div class="card mt14" id="twin-card">
+    <div class="card-title">Historical Twin <span class="text-xs mut">(not a forecast)</span>
+      <button class="btn btn-secondary btn-sm" onclick="loadTwin()">Load Twin</button>
+    </div>
+    <div id="twin-content" class="text-sm mut">Click "Load Twin" to find the most similar historical period.</div>
+  </div>
+  `;
+
+  setTimeout(() => {
+    if (typeof Plotly !== 'undefined') {
+      const hm = m.historical;
+      Plotly.react('hist-chart', [{type:'bar', x:hm.histogram.edges.slice(0,-1), y:hm.histogram.counts, marker:{color:'#1e40af'}}],
+        {margin:{t:5,l:35,r:5,b:30}, paper_bgcolor:'#fff', plot_bgcolor:'#fff', font:{family:'Inter,sans-serif',size:11},
+         xaxis:{title:'Outcome %',gridcolor:'#f0f2f7'}, yaxis:{gridcolor:'#f0f2f7'}}, {displayModeBar:false});
+    }
+  }, 100);
+}
+
+function renderScenariosHtml(rows) {
+  if (!rows) return '<div class="empty">No data</div>';
+  return `<table><tr><th>Move</th><th>Final Value</th><th>P&L</th><th>Barrier</th></tr>
+  ${rows.map(r=>`<tr><td>${r.move_pct>0?'+':''}${r.move_pct}%</td><td>${fmtInr(r.final_value)}</td>
+  <td class="${r.pnl_pct<0?'warn-text':'ok-text'}">${r.pnl_pct}%<br><span class="text-xs mut">${fmtInr(Math.abs(r.pnl))}</span></td>
+  <td>${r.barrier_breached==null?'—':r.barrier_breached?'<span class="warn-text">Breached</span>':'Safe'}</td></tr>`).join('')}</table>`;
+}
+
+async function reExplain() {
+  if (!LAST_AUDIT_ID) return;
+  const mode = $('expl-mode').value;
+  const el = $('expl-text');
+  if (el) el.textContent = 'Generating...';
+  try {
+    const ex = await api('/api/v1/explain', {audit_id: LAST_AUDIT_ID, mode});
+    if (el) el.innerHTML = (ex.text||'').replace(/\n/g,'<br>');
+  } catch(e) {}
+}
+
+async function loadTwin() {
+  const el = $('twin-content');
+  if (!LAST_ASSESSMENT || !el) return;
+  el.innerHTML = '<div class="loading">Finding historical twin</div>';
+  try {
+    const r = await api('/api/v1/historical-twin', {product: LAST_ASSESSMENT.result.product});
+    if (r.error) { el.textContent = r.error; return; }
+    const cm = r.current_market, tw = r.twin;
+    el.innerHTML = `
+    <div class="grid-2">
+      <div>
+        <div class="fw6 mt4">Current Market (last 3 months)</div>
+        <div class="text-sm mt4">Return: <b>${cm.return_pct}%</b> | Volatility: <b>${cm.vol_pct}%</b> | Drawdown: <b>${cm.drawdown_pct}%</b></div>
+      </div>
+      <div>
+        <div class="fw6 mt4">Closest Historical Period: <span class="info-text">${tw.period}</span></div>
+        <div class="text-sm mt4">Similarity: <b>${(tw.similarity_score*100).toFixed(0)}%</b></div>
+        <div class="text-sm mt4">Product outcome in that period: <b class="${tw.product_pnl_pct<0?'warn-text':'ok-text'}">${tw.product_pnl_pct}%</b> (${fmtInr(Math.abs(tw.product_loss_inr))} loss)</div>
+        <div class="text-sm mt4">Barrier: <b>${tw.barrier_breached ? '<span class="warn-text">Breached</span>' : 'Not breached'}</b></div>
+      </div>
+    </div>
+    <div class="text-xs mut mt8">${r.disclaimer}</div>`;
+  } catch(e) { el.textContent = 'Error: ' + e.message; }
+}
+
+// ══════════════ STRESS ══════════════
+async function renderStress() {
+  const el = $('rm-stress-content');
+  if (!el || !LAST_ASSESSMENT) return;
+  el.innerHTML = '<div class="loading">Running stress analysis</div>';
+  try {
+    const [ladderR, regimeR] = await Promise.all([
+      api('/api/v1/stress-ladder', {product: prod(), customer_id: SELECTED_CUSTOMER.id}),
+      api('/api/v1/regime-stress', {product: prod(), customer_id: SELECTED_CUSTOMER.id}),
+    ]);
+    const ladder = ladderR.ladder;
+    const regimes = regimeR.regimes;
+    const colorMap = {SUITABLE:'var(--ok)', REVIEW:'var(--rev)', MISMATCH:'var(--bad)'};
+    const bgMap = {bull:'bull', Normal:'normal', MildStress:'mild', SevereStress:'severe', Crash:'crash'};
+    el.innerHTML = `
+    <div class="card">
+      <div class="card-title">Regime Stress</div>
+      <div class="grid-5" style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px">
+      ${regimes.map(reg=>`<div class="regime-card ${bgMap[reg.regime]||''}">
+        <div class="fw6 text-sm">${reg.label}</div>
+        <div class="text-xs mut mt4">${reg.range}</div>
+        <div class="mt8 fw6" style="color:${colorMap[reg.suitability]}">${reg.suitability}</div>
+        <div class="text-sm mt4">${reg.example_shock_pct>0?'+':''}${reg.example_shock_pct}%: ${reg.pnl_pct}%</div>
+        <div class="text-xs mut">Loss: ${reg.loss_pct}% (${fmtInr(reg.loss_inr)})</div>
+        ${reg.barrier_breached ? '<div class="text-xs warn-text mt4">Barrier breached</div>' : ''}
+      </div>`).join('')}
+      </div>
+    </div>
+    <div class="card mt14">
+      <div class="card-title">Stress Ladder</div>
+      ${ladder.map(r=>`<div class="ladder-row">
+        <span class="ladder-shock">${r.shock_pct}%</span>
+        <div class="ladder-bar-wrap"><div class="ladder-bar" style="width:${Math.min(100,r.loss_pct/50*100)}%;background:${colorMap[r.loss_rule]}"></div></div>
+        <span class="ladder-loss">${r.loss_pct}%<br><span class="text-xs">${fmtInr(r.loss_inr)}</span></span>
+        <span class="ladder-status">${badge(r.overall)}</span>
+      </div>`).join('')}
+    </div>`;
+  } catch(e) { el.innerHTML = `<div class="warn-text">Error: ${e.message}</div>`; }
+}
+
+// ══════════════ PORTFOLIO IMPACT ══════════════
+async function renderPortfolioImpact() {
+  const el = $('rm-portfolio-content');
+  if (!el || !SELECTED_CUSTOMER) return;
+  el.innerHTML = '<div class="loading">Calculating portfolio impact</div>';
+  try {
+    const r = await api('/api/v1/portfolio-impact', {product: prod(), customer_id: SELECTED_CUSTOMER.id, stress_shock_pct: -35});
+    const ri = await api('/api/v1/rupee-impact', {product: prod(), customer_id: SELECTED_CUSTOMER.id});
+    el.innerHTML = `
+    <div class="disclaimer">${r.note}</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Portfolio Loss at ${r.stress_shock_pct}% Shock</div>
+        <div class="flex gap-14 mt4">
+          <div class="kpi" style="flex:1;padding:12px"><div class="kpi-label">Before Product</div>
+            <div class="kpi-value ${r.before.loss_pct>10?'warn-text':''}">${r.before.loss_pct}%</div>
+            <div class="kpi-sub">${fmtInr(r.before.loss_inr)}</div>
+          </div>
+          <div style="display:flex;align-items:center;font-size:20px;color:var(--mut)">→</div>
+          <div class="kpi" style="flex:1;padding:12px"><div class="kpi-label">After Product</div>
+            <div class="kpi-value ${r.after.loss_pct>10?'warn-text':''}">${r.after.loss_pct}%</div>
+            <div class="kpi-sub">${fmtInr(r.after.loss_inr)}</div>
+          </div>
+        </div>
+        <div class="mt8 text-sm">Delta: <b class="${r.delta_loss_pct>0?'warn-text':'ok-text'}">+${r.delta_loss_pct}%</b> (${fmtInr(r.delta_loss_inr)} additional loss)</div>
+        <div class="mt8 text-sm">Concentration in ${r.underlying}: <b class="${r.concentration_flag?'warn-text':''}">${r.concentration_pct}%</b> (limit: ${r.concentration_limit_pct}%)</div>
+        ${r.concentration_flag ? '<div class="badge MISMATCH mt8">Concentration limit exceeded</div>' : ''}
+      </div>
+      <div class="card">
+        <div class="card-title">Rupee Impact</div>
+        <div class="kpi mt4"><div class="kpi-label">Investment</div><div class="kpi-value">${fmtInr(ri.notional)}</div></div>
+        <div class="kpi mt8"><div class="kpi-label">Modeled Tail Loss (${ri.tail_loss_pct}%)</div><div class="kpi-value warn-text">${fmtInr(ri.loss_inr)}</div></div>
+        ${ri.months_equivalent != null ? `<div class="text-sm mut mt8">≈ ${ri.months_equivalent_text}</div>` : ''}
+      </div>
+    </div>`;
+  } catch(e) { el.innerHTML = `<div class="warn-text">Error: ${e.message}</div>`; }
+}
+
+// ══════════════ REPAIR ══════════════
+async function renderRepair() {
+  const el = $('rm-repair-content');
+  if (!el || !LAST_ASSESSMENT) return;
+  const repairs = LAST_ASSESSMENT.result.repairs || [];
+  if (repairs.length === 0) {
+    el.innerHTML = '<div class="card"><div class="empty">No repair needed — product is SUITABLE, or no suitable alternative found within configured bounds.</div></div>';
+    return;
+  }
+  el.innerHTML = `<div class="card">
+    <div class="card-title">Repair Options <span class="text-xs mut">(Decision support — not advice)</span></div>
+    <div class="disclaimer">These are alternative configurations that clear the suitability rules. The RM must evaluate suitability independently.</div>
+    ${repairs.map((r,i)=>`<div class="card" style="border-color:var(--ok)">
+      <div class="fw6 ok-text">Option ${i+1}: ${r.description}</div>
+      <div class="text-sm mt4">Changes: ${Object.entries(r.changes).map(([k,v])=>`<b>${k}</b>: ${v}`).join(', ')}</div>
+      <div class="text-sm mt4">After repair: ${badge(r.decision_after)} | Tail loss: ${r.tail_loss_pct_after}%</div>
+    </div>`).join('')}
+  </div>`;
+}
+
+
+// ══════════════ RM NOTE ══════════════
+async function loadRMNote() {
+  const el = $('rm-notes-content');
+  if (!el || !LAST_AUDIT_ID) return;
+  el.innerHTML = `<div class="card">
+    <div class="card-title">RM Justification Note</div>
+    <div class="form-group mt8"><label>RM Decision</label>
+      <select id="rm-decision"><option value="">— Select —</option><option>Proceed</option><option>Modify</option><option>Decline</option></select>
+    </div>
+    <div class="form-group"><label>RM Comments</label><textarea id="rm-comments" rows="4" placeholder="Add your assessment notes, client conversation summary, or rationale here..."></textarea></div>
+    <div class="flex gap-8">
+      <button class="btn btn-primary" onclick="generateRMNote()">Generate Note</button>
+    </div>
+    <div id="rm-note-output" class="mt14"></div>
+  </div>`;
+}
+
+async function generateRMNote() {
+  const el = $('rm-note-output');
+  if (!el) return;
+  el.innerHTML = '<div class="loading">Generating note</div>';
+  try {
+    const r = await api('/api/v1/rm-note', {audit_id: LAST_AUDIT_ID, rm_decision: $('rm-decision').value||null, rm_comments: $('rm-comments').value||null});
+    el.innerHTML = `<div class="card" style="background:var(--bg)">
+      <div class="card-title">Generated Note <button class="btn btn-secondary btn-sm" onclick="copyNote(this)">Copy</button></div>
+      <pre id="rm-note-text" style="white-space:pre-wrap;font-size:12px;font-family:monospace;color:var(--ink2)">${r.note}</pre>
+    </div>`;
+  } catch(e) { el.textContent = 'Error: ' + e.message; }
+}
+
+function copyNote(btn) {
+  const text = $('rm-note-text')?.textContent;
+  if (text) { navigator.clipboard.writeText(text); btn.textContent = 'Copied!'; setTimeout(()=>btn.textContent='Copy',2000); }
+}
+
+// ══════════════ AUDIT TABLE ══════════════
+async function loadAuditTable() {
+  const el = $('audit-table');
+  if (!el) return;
+  const rows = await api('/api/v1/audit').catch(()=>[]);
+  el.innerHTML = `<table>
+    <tr><th>ID</th><th>Timestamp</th><th>Customer</th><th>Decision</th><th>Data Source</th><th>Model</th></tr>
+    ${rows.map(r=>`<tr>
+      <td>#${r.id}</td>
+      <td class="text-xs">${r.ts?.substring(0,19)||'—'}</td>
+      <td>${r.customer_id}</td>
+      <td>${badge(r.decision)}</td>
+      <td class="text-xs">${r.data_source}</td>
+      <td class="text-xs mut">${(r.model_version||'').substring(0,30)}</td>
+    </tr>`).join('')}
+  </table>`;
+}
+
+// ══════════════ ALERTS ══════════════
+async function loadAlerts(customerId) {
+  const el = $('alerts-content');
+  if (!el) return;
+  const cid = customerId || SELECTED_CUSTOMER?.id || (AUTH?.user?.customer_id);
+  if (!cid) { el.innerHTML = '<div class="empty">No customer selected.</div>'; return; }
+  const r = await api(`/api/v1/customers/${cid}/alerts`).catch(()=>({alerts:[],unread_count:0}));
+  if (!r.alerts?.length) { el.innerHTML = '<div class="empty">No alerts at this time.</div>'; return; }
+  el.innerHTML = r.alerts.map(a=>`
+    <div class="alert-item ${a.severity}">
+      <div class="flex items-center gap-8">
+        <div class="alert-title">${a.title}</div>
+        <span class="badge ${a.severity}">${a.severity}</span>
+        ${!a.is_read ? '<span class="badge INFO text-xs">NEW</span>' : ''}
+      </div>
+      <div class="alert-msg mt4">${a.message}</div>
+      <div class="flex gap-8 mt4">
+        <span class="text-xs mut">Trigger: ${a.trigger_value} | Threshold: ${a.threshold}</span>
+        ${!a.is_read ? `<button class="btn btn-secondary btn-sm" onclick="markRead(${a.id},this)">Mark read</button>` : ''}
+      </div>
+      <div class="alert-action">${a.recommended_action}</div>
+    </div>`).join('');
+}
+
+async function markRead(id, btn) {
+  await api(`/api/v1/alerts/${id}/read`, {}, 'POST');
+  btn.closest('.alert-item').querySelector('.badge.INFO')?.remove();
+  btn.remove();
+  updateAlertBadge(SELECTED_CUSTOMER?.id || AUTH?.user?.customer_id);
+}
+
+async function updateAlertBadge(customerId) {
+  if (!customerId) return;
+  const r = await api(`/api/v1/customers/${customerId}/alerts?unread_only=true`).catch(()=>({unread_count:0}));
+  const el = $('alert-count-badge');
+  if (el) {
+    el.textContent = r.unread_count;
+    el.style.display = r.unread_count > 0 ? 'block' : 'none';
+  }
+}
+
+function pollAlerts() {
+  const cid = SELECTED_CUSTOMER?.id || AUTH?.user?.customer_id;
+  if (cid) updateAlertBadge(cid);
+  setInterval(() => {
+    const id = SELECTED_CUSTOMER?.id || AUTH?.user?.customer_id;
+    if (id) updateAlertBadge(id);
+  }, 30000);
+}
+
+// ══════════════ INTERACTIVE RISK & RETURN SIMULATOR ══════════════
+let SIM_STATE = {
+  notional: 1000000,
+  move_pct: -15,
+  barrier_pct: 70,
+  coupon_pct: 12,
+  tenor_months: 12,
+  strike_pct: 100,
+  product_type: 'ELN'
+};
+
+function loadSimulatorPage() {
+  renderSimulatorView('cust-simulator-content');
+}
+
+function onSimCustomerChange(cid) {
+  SELECTED_CUSTOMER = CUSTOMERS.find(c => c.id === cid) || SELECTED_CUSTOMER;
+  updateSimulator();
+}
+
+function onSimNotionalInput(val) {
+  const num = Math.max(10000, +val || 1000000);
+  SIM_STATE.notional = num;
+  const range = $('sim-notional-range');
+  if (range && num <= 10000000) range.value = num;
+  updateSimulator();
+}
+
+function onSimNotionalRange(val) {
+  const num = +val;
+  SIM_STATE.notional = num;
+  const inp = $('sim-notional');
+  if (inp) inp.value = num;
+  updateSimulator();
+}
+
+function setSimAmount(val) {
+  SIM_STATE.notional = val;
+  const inp = $('sim-notional');
+  if (inp) inp.value = val;
+  const range = $('sim-notional-range');
+  if (range) range.value = val;
+  updateSimulator();
+}
+
+function onSimMoveChange(val) {
+  SIM_STATE.move_pct = +val;
+  updateSimulator();
+}
+
+function setSimMove(val) {
+  SIM_STATE.move_pct = val;
+  const range = $('sim-move-range');
+  if (range) range.value = val;
+  updateSimulator();
+}
+
+function onSimBarrierChange(val) {
+  SIM_STATE.barrier_pct = +val;
+  updateSimulator();
+}
+
+function onSimCouponChange(val) {
+  SIM_STATE.coupon_pct = +val;
+  updateSimulator();
+}
+
+function onSimTenorChange(val) {
+  SIM_STATE.tenor_months = +val;
+  updateSimulator();
+}
+
+function renderSimulatorView(containerId, isRm = false) {
+  const el = $(containerId);
+  if (!el) return;
+  const c = SELECTED_CUSTOMER || (CUSTOMERS.length ? CUSTOMERS[0] : {name:'Client', risk_appetite:'conservative', loss_tolerance_pct:5, portfolio_value:10000000});
+
+  el.innerHTML = `
+  <div class="section-header">
+    <div>
+      <div class="section-title">🎛️ Interactive Risk & Return Playground</div>
+      <div class="section-sub">Experiment with your desired investment amount, market scenarios, and safety buffers to see exact returns, potential losses, and plain-language explanations in real time.</div>
+    </div>
+    <div class="flex gap-8 items-center">
+      ${isRm ? `
+        <span class="text-xs mut">Client Profile:</span>
+        <select id="sim-cust-sel" onchange="onSimCustomerChange(this.value)" style="padding:6px 10px;border-radius:6px;border:1.5px solid var(--line);font-size:12px;font-weight:600;outline:none">
+          ${CUSTOMERS.map(cust => `<option value="${cust.id}" ${cust.id === c.id ? 'selected' : ''}>${cust.name} (${cust.risk_appetite}, loss tol ${cust.loss_tolerance_pct}%)</option>`).join('')}
+        </select>
+      ` : `
+        <div class="flex items-center gap-8" style="background:#fff;padding:6px 12px;border:1px solid var(--line);border-radius:8px">
+          <span class="text-xs mut">Your Mandate:</span>
+          <span class="badge INFO" style="font-size:11px">${c.risk_appetite.toUpperCase()}</span>
+          <span class="text-xs">Max Loss: <b class="warn-text">${c.loss_tolerance_pct}%</b></span>
+        </div>
+      `}
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    ⚡ <b>Deterministic Financial Simulation:</b> Every payout, safety buffer breach, and rupee loss is computed mathematically using pure contract rules. Drag any slider to watch the results and explanations update live.
+  </div>
+
+  <div class="two-col" style="grid-template-columns:380px 1fr;gap:16px">
+    <!-- LEFT COLUMN: CONTROLS & SLIDERS -->
+    <div>
+      <!-- Amount Card -->
+      <div class="card">
+        <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+          <span>💰 1. Desired Investment Amount</span>
+          <span class="badge INFO" id="sim-notional-pill" style="font-size:13px;font-weight:700">₹10,00,000</span>
+        </div>
+        <div class="form-group" style="margin-bottom:8px">
+          <label class="text-xs mut">Enter Amount in ₹:</label>
+          <input type="number" id="sim-notional" value="${SIM_STATE.notional}" min="50000" max="50000000" step="50000" oninput="onSimNotionalInput(this.value)" style="font-size:16px;font-weight:700;padding:8px 12px;color:var(--pri)">
+        </div>
+        <div class="sim-range-wrap">
+          <input type="range" class="sim-range" id="sim-notional-range" min="100000" max="10000000" step="50000" value="${SIM_STATE.notional}" oninput="onSimNotionalRange(this.value)">
+        </div>
+        <div class="flex gap-8 wrap mt8">
+          <button class="sim-chip-btn ${SIM_STATE.notional===200000?'active':''}" onclick="setSimAmount(200000)">₹2 Lakh</button>
+          <button class="sim-chip-btn ${SIM_STATE.notional===500000?'active':''}" onclick="setSimAmount(500000)">₹5 Lakh</button>
+          <button class="sim-chip-btn ${SIM_STATE.notional===1000000?'active':''}" onclick="setSimAmount(1000000)">₹10 Lakh</button>
+          <button class="sim-chip-btn ${SIM_STATE.notional===2500000?'active':''}" onclick="setSimAmount(2500000)">₹25 Lakh</button>
+          <button class="sim-chip-btn ${SIM_STATE.notional===5000000?'active':''}" onclick="setSimAmount(5000000)">₹50 Lakh</button>
+          <button class="sim-chip-btn ${SIM_STATE.notional===10000000?'active':''}" onclick="setSimAmount(10000000)">₹1 Crore</button>
+        </div>
+      </div>
+
+      <!-- Market Movement Slider Card -->
+      <div class="card">
+        <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+          <span>📉 2. Market Movement at Maturity</span>
+          <span class="badge" id="sim-move-pill" style="font-size:13px;font-weight:700">-15%</span>
+        </div>
+        <div class="text-xs mut mb8">Simulate what happens if NIFTY 50 drops or rallies by this percentage:</div>
+        
+        <div class="sim-range-wrap">
+          <input type="range" class="sim-range" id="sim-move-range" min="-60" max="40" step="1" value="${SIM_STATE.move_pct}" oninput="onSimMoveChange(this.value)">
+        </div>
+
+        <!-- Visual Spectrum Bar with Live Marker -->
+        <div class="sim-spectrum-bar" id="sim-spectrum">
+          <div class="sim-spectrum-pin" id="sim-pin" style="left:45%"></div>
+        </div>
+        <div class="flex justify-between text-xs mut" style="margin-top:-4px">
+          <span style="color:var(--bad)">💥 -60% Crash</span>
+          <span style="color:#d97706" id="sim-barrier-label">-${100 - SIM_STATE.barrier_pct}% Barrier</span>
+          <span style="color:var(--pri)">0% Flat</span>
+          <span style="color:var(--ok)">🚀 +40% Rally</span>
+        </div>
+
+        <div class="mt14 text-xs fw6" style="margin-bottom:6px">Quick Scenario Presets:</div>
+        <div class="flex gap-8 wrap">
+          <button class="sim-chip-btn" onclick="setSimMove(-50)">💥 2008 Crash (-50%)</button>
+          <button class="sim-chip-btn" onclick="setSimMove(-35)">⚠️ COVID Drop (-35%)</button>
+          <button class="sim-chip-btn" onclick="setSimMove(-20)">🛡️ Cushion Safe (-20%)</button>
+          <button class="sim-chip-btn" onclick="setSimMove(-10)">📉 Mild Dip (-10%)</button>
+          <button class="sim-chip-btn" onclick="setSimMove(0)">⚖️ Flat (0%)</button>
+          <button class="sim-chip-btn" onclick="setSimMove(15)">📈 Bull Rally (+15%)</button>
+          <button class="sim-chip-btn" onclick="setSimMove(30)">🚀 High Growth (+30%)</button>
+        </div>
+      </div>
+
+      <!-- Product Parameters Tuning -->
+      <div class="card">
+        <div class="card-title">⚙️ 3. Product Protection Parameters</div>
+        
+        <div class="form-group">
+          <div class="flex justify-between text-xs" style="margin-bottom:4px">
+            <label style="margin-bottom:0">Safety Barrier Level:</label>
+            <span class="fw6" id="sim-barrier-val">${SIM_STATE.barrier_pct}% (Protected up to ${100 - SIM_STATE.barrier_pct}% drop)</span>
+          </div>
+          <input type="range" class="sim-range" id="sim-barrier-range" min="50" max="90" step="5" value="${SIM_STATE.barrier_pct}" oninput="onSimBarrierChange(this.value)">
+          <div class="text-xs mut mt4">Acts as an airbag: as long as the market doesn't fall more than ${100 - SIM_STATE.barrier_pct}%, your principal is safe.</div>
+        </div>
+
+        <div class="form-group">
+          <div class="flex justify-between text-xs" style="margin-bottom:4px">
+            <label style="margin-bottom:0">Annual Coupon Rate:</label>
+            <span class="fw6 ok-text" id="sim-coupon-val">${SIM_STATE.coupon_pct}% p.a.</span>
+          </div>
+          <input type="range" class="sim-range" id="sim-coupon-range" min="6" max="22" step="1" value="${SIM_STATE.coupon_pct}" oninput="onSimCouponChange(this.value)">
+        </div>
+
+        <div class="form-group" style="margin-bottom:0">
+          <label class="text-xs">Investment Tenor:</label>
+          <select id="sim-tenor-sel" onchange="onSimTenorChange(this.value)" style="padding:6px 10px;border-radius:6px;border:1.5px solid var(--line);font-size:13px;outline:none;width:100%">
+            <option value="6" ${SIM_STATE.tenor_months===6?'selected':''}>6 Months</option>
+            <option value="12" ${SIM_STATE.tenor_months===12?'selected':''}>12 Months (1 Year)</option>
+            <option value="24" ${SIM_STATE.tenor_months===24?'selected':''}>24 Months (2 Years)</option>
+            <option value="36" ${SIM_STATE.tenor_months===36?'selected':''}>36 Months (3 Years)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: RESULTS, GAUGES, TOLERANCE & DYNAMIC EXPLANATIONS -->
+    <div>
+      <!-- Hero Banner -->
+      <div id="sim-hero-banner" class="sim-outcome-hero safe"></div>
+
+      <!-- 4 Outcome KPIs -->
+      <div class="grid-4" id="sim-kpis"></div>
+
+      <!-- Personal Tolerance Comparison Alert -->
+      <div id="sim-tolerance-alert" class="mt14"></div>
+
+      <!-- Dynamic Plain-English Explanations Section -->
+      <div class="mt14">
+        <div class="card-title" style="font-size:16px;margin-bottom:10px;display:flex;align-items:center;gap:8px">
+          <span>📝 Scenario Analysis & Plain-English Explanations</span>
+          <span class="badge INFO" style="font-size:11px">Auto-Generated</span>
+        </div>
+        
+        <!-- Card 1: What happens to your capital -->
+        <div class="sim-expl-card" id="sim-expl-math"></div>
+
+        <!-- Card 2: Why Did This Happen (Barrier Mechanics) -->
+        <div class="sim-expl-card" id="sim-expl-barrier"></div>
+
+        <!-- Card 3: Direct NIFTY vs FD Comparison -->
+        <div class="sim-expl-card" id="sim-expl-compare"></div>
+
+        <!-- Card 4: Actionable Advice for Investor -->
+        <div class="sim-expl-card" id="sim-expl-advice" style="background:#f8faff;border-color:var(--pri-l)"></div>
+      </div>
+    </div>
+  </div>
+  `;
+
+  updateSimulator();
+}
+
+function updateSimulator() {
+  const notional = SIM_STATE.notional;
+  const move = SIM_STATE.move_pct;
+  const barrier = SIM_STATE.barrier_pct;
+  const couponRate = SIM_STATE.coupon_pct;
+  const tenorMonths = SIM_STATE.tenor_months;
+  const t = tenorMonths / 12.0;
+  const barrierBuffer = 100 - barrier;
+
+  // Update pills and labels
+  if ($('sim-notional-pill')) $('sim-notional-pill').textContent = fmtInr(notional);
+  if ($('sim-barrier-val')) $('sim-barrier-val').textContent = `${barrier}% (Protected up to ${barrierBuffer}% drop)`;
+  if ($('sim-barrier-label')) $('sim-barrier-label').textContent = `-${barrierBuffer}% Barrier`;
+  if ($('sim-coupon-val')) $('sim-coupon-val').textContent = `${couponRate}% p.a.`;
+
+  const movePill = $('sim-move-pill');
+  if (movePill) {
+    if (move < 0) {
+      movePill.className = move <= -barrierBuffer ? 'badge MISMATCH' : 'badge WARNING';
+      movePill.textContent = `${move}% (Market Drop)`;
+    } else if (move === 0) {
+      movePill.className = 'badge INFO';
+      movePill.textContent = '0% (Flat Market)';
+    } else {
+      movePill.className = 'badge SUITABLE';
+      movePill.textContent = `+${move}% (Market Rally)`;
+    }
+  }
+
+  // Active chip button styling
+  document.querySelectorAll('.sim-chip-btn').forEach(b => {
+    const txt = b.textContent;
+    if (txt.includes('Lakh') || txt.includes('Crore')) {
+      const match = (notional === 200000 && txt.includes('2')) ||
+                    (notional === 500000 && txt.includes('5')) ||
+                    (notional === 1000000 && txt.includes('10')) ||
+                    (notional === 2500000 && txt.includes('25')) ||
+                    (notional === 5000000 && txt.includes('50')) ||
+                    (notional === 10000000 && txt.includes('1 Crore'));
+      b.classList.toggle('active', match);
+    }
+  });
+
+  // Spectrum meter pin position (-60 to +40, span = 100)
+  const pinLeft = Math.min(100, Math.max(0, (move - (-60)) / 100 * 100));
+  const pin = $('sim-pin');
+  if (pin) pin.style.left = pinLeft + '%';
+
+  // Mathematical Payoff Calculation
+  const couponInr = notional * (couponRate / 100.0) * t;
+  const breached = (100.0 + move) < barrier;
+
+  let principalReturned, principalLost, totalPayout, netPnl, netReturnPct;
+  if (breached) {
+    principalReturned = notional * (1.0 + move / 100.0);
+    principalLost = notional - principalReturned;
+    totalPayout = principalReturned + couponInr;
+    netPnl = totalPayout - notional;
+    netReturnPct = (netPnl / notional) * 100.0;
+  } else {
+    principalReturned = notional;
+    principalLost = 0;
+    totalPayout = notional + couponInr;
+    netPnl = couponInr;
+    netReturnPct = (couponRate * t);
+  }
+
+  // Hero Banner
+  const hero = $('sim-hero-banner');
+  if (hero) {
+    if (!breached) {
+      hero.className = 'sim-outcome-hero safe';
+      hero.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--ok);text-transform:uppercase;letter-spacing:0.8px">
+              🟢 Safety Buffer Active · Capital 100% Protected
+            </div>
+            <div style="font-size:24px;font-weight:800;color:var(--ink);margin-top:2px">
+              Estimated Payout: <span style="color:var(--ok)">${fmtInr(totalPayout)}</span>
+              <span style="font-size:15px;font-weight:600;color:var(--ok);margin-left:6px">(+${fmtInr(netPnl)} / +${netReturnPct.toFixed(1)}%)</span>
+            </div>
+            <div class="text-xs mut mt4">
+              NIFTY move of <b>${move > 0 ? '+' : ''}${move}%</b> is safely within your <b>${barrierBuffer}%</b> downside protection buffer.
+            </div>
+          </div>
+          <div>
+            <span class="badge SUITABLE" style="font-size:13px;padding:6px 14px">🛡️ Zero Capital Loss</span>
+          </div>
+        </div>
+      `;
+    } else {
+      hero.className = 'sim-outcome-hero breached';
+      hero.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--bad);text-transform:uppercase;letter-spacing:0.8px">
+              🚨 Safety Buffer Breached · Capital Loss Active
+            </div>
+            <div style="font-size:24px;font-weight:800;color:var(--ink);margin-top:2px">
+              Estimated Payout: <span style="color:var(--bad)">${fmtInr(totalPayout)}</span>
+              <span style="font-size:15px;font-weight:600;color:var(--bad);margin-left:6px">(-${fmtInr(Math.abs(netPnl))} / ${netReturnPct.toFixed(1)}%)</span>
+            </div>
+            <div class="text-xs mut mt4">
+              NIFTY fell by <b>${Math.abs(move)}%</b>, breaking past your <b>${barrierBuffer}%</b> buffer. Capital absorbs market drop.
+            </div>
+          </div>
+          <div>
+            <span class="badge MISMATCH" style="font-size:13px;padding:6px 14px">⚠️ Capital At Risk</span>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  // 4 KPIs
+  const kpis = $('sim-kpis');
+  if (kpis) {
+    kpis.innerHTML = `
+      <div class="kpi">
+        <div class="kpi-label">Your Investment</div>
+        <div class="kpi-value">${fmtInr(notional)}</div>
+        <div class="kpi-sub">Principal allocated</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Maturity Payout</div>
+        <div class="kpi-value" style="color:${netPnl >= 0 ? 'var(--ok)' : 'var(--bad)'}">${fmtInr(totalPayout)}</div>
+        <div class="kpi-sub">Principal + Coupon</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Net Gain / Loss</div>
+        <div class="kpi-value ${netPnl >= 0 ? 'ok-text' : 'warn-text'}">
+          ${netPnl >= 0 ? '+' : '−'}${fmtInr(Math.abs(netPnl))}
+        </div>
+        <div class="kpi-sub">${netPnl >= 0 ? 'Profit credited' : 'Capital lost'}</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Net Return %</div>
+        <div class="kpi-value ${netReturnPct >= 0 ? 'ok-text' : 'warn-text'}">
+          ${netReturnPct >= 0 ? '+' : ''}${netReturnPct.toFixed(1)}%
+        </div>
+        <div class="kpi-sub">Over ${tenorMonths} months</div>
+      </div>
+    `;
+  }
+
+  // Tolerance Comparison
+  const c = SELECTED_CUSTOMER || (CUSTOMERS.length ? CUSTOMERS[0] : {name:'Client', risk_appetite:'conservative', loss_tolerance_pct:5, portfolio_value:10000000});
+  const custLossTol = c.loss_tolerance_pct || 10;
+  const maxTolInr = notional * (custLossTol / 100);
+  const actualLossPct = Math.max(0, -netReturnPct);
+  const actualLossInr = Math.max(0, -netPnl);
+
+  const alertEl = $('sim-tolerance-alert');
+  if (alertEl) {
+    if (actualLossInr === 0) {
+      alertEl.innerHTML = `
+        <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:8px;padding:12px 16px;display:flex;align-items:center;gap:12px">
+          <span style="font-size:20px">✅</span>
+          <div class="text-sm">
+            <b class="ok-text">Completely Safe for ${c.name} (${c.risk_appetite.toUpperCase()}):</b>
+            In this scenario, there is <b>₹0 capital loss</b>. You receive your full principal of ${fmtInr(notional)} plus ${fmtInr(couponInr)} coupon. This comfortably satisfies your mandate.
+          </div>
+        </div>
+      `;
+    } else if (actualLossPct <= custLossTol) {
+      alertEl.innerHTML = `
+        <div style="background:#fefce8;border:1.5px solid #fef08a;border-radius:8px;padding:12px 16px;display:flex;align-items:center;gap:12px">
+          <span style="font-size:20px">🟡</span>
+          <div class="text-sm">
+            <b style="color:#b45309">Within Acceptable Loss Tolerance:</b>
+            Simulated loss of <b>${fmtInr(actualLossInr)} (${actualLossPct.toFixed(1)}%)</b> is within ${c.name}'s maximum loss threshold of <b>${custLossTol}% (${fmtInr(maxTolInr)})</b>.
+          </div>
+        </div>
+      `;
+    } else {
+      const excessInr = actualLossInr - maxTolInr;
+      alertEl.innerHTML = `
+        <div style="background:#fef2f2;border:1.5px solid #fca5a5;border-radius:8px;padding:12px 16px;display:flex;align-items:center;gap:12px">
+          <span style="font-size:20px">🚨</span>
+          <div class="text-sm">
+            <b style="color:var(--bad)">CRITICAL ALERT: EXCEEDS ${c.name.toUpperCase()}'S RISK TOLERANCE</b><br>
+            At a <b>${move}%</b> market drop, your loss would be <b class="warn-text">${fmtInr(actualLossInr)} (${actualLossPct.toFixed(1)}%)</b>, which EXCEEDS your stated comfort limit of <b>${custLossTol}% (${fmtInr(maxTolInr)})</b> by <b class="warn-text">${fmtInr(excessInr)}</b>! This product would fail regulatory suitability checks at this market shock level.
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  // Card 1: What happens to your capital (Step-by-step)
+  const mathEl = $('sim-expl-math');
+  if (mathEl) {
+    mathEl.innerHTML = `
+      <div class="sim-expl-title">💰 1. What Happens to Your Money (Exact Step-by-Step Breakdown)</div>
+      <div class="text-sm" style="line-height:1.7">
+        If you invest <b>${fmtInr(notional)}</b> for <b>${tenorMonths} months</b> and NIFTY ends at <b>${move > 0 ? '+' : ''}${move}%</b>:
+        <div style="background:var(--bg);border-radius:6px;padding:10px 14px;margin:8px 0">
+          <div>• <b>Principal Returned:</b> ${!breached ? `<span class="ok-text">100% returned in full (${fmtInr(notional)})</span>` : `<span class="warn-text">${fmtInr(principalReturned)} (${(100+move).toFixed(0)}% of principal — capital loss of ${fmtInr(principalLost)})</span>`}</div>
+          <div class="mt4">• <b>Guaranteed Coupon:</b> <span class="ok-text">+${fmtInr(couponInr)}</span> (${couponRate}% p.a. for ${tenorMonths} months, credited regardless of market level)</div>
+          <div class="mt4" style="border-top:1px solid var(--line);padding-top:4px">• <b>Total Bank Payout:</b> <b>${fmtInr(totalPayout)}</b> (${fmtInr(principalReturned)} principal + ${fmtInr(couponInr)} coupon)</div>
+          <div class="mt4">• <b>Net Result:</b> <b class="${netPnl >= 0 ? 'ok-text' : 'warn-text'}">${netPnl >= 0 ? 'Profit of +' : 'Net loss of −'}${fmtInr(Math.abs(netPnl))} (${netReturnPct >= 0 ? '+' : ''}${netReturnPct.toFixed(1)}%)</b></div>
+        </div>
+      </div>
+    `;
+  }
+
+  // Card 2: How the safety cushion worked
+  const barrierEl = $('sim-expl-barrier');
+  if (barrierEl) {
+    barrierEl.innerHTML = `
+      <div class="sim-expl-title">🛡️ 2. How the Safety Barrier Worked in This Scenario</div>
+      <div class="text-sm" style="line-height:1.7">
+        ${!breached ? `
+          Your product has a <b>${barrier}% barrier</b>, giving you a <b>${barrierBuffer}% safety cushion</b> against market drops.
+          Because NIFTY dropped by <b>${Math.abs(move)}%</b> (which is less than the ${barrierBuffer}% limit), the safety cushion deployed like an <b>airbag</b>.
+          Every rupee of your initial capital remained 100% protected. You beat the stock market while it fell!
+        ` : `
+          Your product has a <b>${barrier}% barrier</b>, protecting you only against drops up to <b>${barrierBuffer}%</b>.
+          Because NIFTY plunged by <b>${Math.abs(move)}%</b>, the market crash broke through the safety cushion by <b>${(Math.abs(move) - barrierBuffer).toFixed(1)}%</b>.
+          Once the barrier is breached, the protective airbag deflates completely, and your investment absorbs the full market drop.
+        `}
+      </div>
+    `;
+  }
+
+  // Card 3: Comparison table (Structured Note vs NIFTY ETF vs Bank FD)
+  const compEl = $('sim-expl-compare');
+  if (compEl) {
+    const niftyPayout = notional * (1.0 + move / 100.0);
+    const niftyPnl = notional * (move / 100.0);
+    const fdPayout = notional * (1.0 + 0.07 * t);
+    const fdPnl = notional * 0.07 * t;
+    const diffVsNifty = netPnl - niftyPnl;
+
+    compEl.innerHTML = `
+      <div class="sim-expl-title">📊 3. How Does This Compare to Direct Stocks or Fixed Deposit?</div>
+      <div class="text-xs mut">What would have happened to this exact ${fmtInr(notional)} across different investments:</div>
+      <table class="sim-compare-table mt8">
+        <thead>
+          <tr>
+            <th>Investment Option</th>
+            <th>Maturity Payout</th>
+            <th>Net Gain / Loss</th>
+            <th>Net Return %</th>
+            <th>Downside Protection</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="highlight">
+            <td><b>🛡️ FinVision Note (${couponRate}%, ${barrier}% Barrier)</b></td>
+            <td><b>${fmtInr(totalPayout)}</b></td>
+            <td class="${netPnl >= 0 ? 'ok-text' : 'warn-text'}"><b>${netPnl >= 0 ? '+' : ''}${fmtInr(netPnl)}</b></td>
+            <td class="${netReturnPct >= 0 ? 'ok-text' : 'warn-text'}"><b>${netReturnPct >= 0 ? '+' : ''}${netReturnPct.toFixed(1)}%</b></td>
+            <td>${!breached ? '<span class="ok-text">✓ Cushion Safe (100% Protected)</span>' : '<span class="warn-text">⚠️ Breached (-' + Math.abs(move) + '%)</span>'}</td>
+          </tr>
+          <tr>
+            <td><b>📈 Direct NIFTY 50 ETF / Mutual Fund</b></td>
+            <td>${fmtInr(niftyPayout)}</td>
+            <td class="${move >= 0 ? 'ok-text' : 'warn-text'}">${move >= 0 ? '+' : ''}${fmtInr(niftyPnl)}</td>
+            <td class="${move >= 0 ? 'ok-text' : 'warn-text'}">${move >= 0 ? '+' : ''}${move.toFixed(1)}%</td>
+            <td><span class="mut">No Protection (100% Market Risk)</span></td>
+          </tr>
+          <tr>
+            <td><b>🏦 Bank Fixed Deposit (7.0% p.a.)</b></td>
+            <td>${fmtInr(fdPayout)}</td>
+            <td class="ok-text">+${fmtInr(fdPnl)}</td>
+            <td class="ok-text">+${(7.0 * t).toFixed(1)}%</td>
+            <td><span class="ok-text">Guaranteed by Bank</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="text-xs mut mt8">
+        ${diffVsNifty >= 0 ? `
+          🌟 <b>Advantage:</b> You are <b class="ok-text">${fmtInr(diffVsNifty)} better off</b> with this Structured Note compared to a direct NIFTY index fund in this scenario.
+        ` : `
+          In extreme crashes, the coupon of ${fmtInr(couponInr)} still softens the blow compared to a naked market loss.
+        `}
+      </div>
+    `;
+  }
+
+  // Card 4: Actionable Advice
+  const adviceEl = $('sim-expl-advice');
+  if (adviceEl) {
+    if (breached) {
+      const suggestedBarrier = Math.max(50, 100 - Math.abs(move) - 5);
+      const suggestedNotional = Math.round(notional * 0.5);
+      adviceEl.innerHTML = `
+        <div class="sim-expl-title">💡 4. How to Reduce Risk in This Scenario</div>
+        <div class="text-sm" style="line-height:1.7">
+          If you want to protect your capital against a <b>-${Math.abs(move)}% crash</b>, try these adjustments:
+          <div class="mt4">• <b>Lower the barrier:</b> Drag the Barrier slider down to <b>${suggestedBarrier}%</b>. This widens your safety buffer to ${100 - suggestedBarrier}%, keeping your principal 100% safe.</div>
+          <div class="mt4">• <b>Reduce ticket size:</b> Lower your investment to <b>${fmtInr(suggestedNotional)}</b> to keep your absolute rupee loss within your comfort limit.</div>
+        </div>
+      `;
+    } else {
+      adviceEl.innerHTML = `
+        <div class="sim-expl-title">💡 4. Smart Investor Takeaway</div>
+        <div class="text-sm" style="line-height:1.7">
+          Even though the market fell by <b>${Math.abs(move)}%</b>, you earned a healthy positive return of <b>+${netReturnPct.toFixed(1)}% (${fmtInr(netPnl)})</b>.
+          This demonstrates why structured notes are popular: they offer equity-beating returns in flat or mildly declining markets without risking capital, as long as the barrier is maintained.
+        </div>
+      `;
+    }
+  }
+
+  // Update dashboard preview widget if present
+  updateDashboardSimulator();
+}
+
+function renderDashboardSimulatorPreview() {
+  const el = $('dash-simulator-widget');
+  if (!el) return;
+
+  el.innerHTML = `
+    <div class="grid-2" style="gap:14px;align-items:center">
+      <div>
+        <div class="flex justify-between text-xs" style="margin-bottom:2px">
+          <span>Investment Amount: <b id="dash-sim-notional-txt">${fmtInr(SIM_STATE.notional)}</b></span>
+          <span class="mut">Drag to test</span>
+        </div>
+        <input type="range" class="sim-range" id="dash-sim-notional" min="100000" max="5000000" step="50000" value="${SIM_STATE.notional}" oninput="onDashSimNotional(this.value)">
+        
+        <div class="flex justify-between text-xs mt8" style="margin-bottom:2px">
+          <span>Market Movement: <b id="dash-sim-move-txt">${SIM_STATE.move_pct}%</b></span>
+          <span class="mut">-60% to +40%</span>
+        </div>
+        <input type="range" class="sim-range" id="dash-sim-move" min="-60" max="40" step="1" value="${SIM_STATE.move_pct}" oninput="onDashSimMove(this.value)">
+      </div>
+
+      <div id="dash-sim-result-box" style="background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px">
+        <!-- populated by updateDashboardSimulator -->
+      </div>
+    </div>
+  `;
+  updateDashboardSimulator();
+}
+
+function onDashSimNotional(val) {
+  SIM_STATE.notional = +val;
+  updateSimulator();
+}
+
+function onDashSimMove(val) {
+  SIM_STATE.move_pct = +val;
+  updateSimulator();
+}
+
+function updateDashboardSimulator() {
+  const notionalTxt = $('dash-sim-notional-txt');
+  if (notionalTxt) notionalTxt.textContent = fmtInr(SIM_STATE.notional);
+  const moveTxt = $('dash-sim-move-txt');
+  if (moveTxt) moveTxt.textContent = (SIM_STATE.move_pct > 0 ? '+' : '') + SIM_STATE.move_pct + '%';
+  const rangeN = $('dash-sim-notional');
+  if (rangeN && +rangeN.value !== SIM_STATE.notional && SIM_STATE.notional <= 5000000) rangeN.value = SIM_STATE.notional;
+  const rangeM = $('dash-sim-move');
+  if (rangeM && +rangeM.value !== SIM_STATE.move_pct) rangeM.value = SIM_STATE.move_pct;
+
+  const box = $('dash-sim-result-box');
+  if (!box) return;
+
+  const notional = SIM_STATE.notional;
+  const move = SIM_STATE.move_pct;
+  const barrier = SIM_STATE.barrier_pct;
+  const couponRate = SIM_STATE.coupon_pct;
+  const t = SIM_STATE.tenor_months / 12.0;
+  const couponInr = notional * (couponRate / 100.0) * t;
+  const breached = (100.0 + move) < barrier;
+
+  let totalPayout, netPnl, netReturnPct;
+  if (breached) {
+    const principalReturned = notional * (1.0 + move / 100.0);
+    totalPayout = principalReturned + couponInr;
+    netPnl = totalPayout - notional;
+    netReturnPct = (netPnl / notional) * 100.0;
+  } else {
+    totalPayout = notional + couponInr;
+    netPnl = couponInr;
+    netReturnPct = (couponRate * t);
+  }
+
+  box.innerHTML = `
+    <div class="flex justify-between items-center">
+      <span class="text-xs mut">Maturity Payout:</span>
+      <b style="font-size:16px;color:${netPnl >= 0 ? 'var(--ok)' : 'var(--bad)'}">${fmtInr(totalPayout)}</b>
+    </div>
+    <div class="flex justify-between items-center mt4">
+      <span class="text-xs mut">Net Return:</span>
+      <span class="fw6 ${netPnl >= 0 ? 'ok-text' : 'warn-text'}">${netPnl >= 0 ? '+' : '−'}${fmtInr(Math.abs(netPnl))} (${netReturnPct >= 0 ? '+' : ''}${netReturnPct.toFixed(1)}%)</span>
+    </div>
+    <div class="flex justify-between items-center mt4">
+      <span class="text-xs mut">Safety Buffer:</span>
+      <span>${!breached ? '<span class="badge SUITABLE" style="font-size:10px">Protected 100%</span>' : '<span class="badge MISMATCH" style="font-size:10px">Breached</span>'}</span>
+    </div>
+    <div class="text-xs mut mt8" style="border-top:1px solid var(--line);padding-top:6px;line-height:1.4">
+      ${!breached ? `✨ Market fell ${Math.abs(move)}%, but your ₹${(notional/100000).toFixed(0)}L is safe + you earn ${fmtInr(couponInr)}!` : `⚠️ Market drop broke your barrier; capital absorbs ${Math.abs(move)}% loss.`}
+    </div>
+  `;
+}
+
+// ══════════════ CUSTOMER PAGES ══════════════
+async function loadCustomerDashboard() {
+  const c = SELECTED_CUSTOMER;
+  $('cust-kpis').innerHTML = `
+    <div class="kpi"><div class="kpi-label">My Portfolio Value</div><div class="kpi-value">${fmtInr(c.portfolio_value)}</div><div class="kpi-sub">Total investments</div></div>
+    <div class="kpi"><div class="kpi-label">My Risk Level</div><div class="kpi-value" style="font-size:16px;text-transform:capitalize">${c.risk_appetite}</div><div class="kpi-sub">Investor profile</div></div>
+    <div class="kpi"><div class="kpi-label">Max I Can Lose</div><div class="kpi-value">${c.loss_tolerance_pct}%</div><div class="kpi-sub">${fmtInr(c.portfolio_value * c.loss_tolerance_pct / 100)} max loss</div></div>
+    <div class="kpi"><div class="kpi-label">Investment Period</div><div class="kpi-value">${c.horizon_months} months</div><div class="kpi-sub">${(c.horizon_months/12).toFixed(1)} years</div></div>
+  `;
+  updateAlertBadge(c.id);
+  loadAlerts(c.id);
+  // Kick off all customer analysis sections
+  CUST_PRODUCT = CUST_PRODUCT || CUST_DEFAULT_PRODUCT;
+  runCustDashboardAnalysis();
+}
+
+async function runCustDashboardAnalysis() {
+  // Run assessment for dashboard widgets
+  const c = SELECTED_CUSTOMER;
+  const p = CUST_PRODUCT || CUST_DEFAULT_PRODUCT;
+  try {
+    const r = await api('/api/v1/assessment', {product: p, customer_id: c.id, mode: 'client'});
+    const a = r.result, bp = a.breaking_point, m = a.metrics, ru = a.product;
+    // Suitability card
+    const statusText = {SUITABLE:'✅ This product appears suitable for your profile.', REVIEW:'⚠️ This product needs review before investing.', MISMATCH:'❌ This product does NOT match your risk profile.'}[a.decision] || a.decision;
+    $('cust-suitability-summary').innerHTML = `
+      <div class="flex items-center gap-8 mt4">${badge(a.decision)}</div>
+      <div class="mt8 text-sm" style="line-height:1.7">${statusText}</div>
+      <div class="mt8 text-sm mut">Your max acceptable loss: <b>${c.loss_tolerance_pct}%</b> &nbsp;|&nbsp; Modelled worst-case loss: <b>${m.tail_loss_pct}%</b></div>
+    `;
+    // Breaking point card
+    $('cust-breaking-point').innerHTML = `
+      <div class="text-sm mt4" style="line-height:1.8">
+        <div>🟢 <b>Safe if NIFTY stays above:</b> &nbsp;<b class="ok-text">${bp.suitable_until_pct != null ? bp.suitable_until_pct+'% fall' : 'n/a'}</b></div>
+        <div>🟡 <b>Review zone starts at:</b> &nbsp;<b class="warn-text">${bp.review_from_pct != null ? bp.review_from_pct+'% fall' : 'n/a'}</b></div>
+        <div>🔴 <b>Mismatch (loss too high) from:</b> &nbsp;<b style="color:var(--bad)">${bp.mismatch_from_pct != null ? bp.mismatch_from_pct+'% fall' : 'n/a'}</b></div>
+      </div>
+    `;
+    // Rupee impact card
+    const ri = await api('/api/v1/rupee-impact', {product: p, customer_id: c.id}).catch(()=>null);
+    if (ri && $('cust-rupee-summary')) {
+      $('cust-rupee-summary').innerHTML = `
+        <div class="text-sm mt4" style="line-height:1.8">
+          <div>💰 <b>Investment amount:</b> ${fmtInr(ri.notional)}</div>
+          <div>⚠️ <b>Worst-case modelled loss:</b> <span class="warn-text"><b>${fmtInr(ri.loss_inr)}</b> (${ri.tail_loss_pct}%)</span></div>
+          ${ri.months_equivalent != null ? `<div class="text-xs mut mt4">${ri.months_equivalent_text}</div>` : ''}
+        </div>
+      `;
+    }
+    // Quick scenarios
+    const sc = a.scenarios || [];
+    if (sc.length && $('cust-quick-scenarios')) {
+      $('cust-quick-scenarios').innerHTML = `<table>
+        <tr><th>If NIFTY moves</th><th>You receive</th><th>Gain / Loss</th></tr>
+        ${sc.filter((_,i)=>[0,1,2,4,6].includes(i)).map(s=>`<tr>
+          <td>${s.move_pct>0?'+':''}${s.move_pct}%</td>
+          <td>${fmtInr(s.final_value)}</td>
+          <td class="${s.pnl_pct<0?'warn-text':'ok-text'}">${s.pnl_pct>0?'+':''}${s.pnl_pct}%</td>
+        </tr>`).join('')}
+      </table>`;
+    }
+    // Plain-language AI explanation
+    const ex = await api('/api/v1/explain', {audit_id: r.audit_id, mode: 'client'}).catch(()=>null);
+    if (ex && $('cust-explanation')) {
+      $('cust-explanation').innerHTML = (ex.text||'').replace(/\n/g,'<br>');
+    }
+  } catch(e) {
+    ['cust-suitability-summary','cust-breaking-point','cust-rupee-summary','cust-quick-scenarios','cust-explanation']
+      .forEach(id=>{ const el=$(id); if(el) el.innerHTML=`<span class="warn-text text-sm">Could not load: ${e.message}</span>`; });
+  }
+}
+
+async function runCustAnalysis() {
+  const c = SELECTED_CUSTOMER;
+  const p = CUST_PRODUCT || CUST_DEFAULT_PRODUCT;
+  const el = $('cust-analysis-content');
+  if (!el) return;
+  el.innerHTML = '<div class="loading">Running full analysis</div>';
+  try {
+    const r = await api('/api/v1/assessment', {product: p, customer_id: c.id, mode: 'client'});
+    const a = r.result, bp = a.breaking_point, m = a.metrics, h = m.historical;
+    const ri = await api('/api/v1/rupee-impact', {product: p, customer_id: c.id}).catch(()=>null);
+    el.innerHTML = `
+    <div class="disclaimer">All calculations are mathematically exact based on your product terms. Historical data is for illustration only — not a prediction.
+      ${a.data_source==='synthetic_fallback'?'<b class="warn-text"> Demo data — contact your RM for real market data.</b>':''}
+    </div>
+    <div class="grid-4">
+      <div class="kpi"><div class="kpi-label">Overall Verdict</div><div class="kpi-value">${badge(a.decision)}</div></div>
+      <div class="kpi"><div class="kpi-label">Worst-Case Loss</div><div class="kpi-value warn-text">${m.tail_loss_pct}%</div><div class="kpi-sub">${ri?fmtInr(ri.loss_inr):''}</div></div>
+      <div class="kpi"><div class="kpi-label">Safe Until Fall of</div><div class="kpi-value ok-text">${bp.suitable_until_pct!=null?bp.suitable_until_pct+'%':'n/a'}</div></div>
+      <div class="kpi"><div class="kpi-label">Investment</div><div class="kpi-value">${fmtInr(p.notional)}</div></div>
+    </div>
+    <div class="grid-2 mt14">
+      <div class="card">
+        <div class="card-title">🛡️ Suitability Rules — In Plain Language</div>
+        <table><tr><th>Check</th><th>Result</th><th>What it means</th></tr>
+        ${a.rules.map(x=>{
+          const plain = {
+            RISK_MATCH: 'Does your risk level match this product?',
+            LOSS_TOLERANCE: 'Can you afford the potential loss?',
+            TENOR: 'Is the product duration right for you?',
+            CONCENTRATION: 'Are you putting too much into one investment?',
+          }[x.rule_id] || x.rule_id;
+          return `<tr><td class="text-xs">${plain}</td><td>${badge(x.status)}</td><td class="text-xs">${x.message}</td></tr>`;
+        }).join('')}
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">📅 Past Performance (Illustration Only)</div>
+        <div class="flex gap-8 mt4">
+          <div class="kpi" style="flex:1;padding:10px"><div class="kpi-label ok-text">Best past result</div><div class="kpi-value ok-text">${h.best_pct}%</div></div>
+          <div class="kpi" style="flex:1;padding:10px"><div class="kpi-label">Average</div><div class="kpi-value">${h.avg_pct}%</div></div>
+          <div class="kpi" style="flex:1;padding:10px"><div class="kpi-label warn-text">Worst past result</div><div class="kpi-value warn-text">${h.worst_pct}%</div></div>
+        </div>
+        <div class="text-xs mut mt8">Based on ${h.n_windows} rolling historical periods. Worst period: ${h.worst_window.join(' → ')}</div>
+        <div class="text-xs mut mt4">In ${h.pct_windows_loss}% of past periods, this product would have made a loss.</div>
+      </div>
+    </div>
+    ${ri?`
+    <div class="card mt14">
+      <div class="card-title">💸 Your Money in Rupees — What Could Happen?</div>
+      <div class="grid-3 mt4">
+        <div class="kpi"><div class="kpi-label">You are investing</div><div class="kpi-value">${fmtInr(ri.notional)}</div></div>
+        <div class="kpi"><div class="kpi-label">Worst-case modelled loss</div><div class="kpi-value warn-text">${fmtInr(ri.loss_inr)}</div><div class="kpi-sub">(${ri.tail_loss_pct}% of your investment)</div></div>
+        ${ri.months_equivalent!=null?`<div class="kpi"><div class="kpi-label">That is roughly</div><div class="kpi-value" style="font-size:16px">${ri.months_equivalent_text}</div></div>`:''}
+      </div>
+    </div>`:''}
+    `;
+  } catch(e) {
+    el.innerHTML = `<div class="warn-text">Error: ${e.message}</div>`;
+  }
+}
+
+async function loadCustPayoff() {
+  const p = CUST_PRODUCT || CUST_DEFAULT_PRODUCT;
+  try {
+    const r = await api('/api/v1/payoff', {product: p});
+    if (typeof Plotly !== 'undefined' && $('cust-payoff-chart')) {
+      const x = r.curve.map(pt=>pt.move_pct), y = r.curve.map(pt=>pt.return_pct);
+      Plotly.react('cust-payoff-chart', [
+        {x, y, mode:'lines', name:'Return %', line:{color:'#1e40af',width:2}},
+        {x, y:y.map(v=>Math.min(v,0)), fill:'tozeroy', mode:'none', fillcolor:'rgba(185,28,28,.15)', name:'Loss zone'}
+      ], {
+        margin:{t:10,l:45,r:10,b:40}, paper_bgcolor:'#fff', plot_bgcolor:'#fff',
+        xaxis:{title:'How much NIFTY moves at maturity (%)', gridcolor:'#f0f2f7'},
+        yaxis:{title:'Return on your investment (%)', gridcolor:'#f0f2f7'},
+        legend:{orientation:'h',y:-0.2}, font:{family:'Inter,sans-serif',size:12}
+      }, {displayModeBar:false});
+    }
+    const sc = r.scenarios || [];
+    if ($('cust-scenario-table')) {
+      $('cust-scenario-table').innerHTML = `<table>
+        <tr><th>If NIFTY moves</th><th>Your money becomes</th><th>Gain / Loss %</th><th>Gain / Loss in ₹</th><th>Barrier status</th></tr>
+        ${sc.map(s=>`<tr>
+          <td><b>${s.move_pct>0?'+':''}${s.move_pct}%</b></td>
+          <td>${fmtInr(s.final_value)}</td>
+          <td class="${s.pnl_pct<0?'warn-text':'ok-text'}">${s.pnl_pct>0?'+':''}${s.pnl_pct}%</td>
+          <td class="${s.pnl<0?'warn-text':'ok-text'}">${s.pnl<0?'−':'+'}${fmtInr(Math.abs(s.pnl))}</td>
+          <td>${s.barrier_breached==null?'—':s.barrier_breached?'<span class="warn-text">Breached — loss amplified</span>':'<span class="ok-text">Safe</span>'}</td>
+        </tr>`).join('')}
+      </table>
+      <div class="text-xs mut mt8">"Barrier" is the safety cushion. If NIFTY falls below the ${(p.barrier_pct||70)}% level, your principal is no longer fully protected.</div>
+      `;
+    }
+  } catch(e) {
+    if($('cust-payoff-chart')) $('cust-payoff-chart').innerHTML=`<div class="warn-text">Error: ${e.message}</div>`;
+  }
+}
+
+async function loadCustStress() {
+  const c = SELECTED_CUSTOMER;
+  const p = CUST_PRODUCT || CUST_DEFAULT_PRODUCT;
+  const el = $('cust-stress-content');
+  if (!el) return;
+  el.innerHTML = '<div class="loading">Running stress analysis</div>';
+  try {
+    const [ladderR, regimeR] = await Promise.all([
+      api('/api/v1/stress-ladder', {product: p, customer_id: c.id}),
+      api('/api/v1/regime-stress', {product: p, customer_id: c.id}),
+    ]);
+    const colorMap = {SUITABLE:'var(--ok)',REVIEW:'var(--rev)',MISMATCH:'var(--bad)'};
+    const bgMap = {bull:'bull',Normal:'normal',MildStress:'mild',SevereStress:'severe',Crash:'crash'};
+    const plainLabel = {bull:'📈 Bull Market (rising)',Normal:'😐 Normal Market',MildStress:'😟 Mild Stress',SevereStress:'😰 Severe Stress',Crash:'💥 Market Crash'};
+    el.innerHTML = `
+    <div class="card">
+      <div class="card-title">Market Condition Scenarios — What Happens to Your Money?</div>
+      <div class="grid-5" style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px">
+      ${regimeR.regimes.map(reg=>`<div class="regime-card ${bgMap[reg.regime]||''}" style="text-align:center">
+        <div class="fw6 text-sm">${plainLabel[reg.regime]||reg.label}</div>
+        <div class="text-xs mut mt4">${reg.range}</div>
+        <div class="mt8 fw6" style="color:${colorMap[reg.suitability]}">${{SUITABLE:'✅ Safe',REVIEW:'⚠️ Review',MISMATCH:'❌ Too risky'}[reg.suitability]||reg.suitability}</div>
+        <div class="text-sm mt4">${reg.pnl_pct>=0?'+':''}${reg.pnl_pct}% return</div>
+        <div class="text-xs mt4">Loss: <b>${fmtInr(reg.loss_inr)}</b></div>
+        ${reg.barrier_breached?'<div class="text-xs warn-text mt4">⚠️ Safety barrier breached</div>':''}
+      </div>`).join('')}
+      </div>
+    </div>
+    <div class="card mt14">
+      <div class="card-title">Stress Ladder — Step by Step</div>
+      <div class="text-sm mut mb8">Shows how your investment is affected as the market falls from 0% to -60%</div>
+      ${ladderR.ladder.map(r=>`<div class="ladder-row">
+        <span class="ladder-shock">${r.shock_pct}%</span>
+        <div class="ladder-bar-wrap"><div class="ladder-bar" style="width:${Math.min(100,r.loss_pct/50*100)}%;background:${colorMap[r.loss_rule]}"></div></div>
+        <span class="ladder-loss">${r.loss_pct}%<br><span class="text-xs">${fmtInr(r.loss_inr)}</span></span>
+        <span class="ladder-status">${{SUITABLE:'✅ Safe',REVIEW:'⚠️ Review',MISMATCH:'❌ Risk'}[r.overall]||badge(r.overall)}</span>
+      </div>`).join('')}
+      <div class="text-xs mut mt8">Left = small market drop. Right = bigger drop. Green = your money is safe. Red = you are losing more than you are comfortable with.</div>
+    </div>`;
+  } catch(e) { el.innerHTML=`<div class="warn-text">Error: ${e.message}</div>`; }
+}
+
+async function loadCustPortfolioImpact() {
+  const c = SELECTED_CUSTOMER;
+  const p = CUST_PRODUCT || CUST_DEFAULT_PRODUCT;
+  const el = $('cust-impact-content');
+  if (!el) return;
+  el.innerHTML = '<div class="loading">Calculating portfolio impact</div>';
+  try {
+    const [r, ri] = await Promise.all([
+      api('/api/v1/portfolio-impact', {product: p, customer_id: c.id, stress_shock_pct: -35}),
+      api('/api/v1/rupee-impact', {product: p, customer_id: c.id}),
+    ]);
+    el.innerHTML = `
+    <div class="disclaimer">${r.note}</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">If the Market Falls 35% — Your Total Portfolio</div>
+        <div class="text-sm mut mb8">Adding this product changes how your whole portfolio reacts to a market crash</div>
+        <div class="flex gap-14 mt4">
+          <div class="kpi" style="flex:1;padding:12px">
+            <div class="kpi-label">Without this product</div>
+            <div class="kpi-value ${r.before.loss_pct>10?'warn-text':''}">${r.before.loss_pct}% loss</div>
+            <div class="kpi-sub">${fmtInr(r.before.loss_inr)}</div>
+          </div>
+          <div style="display:flex;align-items:center;font-size:20px;color:var(--mut)">→</div>
+          <div class="kpi" style="flex:1;padding:12px">
+            <div class="kpi-label">With this product added</div>
+            <div class="kpi-value ${r.after.loss_pct>10?'warn-text':''}">${r.after.loss_pct}% loss</div>
+            <div class="kpi-sub">${fmtInr(r.after.loss_inr)}</div>
+          </div>
+        </div>
+        <div class="mt8 text-sm">
+          Adding this product increases your potential loss by <b class="${r.delta_loss_pct>0?'warn-text':'ok-text'}">${r.delta_loss_pct>0?'+':''}${r.delta_loss_pct}%</b>
+          (an extra <b>${fmtInr(r.delta_loss_inr)}</b> in a severe crash scenario).
+        </div>
+        <div class="mt8 text-sm">Your exposure to <b>${r.underlying}</b> would be <b class="${r.concentration_flag?'warn-text':''}">${r.concentration_pct}%</b> of your portfolio (limit: ${r.concentration_limit_pct}%).
+          ${r.concentration_flag?'<span class="badge MISMATCH">Too concentrated in one investment</span>':'<span class="badge SUITABLE">Within safe limits</span>'}
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">💸 Your Money — Worst Case in Rupees</div>
+        <div class="kpi mt4"><div class="kpi-label">You are investing</div><div class="kpi-value">${fmtInr(ri.notional)}</div></div>
+        <div class="kpi mt8"><div class="kpi-label">Modelled worst-case loss</div><div class="kpi-value warn-text">${fmtInr(ri.loss_inr)}</div><div class="kpi-sub">${ri.tail_loss_pct}% of your investment</div></div>
+        ${ri.months_equivalent!=null?`<div class="text-sm mut mt8">This is roughly equivalent to <b>${ri.months_equivalent_text}</b>.</div>`:''}
+        <div class="text-sm mut mt8">Your stated maximum acceptable loss is <b>${c.loss_tolerance_pct}%</b> = <b>${fmtInr(c.portfolio_value*c.loss_tolerance_pct/100)}</b>.</div>
+      </div>
+    </div>`;
+  } catch(e) { el.innerHTML=`<div class="warn-text">Error: ${e.message}</div>`; }
+}
+
+function loadCustomerProfile() {
+  const c = SELECTED_CUSTOMER || {};
+  const el = $('cust-profile-content');
+  if (!el) return;
+  el.innerHTML = `
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Personal Information</div>
+      <table>
+        <tr><td class="mut">Name</td><td><b>${c.name}</b></td></tr>
+        <tr><td class="mut">Customer ID</td><td>${c.id}</td></tr>
+        <tr><td class="mut">Email</td><td>${c.email||'—'}</td></tr>
+        <tr><td class="mut">Phone</td><td>${c.phone||'—'}</td></tr>
+        <tr><td class="mut">City</td><td>${c.city||'—'}</td></tr>
+        <tr><td class="mut">KYC Status</td><td>${c.kyc_status||'—'}</td></tr>
+        <tr><td class="mut">Segment</td><td>${c.segment||'HNI'}</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">Risk Profile</div>
+      <table>
+        <tr><td class="mut">Risk Appetite</td><td>${badge(c.risk_appetite==='conservative'?'SUITABLE':c.risk_appetite==='moderate'?'REVIEW':'MISMATCH')} ${c.risk_appetite}</td></tr>
+        <tr><td class="mut">Max Loss Tolerance</td><td><b>${c.loss_tolerance_pct}%</b></td></tr>
+        <tr><td class="mut">Investment Horizon</td><td><b>${c.horizon_months} months</b></td></tr>
+        <tr><td class="mut">Liquidity Need</td><td>${c.liquidity_need||'medium'}</td></tr>
+        <tr><td class="mut">Annual Income</td><td>${c.annual_income_inr ? fmtInr(c.annual_income_inr) : '—'}</td></tr>
+      </table>
+    </div>
+  </div>`;
+}
+
+function loadCustomerPortfolio() {
+  const c = SELECTED_CUSTOMER || {};
+  const el = $('cust-portfolio-content');
+  if (!el) return;
+  const holdings = c.holdings || [];
+  el.innerHTML = `
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Portfolio Summary</div>
+      <div class="kpi"><div class="kpi-label">Total Portfolio Value</div><div class="kpi-value">${fmtInr(c.portfolio_value)}</div></div>
+      <div class="mt8">
+        ${Object.entries(c.existing_exposures||{}).map(([k,v])=>`<div class="flex items-center gap-8 mt4">
+          <span class="text-sm" style="flex:1">${k}</span>
+          <div style="flex:2;height:8px;background:var(--bg);border-radius:4px;overflow:hidden"><div style="height:100%;width:${v}%;background:var(--pri);border-radius:4px"></div></div>
+          <span class="text-sm fw6" style="width:40px;text-align:right">${v}%</span>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Holdings</div>
+      <table><tr><th>Asset</th><th>Type</th><th>Value</th></tr>
+      ${holdings.map(h=>`<tr><td>${h.asset}</td><td class="text-xs">${h.type}</td><td>${fmtInr(h.value)}</td></tr>`).join('')}
+      </table>
+    </div>
+  </div>`;
+}
+
+// ══════════════ CUSTOMER COPILOT ══════════════
+function custAskPrompt(prompt) {
+  const inp = $('cust-q');
+  if (inp) inp.value = prompt;
+  custAsk();
+}
+
+function formatChatMsg(text) {
+  if (!text) return '';
+  let clean = text.replace(/\[kb:[^\]]+\]/g, '');
+  clean = clean.replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>');
+  clean = clean.replace(/\*([^*]+)\*/g, '<i>$1</i>');
+  clean = clean.replace(/\n\n/g, '<br><br>');
+  clean = clean.replace(/\n• /g, '<br>• ');
+  clean = clean.replace(/\n/g, '<br>');
+  return clean;
+}
+
+function clearCustChat() {
+  SESSION_CHAT_HISTORY = [];
+  LAST_CUST_QUERY = '';
+  const chat = $('cust-chat');
+  if (chat) {
+    chat.innerHTML = `
+      <div class="chat-msg bot">
+        👋 <b>Hello! I am your FinVision AI Assistant.</b><br><br>
+        I can explain how your structured investments work in plain, everyday English with no confusing financial jargon.<br><br>
+        Feel free to click any suggested question above or type your question below.
+      </div>
+    `;
+  }
+}
+
+function retryCustLastQuestion() {
+  if (LAST_CUST_QUERY) {
+    const inp = $('cust-q');
+    if (inp) inp.value = LAST_CUST_QUERY;
+    custAsk();
+  }
+}
+
+async function custAsk() {
+  const q = $('cust-q').value.trim();
+  if (!q) return;
+  LAST_CUST_QUERY = q;
+  $('cust-q').value = '';
+  const chat = $('cust-chat');
+  chat.innerHTML += `<div class="chat-msg user">${q}</div>`;
+  chat.innerHTML += `<div class="chat-msg bot" id="bot-latest"><span class="loading" style="padding:0">Thinking...</span></div>`;
+  chat.scrollTop = chat.scrollHeight;
+  try {
+    const cid = SELECTED_CUSTOMER?.id || AUTH?.user?.customer_id || 'C101';
+    const activePage = document.querySelector('.page.active')?.id?.replace('page-', '') || 'cust-copilot';
+    const pageContext = {
+      view: activePage,
+      customer_id: cid,
+      product: LAST_ASSESSMENT?.result?.product || prod(),
+      decision: LAST_ASSESSMENT?.result?.decision || null,
+      breaking_point: LAST_ASSESSMENT?.result?.breaking_point?.mismatch_from_pct || null,
+      portfolio_concentration: LAST_ASSESSMENT?.result?.rules?.find(r=>r.rule_id==='CONCENTRATION')?.details?.concentration_pct || null
+    };
+
+    const payload = {
+      session_id: 'cust-' + (AUTH?.user?.id || 'guest'),
+      message: q,
+      mode: 'client',
+      customer_id: cid,
+      page_context: pageContext,
+      history: SESSION_CHAT_HISTORY.slice(-6)
+    };
+
+    const r = await api('/api/v1/copilot', payload);
+    const ansText = r.answer || '';
+    $('bot-latest').innerHTML = formatChatMsg(ansText);
+    $('bot-latest').id = '';
+
+    SESSION_CHAT_HISTORY.push({role: 'user', content: q});
+    SESSION_CHAT_HISTORY.push({role: 'assistant', content: ansText});
+  } catch(e) {
+    $('bot-latest').innerHTML = `<span class="warn-text">Error: ${e.message}</span>`;
+    $('bot-latest').id = '';
+  }
+  chat.scrollTop = chat.scrollHeight;
+}
+
+// ══════════════ INIT ══════════════
+window.addEventListener('DOMContentLoaded', async () => {
+  // Pre-fill RM creds by default
+  $('login-email').value = 'rm@finvision.demo';
+  $('login-password').value = 'RM@123';
+  await tryAutoLogin();
+});
+</script>
+</body>
+</html>
