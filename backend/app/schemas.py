@@ -72,7 +72,7 @@ class CopilotRequest(BaseModel):
     mode: Literal["rm", "client"] = "client"
     product: Optional[ProductSpec] = None
     customer_id: Optional[str] = None
-    page_context: Optional[str] = None
+    page_context: Optional[Any] = None   # accepts str or dict from frontend
     history: Optional[list[dict]] = None
 
 

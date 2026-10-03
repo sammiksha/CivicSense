@@ -300,7 +300,25 @@ def copilot_ask(req: CopilotRequest):
             s.customer = c
     if req.history:
         s.history = req.history
-    return copilot.ask(s, req.message, req.mode, page_context=req.page_context)
+
+    # Normalize page_context — frontend may send a dict or a plain string
+    page_ctx = req.page_context
+    if isinstance(page_ctx, dict):
+        # Extract the most useful fields for the agent
+        view = page_ctx.get("view", "")
+        decision = page_ctx.get("decision")
+        bp = page_ctx.get("breaking_point")
+        conc = page_ctx.get("portfolio_concentration")
+        parts = [f"view:{view}"]
+        if decision:
+            parts.append(f"decision:{decision}")
+        if bp is not None:
+            parts.append(f"breaking_point_pct:{bp}")
+        if conc is not None:
+            parts.append(f"concentration_pct:{conc}")
+        page_ctx = " | ".join(parts)
+
+    return copilot.ask(s, req.message, req.mode, page_context=page_ctx)
 
 
 # ── portfolio impact ──────────────────────────────────────────────────────────
