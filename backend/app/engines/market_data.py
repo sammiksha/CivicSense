@@ -20,8 +20,9 @@ def get_prices(underlying: str) -> tuple[pd.Series, str]:
     if config.LIVE_DATA:
         try:
             import yfinance as yf
-            sym = {"NIFTY50": "^NSEI", "USDINR": "USDINR=X"}[name]
-            s = yf.download(sym, start="2007-09-01", progress=False, auto_adjust=True)["Close"].squeeze().dropna()
+            symbols = {"NIFTY50": config.YAHOO_NIFTY50_SYMBOL, "USDINR": config.YAHOO_USDINR_SYMBOL}
+            sym = symbols[name]
+            s = yf.download(sym, start=config.YAHOO_START_DATE, progress=False, auto_adjust=True)["Close"].squeeze().dropna()
             s.rename("Close").rename_axis("Date").to_csv(real)
             return s.sort_index(), "yfinance"
         except Exception:

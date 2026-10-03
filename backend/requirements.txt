@@ -5,6 +5,7 @@ numpy>=1.26
 pandas>=2.1
 scikit-learn>=1.4
 anthropic>=0.40
+python-dotenv>=1.0.1
 pymupdf>=1.24
 pytesseract>=0.3.10   # optional OCR (needs the tesseract binary)
 pillow>=10.0
