@@ -1,0 +1,8 @@
+[
+  {"id": "C101", "name": "Customer C101", "risk_appetite": "conservative", "loss_tolerance_pct": 5,
+   "horizon_months": 24, "portfolio_value": 10000000, "existing_exposures": {"NIFTY 50": 45}},
+  {"id": "C102", "name": "Customer C102", "risk_appetite": "moderate", "loss_tolerance_pct": 15,
+   "horizon_months": 36, "portfolio_value": 25000000, "existing_exposures": {"NIFTY 50": 20}},
+  {"id": "C103", "name": "Customer C103", "risk_appetite": "aggressive", "loss_tolerance_pct": 30,
+   "horizon_months": 60, "portfolio_value": 50000000, "existing_exposures": {"NIFTY 50": 30, "USDINR": 5}}
+]

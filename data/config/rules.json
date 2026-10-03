@@ -1,0 +1,5 @@
+{
+  "loss_tolerance_review_multiple": 1.5,
+  "concentration_limit_pct": 50,
+  "tail_loss_basis": "max(historical worst-window loss, Monte Carlo 1st-percentile loss)"
+}

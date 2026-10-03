@@ -1,0 +1,12 @@
+INDICATIVE TERM SHEET - EQUITY LINKED NOTE
+Issuer: Example Bank Ltd (illustrative)
+Product: Equity Linked Note (ELN)
+Reference Asset: NIFTY 50 Index
+Notional: Rs. 10,00,000
+Tenor: 12 months
+Coupon: 12.0% p.a., paid at maturity
+Knock-in Barrier: 70% of initial level (observed daily)
+Strike: 100% of initial level
+Capital Protection: None
+Redemption: If the barrier is not breached, principal is returned. If breached and the
+final level is below the strike, redemption = Notional x Final / Initial.

@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>StructuraAI</title>
+<script>
+(function(){
+  function loadScript(src,cb){var s=document.createElement('script');s.src=src;s.onload=cb;s.onerror=function(){console.warn('Plotly failed to load from '+src)};document.head.appendChild(s);}
+  loadScript('/plotly.min.js',function(){
+    if(typeof Plotly==='undefined')loadScript('https://cdn.plot.ly/plotly-2.35.2.min.js',function(){window._plotlyReady=true;document.dispatchEvent(new Event('plotlyready'))});
+    else{window._plotlyReady=true;document.dispatchEvent(new Event('plotlyready'));}
+  });
+})();
+</script>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--ink:#1b2440;--mut:#6b7494;--line:#dfe4f0;--pri:#2b4acb;--ok:#1f9d55;--rev:#d98c00;--bad:#d64545}
+*{box-sizing:border-box}body{margin:0;font:14px/1.45 system-ui,Segoe UI,Arial;background:var(--bg);color:var(--ink)}
+header{background:var(--pri);color:#fff;padding:12px 20px;display:flex;justify-content:space-between;align-items:center}
+header b{font-size:18px}.pill{background:#ffffff33;border-radius:12px;padding:2px 10px;font-size:12px}
+main{display:grid;grid-template-columns:340px 1fr;gap:14px;padding:14px;max-width:1400px;margin:auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px}
+h3{margin:0 0 8px;font-size:14px}label{display:block;font-size:12px;color:var(--mut);margin-top:8px}
+input,select,textarea,button{width:100%;padding:7px;border:1px solid var(--line);border-radius:6px;font:inherit}
+button{background:var(--pri);color:#fff;border:0;cursor:pointer;margin-top:8px}button.sec{background:#e9edfb;color:var(--pri)}
+table{border-collapse:collapse;width:100%}td,th{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left;font-size:13px}
+.badge{display:inline-block;padding:3px 12px;border-radius:14px;color:#fff;font-weight:600}
+.SUITABLE{background:var(--ok)}.REVIEW{background:var(--rev)}.MISMATCH{background:var(--bad)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.mut{color:var(--mut);font-size:12px}
+#chat{max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:6px;padding:8px;margin-bottom:6px;background:#fafbff}
+.u{color:var(--pri)}.tool{font-size:11px;color:var(--mut)}.warn{color:var(--bad)}
+.ladder{display:flex;height:22px;border-radius:4px;overflow:hidden}.ladder div{flex:1}
+@media(max-width:900px){main{grid-template-columns:1fr}.grid2{grid-template-columns:1fr}}
+</style></head><body>
+<header><b>StructuraAI</b><span><span class="pill" id="llm">...</span> <span class="pill">Mindspark Hackathon 2026 &middot; Fintech</span></span></header>
+<main>
+<section>
+ <div class="card"><h3>1. Customer</h3><select id="cust"></select><div class="mut" id="custInfo"></div></div>
+ <div class="card"><h3>2. Product Studio</h3>
+  <label>Upload term sheet (PDF / TXT)</label><input type="file" id="file" accept=".pdf,.txt">
+  <label>...or describe it</label><textarea id="nl" rows="2" placeholder="one-year NIFTY note, 12% coupon, 70% barrier, 10 lakh"></textarea>
+  <button class="sec" onclick="extract()">Extract &amp; validate</button><div id="exMsg" class="mut"></div>
+  <label>Type</label><select id="type" onchange="live()"><option>ELN</option><option>DCD</option><option>CPN</option></select>
+  <label>Underlying</label><select id="under" onchange="live()"><option>NIFTY 50</option><option>USDINR</option></select>
+  <div class="grid2"><div><label>Tenor (months)</label><input id="tenor" type="number" value="12" onchange="live()"></div>
+   <div><label>Coupon / interest % p.a.</label><input id="coupon" type="number" value="12" onchange="live()"></div></div>
+  <label>Barrier % (ELN): <b id="bv">70</b></label><input id="barrier" type="range" min="30" max="95" value="70" oninput="bv.textContent=this.value;live()">
+  <div class="grid2"><div><label>Strike / conversion %</label><input id="strike" type="number" value="100" onchange="live()"></div>
+   <div><label>Notional (Rs)</label><input id="notional" type="number" value="1000000" onchange="live()"></div></div>
+  <div class="grid2"><div><label>CPN protection %</label><input id="prot" type="number" value="100" onchange="live()"></div>
+   <div><label>CPN participation %</label><input id="part" type="number" value="80" onchange="live()"></div></div>
+  <button onclick="runAssess()">Run full assessment</button>
+ </div>
+</section>
+<section>
+ <div class="card"><h3>Decision</h3><div id="decision" class="mut">Run an assessment.</div><div id="flags"></div><div class="mut" id="src"></div></div>
+ <div class="card"><h3>Payoff at maturity (drag the barrier)</h3><div id="chart" style="height:300px"></div><div id="scen"></div></div>
+ <div class="grid2">
+  <div class="card"><h3>Historical replay</h3><div id="hist" class="mut">-</div><div id="histChart" style="height:200px"></div></div>
+  <div class="card"><h3>Monte Carlo</h3><div id="mc" class="mut">-</div></div>
+ </div>
+ <div class="card"><h3>Suitability rules</h3><div id="rules" class="mut">-</div></div>
+ <div class="card"><h3>Breaking point &amp; repair</h3><div id="bp" class="mut">-</div></div>
+ <div class="card"><h3>Explanation <select id="mode" style="width:auto" onchange="reExplain()"><option value="rm">RM mode</option><option value="client">Client mode</option></select>
+   <a id="pdf" href="#" target="_blank" style="font-size:12px;margin-left:8px"></a></h3><div id="expl" class="mut">-</div><div id="sources" class="tool"></div></div>
+ <div class="card"><h3>AI copilot (agent + RAG)</h3><div id="chat"></div>
+  <input id="q" placeholder="What happens if NIFTY falls 25%?  /  When does it stop being suitable?  /  How can I fix it?" onkeydown="if(event.key==='Enter')ask()"><button onclick="ask()">Ask</button></div>
+</section></main>
+<script>
+const $=id=>document.getElementById(id);let customers=[],auditId=null,sid='s'+Math.random().toString(36).slice(2);
+const api=async(p,b)=>{const r=await fetch(p,b?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}:{});if(!r.ok)throw new Error((await r.text()));return r.json()};
+const prod=()=>{const t=$('type').value,o={product_type:t,underlying:$('under').value,tenor_months:+$('tenor').value,coupon_pct:+$('coupon').value,
+ strike_pct:+$('strike').value,notional:+$('notional').value,protection_pct:+$('prot').value,participation_pct:+$('part').value};if(t==='ELN')o.barrier_pct=+$('barrier').value;return o};
+const fmt=x=>x==null?'n/a':(+x).toLocaleString('en-IN',{maximumFractionDigits:2});
+const badge=s=>`<span class="badge ${s}">${s}</span>`;
+async function init(){const h=await api('/health');$('llm').textContent=h.llm_mode==='claude'?'Claude + RAG':'offline mode';
+ customers=await api('/api/v1/customers');$('cust').innerHTML=customers.map(c=>`<option value="${c.id}">${c.id} - ${c.risk_appetite}</option>`).join('');$('cust').onchange=custInfo;custInfo();
+ if(window._plotlyReady)live();else document.addEventListener('plotlyready',live,{once:true})}
+function custInfo(){const c=customers.find(x=>x.id===$('cust').value);$('custInfo').textContent=`Loss tolerance ${c.loss_tolerance_pct}% | horizon ${c.horizon_months}m | exposure ${JSON.stringify(c.existing_exposures)}`}
+let t0;function live(){clearTimeout(t0);t0=setTimeout(async()=>{try{const r=await api('/api/v1/payoff',{product:prod()});if(typeof Plotly!=='undefined')drawPayoff(r.curve);scen(r.scenarios)}catch(e){}},120)}
+function drawPayoff(c){const x=c.map(p=>p.move_pct),y=c.map(p=>p.return_pct);Plotly.react('chart',[{x,y,mode:'lines',name:'Return %',line:{color:'#2b4acb'}},
+ {x,y:y.map(v=>Math.min(v,0)),fill:'tozeroy',mode:'none',fillcolor:'rgba(214,69,69,.25)',name:'Loss zone'}],
+ {margin:{t:10,l:45,r:10,b:40},xaxis:{title:'Underlying move at maturity (%)'},yaxis:{title:'Return on principal (%)'},legend:{orientation:'h'}},{displayModeBar:false})}
+function scen(s){$('scen').innerHTML='<table><tr><th>Move</th><th>Final value</th><th>P/L</th><th>Barrier breached</th></tr>'+s.map(r=>`<tr><td>${r.move_pct>0?'+':''}${r.move_pct}%</td><td>Rs ${fmt(r.final_value)}</td><td>${r.pnl_pct}%</td><td>${r.barrier_breached==null?'-':r.barrier_breached?'Yes':'No'}</td></tr>`).join('')+'</table>'}
+async function extract(){$('exMsg').textContent='Extracting...';try{let r;const f=$('file').files[0];
+ if(f){const fd=new FormData();fd.append('file',f);const res=await fetch('/api/v1/product/extract-file',{method:'POST',body:fd});r=await res.json()}else r=await api('/api/v1/product/extract-text',{text:$('nl').value});
+ const t=r.terms||{};const m={type:'product_type',under:'underlying',tenor:'tenor_months',coupon:'coupon_pct',barrier:'barrier_pct',strike:'strike_pct',notional:'notional',prot:'protection_pct',part:'participation_pct'};
+ for(const k in m)if(t[m[k]]!=null){$(k).value=t[m[k]];if(k==='barrier')bv.textContent=t[m[k]]}
+ $('exMsg').innerHTML=`<b>${r.method}</b>: ${r.valid?'valid - please confirm values':'needs confirmation: '+(r.needs_confirmation.concat(r.errors)).join(', ')}`;live()}catch(e){$('exMsg').textContent=e.message}}
+async function runAssess(){$('decision').textContent='Running 10,000 simulations...';try{const r=await api('/api/v1/assessment',{product:prod(),customer_id:$('cust').value,mode:$('mode').value});auditId=r.audit_id;render(r)}catch(e){$('decision').textContent=e.message}}
+function render(r){const a=r.result,m=a.metrics,h=m.historical,q=m.monte_carlo,bp=a.breaking_point;
+ $('decision').innerHTML=badge(r.status)+` &nbsp;audit #${r.audit_id}`;$('src').innerHTML=`Data: ${a.data_source}${a.data_source==='synthetic_fallback'?' <b class="warn">(DEMO DATA - run scripts/fetch_market_data.py for real history)</b>':''} | ${a.data_window.join(' to ')}`;
+ $('flags').innerHTML=r.flags.map(f=>`<div>&#9888; ${f.message}</div>`).join('');
+ $('hist').innerHTML=`${h.n_windows} rolling windows | best ${h.best_pct}% | worst ${h.worst_pct}% (${h.worst_window.join(' to ')}) | avg ${h.avg_pct}% | loss-making ${h.pct_windows_loss}%`;
+ Plotly.react('histChart',[{type:'bar',x:h.histogram.edges.slice(0,-1),y:h.histogram.counts,marker:{color:'#2b4acb'}}],{margin:{t:5,l:35,r:5,b:30},xaxis:{title:'Outcome %'}},{displayModeBar:false});
+ $('mc').innerHTML=`${q.n_paths} paths, seed ${q.seed}, vol ${q.annual_vol_pct}%<br>P(loss) <b>${q.prob_loss_pct}%</b> | P(barrier breach) <b>${q.prob_barrier_breach_pct}%</b><br>5th percentile ${q.p5_pct}% | median ${q.median_pct}%<br>Tail loss used by rules: <b>${m.tail_loss_pct}%</b>`;
+ $('rules').innerHTML='<table><tr><th>Rule</th><th>Status</th><th>Reason</th></tr>'+a.rules.map(x=>`<tr><td>${x.rule_id}</td><td>${badge(x.status)}</td><td>${x.message}</td></tr>`).join('')+'</table>';
+ const col={SUITABLE:'#1f9d55',REVIEW:'#d98c00',MISMATCH:'#d64545'};
+ $('bp').innerHTML=`Loss rule: suitable until <b>${bp.suitable_until_pct==null?'n/a':bp.suitable_until_pct+'%'}</b> | review from <b>${bp.review_from_pct==null?'-':bp.review_from_pct+'%'}</b> | mismatch from <b>${bp.mismatch_from_pct==null?'-':bp.mismatch_from_pct+'%'}</b>`+
+  (bp.blocked_by_other_rules.length?`<br>Other rules also failing: ${bp.blocked_by_other_rules.join(', ')}`:'')+
+  `<div class="ladder" style="margin:8px 0">${bp.ladder.map(l=>`<div title="${l.shock_pct}%: loss ${l.loss_pct}%" style="background:${col[l.loss_rule]}"></div>`).join('')}</div><div class="mut">0% &rarr; -60% market shock</div>`+
+  `<h3 style="margin-top:10px">Repair (re-verified by the rule engine)</h3>`+(a.repairs.length?'<ol>'+a.repairs.map(x=>`<li>${x.description} &rarr; ${x.decision_after}</li>`).join('')+'</ol>':'None needed / none found within bounds');
+ showExpl(r.explanation);$('pdf').href='/api/v1/report/'+r.audit_id;$('pdf').textContent='Client PDF'}
+function showExpl(e){$('expl').innerHTML=e.text.replace(/\n/g,'<br>')+(e.warnings.length?`<div class="warn">${e.warnings.join('; ')}</div>`:'');$('sources').textContent=`engine: ${e.engine} | RAG sources: ${e.sources.join(', ')}`}
+async function reExplain(){if(auditId)showExpl(await api('/api/v1/explain',{audit_id:auditId,mode:$('mode').value}))}
+async function ask(){const q=$('q').value.trim();if(!q)return;$('q').value='';const ch=$('chat');ch.innerHTML+=`<div class="u"><b>You:</b> ${q}</div>`;
+ try{const r=await api('/api/v1/copilot',{session_id:sid,message:q,mode:$('mode').value,product:prod(),customer_id:$('cust').value});
+ ch.innerHTML+=`<div><b>Copilot:</b> ${r.answer}</div><div class="tool">tools: ${r.tool_trace.map(t=>t.tool).join(' → ')||'none'} | ${r.engine}${r.warnings.length?' | '+r.warnings.join('; '):''}</div>`}catch(e){ch.innerHTML+=`<div class="warn">${e.message}</div>`}ch.scrollTop=ch.scrollHeight}
+init();
+</script></body></html>

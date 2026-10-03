@@ -1,0 +1,15 @@
+fastapi>=0.110
+uvicorn[standard]>=0.29
+pydantic>=2.6
+numpy>=1.26
+pandas>=2.1
+scikit-learn>=1.4
+anthropic>=0.40
+pymupdf>=1.24
+pytesseract>=0.3.10   # optional OCR (needs the tesseract binary)
+pillow>=10.0
+reportlab>=4.0
+python-multipart>=0.0.9
+yfinance>=0.2.40      # optional, only for scripts/fetch_market_data.py
+pytest>=8.0
+httpx>=0.27
