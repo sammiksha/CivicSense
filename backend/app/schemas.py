@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Literal, Optional
+from typing import Literal, Optional, Any
 from pydantic import BaseModel, Field, model_validator
 
 UNDERLYINGS = {"NIFTY 50": "NIFTY50", "USDINR": "USDINR"}
@@ -16,6 +16,7 @@ class ProductSpec(BaseModel):
     participation_pct: float = Field(100, ge=0, le=500, description="CPN participation %")
     notional: float = Field(1_000_000, gt=0)
     currency: str = "INR"
+    observation_type: str = "at_maturity"
 
     @model_validator(mode="after")
     def _check(self):
@@ -23,6 +24,9 @@ class ProductSpec(BaseModel):
             raise ValueError(f"underlying must be one of {list(UNDERLYINGS)}")
         if self.product_type == "ELN" and self.barrier_pct is None:
             raise ValueError("ELN requires barrier_pct")
+        if self.product_type == "ELN" and self.barrier_pct is not None:
+            if self.barrier_pct > self.strike_pct:
+                raise ValueError("barrier_pct cannot exceed strike_pct")
         return self
 
 
@@ -34,6 +38,16 @@ class CustomerProfile(BaseModel):
     horizon_months: int = Field(gt=0)
     portfolio_value: float = Field(gt=0)
     existing_exposures: dict[str, float] = Field(default_factory=dict, description="underlying -> % of portfolio")
+    annual_income_inr: Optional[float] = None
+    liquidity_need: str = "medium"
+    rm_id: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    city: Optional[str] = None
+    pan: Optional[str] = None
+    kyc_status: str = "verified"
+    segment: str = "HNI"
+    holdings: list[dict] = Field(default_factory=list)
 
 
 class AssessmentRequest(BaseModel):
@@ -45,7 +59,7 @@ class AssessmentRequest(BaseModel):
 
 class ScenarioRequest(BaseModel):
     product: ProductSpec
-    moves: list[float] = [20, 0, -10, -25, -40]
+    moves: list[float] = [20, 10, 0, -10, -20, -25, -30, -35, -40, -50]
 
 
 class CopilotRequest(BaseModel):
@@ -62,4 +76,32 @@ class TextRequest(BaseModel):
 
 class ExplainRequest(BaseModel):
     audit_id: int
+    mode: Literal["rm", "client"] = "client"
+
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+class PortfolioImpactRequest(BaseModel):
+    product: ProductSpec
+    customer_id: str
+    stress_shock_pct: float = -35.0
+
+
+class TeachBackAnswerRequest(BaseModel):
+    audit_id: int
+    answers: list[int]
+
+
+class RMNoteRequest(BaseModel):
+    audit_id: int
+    rm_decision: Optional[str] = None  # "Proceed" | "Modify" | "Decline"
+    rm_comments: Optional[str] = None
+
+
+class TranslateRequest(BaseModel):
+    audit_id: int
+    language: Literal["en", "hi", "mr"] = "en"
     mode: Literal["rm", "client"] = "client"

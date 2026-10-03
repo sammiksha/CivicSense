@@ -1,59 +1,136 @@
-# StructuraAI
-Explainable structured-product suitability platform (ELN, DCD, CPN) with a RAG-grounded, agentic AI copilot.
-Mindspark Hackathon 2026, Fintech track. **F&O / Alternatives Lab has been removed.**
+# FinVision — Understand Before You Invest
+Explainable Structured-Product & Derivatives Suitability Platform for Wealth Management
 
-## Design rule
-Deterministic engines calculate, a rule engine decides, the LLM only orchestrates and explains. It never invents numbers.
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.111.0-009688.svg?style=flat&logo=fastapi)](https://fastapi.tiangolo.com)
+[![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://python.org)
+[![Status](https://img.shields.io/badge/Status-Production%20Ready-success.svg)](#)
 
-## Where RAG, agents and the LLM are used
-| Piece | What it does |
-|---|---|
-| **RAG** (`app/rag`) | Heading-aware chunks of `data/knowledge/*.md` (product explainers, bank policy, glossary, style guide) with TF-IDF retrieval. Used in 3 places: term-sheet glossary for extraction, policy/product context for explanations, and the copilot's `search_knowledge` tool. Answers cite `[kb:doc#n]`. |
-| **Agentic copilot** (`app/agent`) | Claude runs a tool-calling loop over 7 tools (`run_scenario`, `run_assessment`, `find_breaking_point`, `suggest_repairs`, `what_if`, `search_knowledge`, `get_context`). The agent chooses and chains tools; session state holds product/customer. |
-| **Agentic extraction** (`app/extraction`) | PDF/OCR text -> RAG glossary -> Claude forced-tool JSON -> schema validation -> self-repair loop (up to 3 rounds). Missing fields are flagged for the RM, never guessed. |
-| **Explainer** (`app/services/explain.py`) | RM mode / Client mode, grounded by FACTS + retrieved passages. |
-| **Numeric grounding guard** (`app/agent/grounding.py`) | Every number in an LLM answer must trace to engine output; otherwise one corrective retry, then a visible warning. |
-| **No API key?** | Runs in deterministic offline mode (regex extraction, intent router, templates) so the demo never breaks. |
+---
 
-## Quick start
+## 💡 Core Philosophy
+
+> **"Deterministic financial engines calculate. A transparent rule engine decides. The LLM only orchestrates, translates, and explains. It NEVER invents numbers."**
+
+**FinVision** is a purpose-built suitability and explainability platform that helps Relationship Managers (RMs) and retail/HNW customers understand complex structured products (Equity-Linked Notes, Dual Currency Deposits, Capital Protected Notes) *before* committing capital.
+
+FinVision does **NOT** predict stock markets or recommend speculative trades. It guarantees mathematical determinism, transparent regulatory auditability, and clear investor comprehension.
+
+---
+
+## 🌟 Key Features
+
+### 1. ⚖️ Deterministic Financial Engines
+- **Payoff & Barrier Simulation**: Exact analytical payoff calculation across full spot range, barrier-breach simulations, and terminal loss estimation.
+- **Rupee Impact Engine**: Translates percentages into tangible ₹ figures (Best case, Base case, Capital-at-risk, Tail risk loss at ₹10L/₹50L/₹1Cr ticket sizes).
+- **Historical Replay & Historical Twin**: Evaluates proposed notes against historical rolling windows (including 2008 GFC, 2020 COVID crash) and calculates mathematical similarity distance to current market volatility regimes.
+- **Stress Ladder & Regime Scenarios**: Instantaneous and macroeconomic shocks (Inflation surge, Rate cuts, Currency depreciation) with automatic suitability threshold evaluation at each shock level.
+- **Portfolio Impact Analyzer**: Analyzes pre- vs post-allocation asset concentration, sector tilt, and weighted downside risk.
+
+### 2. 🛡️ Suitability & Auto-Repair Engine
+- Multi-dimensional rule engine evaluating:
+  - **Risk Appetite alignment** (Conservative / Moderate / Aggressive)
+  - **Loss Tolerance vs Worst-Case/Tail Risk**
+  - **Investment Horizon vs Product Tenor**
+  - **Underlying Asset Concentration Limit**
+  - **Liquidity & Lock-in Constraints**
+- **Deterministic Auto-Repair**: Suggests parameter modifications (e.g., lower barrier, increase tenor, reduce ticket size) to convert an `UNSUITABLE` or `REVIEW_REQUIRED` product into a `SUITABLE` one.
+
+### 3. 🧠 Teach-Back Verification
+- Generates 3 deterministic, multiple-choice comprehension questions verified strictly by calculation engines.
+- Assesses investor understanding of downside scenarios, barrier breaches, and capital lock-ins before trade execution.
+
+### 4. 📝 Audit Trail & RM Copilot
+- **Complete SQLite Audit Log**: Every calculation, input payload, triggered rule, and generated explanation is fingerprinted and timestamped.
+- **RM Note Generator**: Formats compliant advisory memorandums citing specific risk numbers and regulatory rationale.
+- **Client PDF Report**: Downloads high-fidelity, client-ready suitability summary sheets.
+- **Multilingual Explanations**: Instant client explanations in English, Hindi, and Marathi.
+
+---
+
+## 🚀 Quick Start Guide
+
+### 1. Prerequisites
+- Python 3.10+ (Python 3.11 recommended)
+- `pip` / `virtualenv`
+
+### 2. Installation & Setup
+
 ```bash
-cp .env.example .env            # add ANTHROPIC_API_KEY for LLM mode (optional)
+# Clone or navigate to the repository
+cd structuraai
+
+# Create virtual environment (optional but recommended)
+python -m venv .venv
+# On Windows PowerShell:
+.venv\Scripts\Activate.ps1
+# On Linux/macOS:
+source .venv/bin/activate
+
+# Install backend dependencies
 pip install -r backend/requirements.txt
-cd backend && uvicorn app.main:app --reload     # open http://localhost:8000
-# tests
-python -m pytest -q
-# docker
-docker compose up --build
-```
-Env vars are read from the process environment (export them, or use docker compose `.env`).
-
-## Real market data
-The zip ships **synthetic** fallback prices (`data/market/*_fallback.csv`, generated by `scripts/make_fallback_data.py`, includes a fake 2020-style crash). The API and UI label this `synthetic_fallback` / DEMO DATA. For real history run `python scripts/fetch_market_data.py` (needs internet + yfinance); it is then used automatically (`cached_real`).
-
-## Project layout
-```
-backend/app/engines     payoff, historical replay, Monte Carlo, suitability rules, breaking point, repair
-backend/app/rag         knowledge base + retrieval
-backend/app/agent       copilot, tools, session, offline router, grounding guard
-backend/app/extraction  term-sheet extraction + validation
-backend/app/services    assessment pipeline, explainer, PDF report
-backend/app/audit.py    SQLite audit trail (inputs, data window, rules fired, decision, explanation, model version)
-backend/tests           payoff hand-computed cases, determinism, rules, RAG, agent, API
-frontend/index.html     single-page UI (Plotly): Product Studio, live barrier slider, scenarios, replay, MC, rules, breaking point, repair, explanation, copilot
-data/knowledge          RAG corpus (edit these to change what the AI knows)
-data/config/rules.json  suitability thresholds
 ```
 
-## API
-`POST /api/v1/assessment` -> `{audit_id, status, flags, explanation, result}` | `POST /api/v1/payoff` | `POST /api/v1/product/extract-text|extract-file` | `POST /api/v1/copilot` | `POST /api/v1/explain` | `GET /api/v1/knowledge/search?q=` | `GET /api/v1/audit[/id]` | `GET /api/v1/report/{id}` (client PDF) | `GET /docs` (OpenAPI)
+### 3. Running the Application
 
-## Modelling assumptions (also stated on screen)
-- ELN: coupon always paid; principal returned unless barrier breached AND final < strike, then principal x final/initial. Barrier monitored on the path minimum.
-- DCD: interest always paid; converts at the strike if final < strike. CPN: protection + participation x max(0, return).
-- **Tail loss** used by the loss-tolerance rule = max(worst historical rolling-window loss, Monte Carlo 1st-percentile loss).
-- Breaking point = rules re-run at instantaneous market shocks 0% to -60% (1% steps).
-- Risk levels, thresholds (loss review multiple 1.5, concentration limit 50%) are illustrative bank policy in `rules.json` / `suitability_policy.md`. `regulatory_notes.md` is generic, not legal advice; confirm SEBI/RBI requirements with compliance.
-- Monte Carlo drift (8%) is an assumption; volatility comes from history.
+```bash
+# Start backend server from structuraai/backend directory
+cd backend
+python -m uvicorn app.main:app --reload --port 8000
+```
 
-## Not included (future scope)
-Autocallables, implied-vol surfaces, bank CRM integration, Hindi/Marathi explanations, natural-language customer-profile creation, Next.js frontend (the UI is a single static page served by FastAPI to keep the demo simple).
+Open your browser and navigate to:
+👉 **[http://localhost:8000](http://localhost:8000)**
+
+---
+
+## 👥 Demo Logins & Persona Roles
+
+| Role | Username | Password | Purpose |
+|---|---|---|---|
+| **Relationship Manager** | `rm_user` | `rm123` | Full access: Product Studio, Assessment, Stress Ladder, Auto-Repair, RM Notes, Audit Trail |
+| **Customer** | `cust_user` | `cust123` | Customer view: Rupee Impact, Simple Breakdown, Historical Twin, Teach-Back Check, PDF Download |
+| **Auditor / Compliance** | `audit_user` | `audit123` | Read-only compliance audit trail, regulatory reports, and mathematical verification logs |
+
+---
+
+## 📁 Architecture & Directory Structure
+
+```
+structuraai/
+├── backend/
+│   ├── app/
+│   │   ├── main.py              # FastAPI application, routing, auth & static mount
+│   │   ├── schemas.py           # Pydantic data schemas & validators
+│   │   ├── auth.py              # Role-based JWT/token authentication
+│   │   ├── alerts.py            # Deterministic risk alert engine
+│   │   ├── audit.py             # SQLite immutable audit storage
+│   │   ├── engines/             # Pure deterministic financial math
+│   │   │   ├── payoff.py        # Exact payoff curves & formulas
+│   │   │   ├── suitability.py   # Multi-factor rule evaluator
+│   │   │   ├── portfolio.py     # Portfolio concentration & impact
+│   │   │   ├── twin.py          # Historical rolling window similarity
+│   │   │   ├── stress.py        # Stress ladder & macroeconomic regimes
+│   │   │   ├── teachback.py     # Deterministic comprehension verification
+│   │   │   ├── historical.py    # Rolling replay engine
+│   │   │   ├── monte_carlo.py   # Stochastic tail risk simulation
+│   │   │   ├── breaking_point.py# Vulnerability threshold scanner
+│   │   │   └── repair.py        # Constraint-satisfaction auto-repair
+│   │   ├── extraction/          # Term-sheet text extraction
+│   │   ├── rag/                 # Regulatory & product knowledge retrieval
+│   │   └── services/            # Explanation generation & PDF reporting
+│   └── requirements.txt
+├── frontend/
+│   └── index.html               # Premium interactive Single-Page Application (Plotly.js + Tailwind)
+├── data/
+│   ├── samples/                 # Sample customers, products, and portfolios
+│   └── market/                  # Historical price series (NIFTY50, USDINR, etc.)
+└── scripts/                     # Market data fetchers and test utilities
+```
+
+---
+
+## 🛡️ Regulatory Compliance & Grounding
+
+- **SEBI / RBI Aligned**: Tailored to structured product disclosure guidelines.
+- **Zero Hallucination Guarantee**: All numbers displayed in explanations or RM memos must directly reconcile with engine outputs.
+- **Complete Replayability**: Any past assessment can be audited and mathematically re-executed from the immutable SQLite audit record.

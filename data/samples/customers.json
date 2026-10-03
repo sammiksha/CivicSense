@@ -1,8 +1,71 @@
 [
-  {"id": "C101", "name": "Customer C101", "risk_appetite": "conservative", "loss_tolerance_pct": 5,
-   "horizon_months": 24, "portfolio_value": 10000000, "existing_exposures": {"NIFTY 50": 45}},
-  {"id": "C102", "name": "Customer C102", "risk_appetite": "moderate", "loss_tolerance_pct": 15,
-   "horizon_months": 36, "portfolio_value": 25000000, "existing_exposures": {"NIFTY 50": 20}},
-  {"id": "C103", "name": "Customer C103", "risk_appetite": "aggressive", "loss_tolerance_pct": 30,
-   "horizon_months": 60, "portfolio_value": 50000000, "existing_exposures": {"NIFTY 50": 30, "USDINR": 5}}
+  {
+    "id": "C101", "name": "Rahul Gupta",
+    "risk_appetite": "conservative",
+    "loss_tolerance_pct": 5,
+    "horizon_months": 24,
+    "portfolio_value": 10000000,
+    "existing_exposures": {"NIFTY 50": 45},
+    "annual_income_inr": 2000000,
+    "liquidity_need": "medium",
+    "rm_id": "RM001",
+    "email": "customer@finvision.demo",
+    "phone": "+91-98765-43210",
+    "city": "Mumbai",
+    "pan": "ABCDE1234F",
+    "kyc_status": "verified",
+    "segment": "HNI",
+    "holdings": [
+      {"asset": "NIFTY 50 Mutual Fund", "underlying": "NIFTY 50", "value": 4500000, "type": "equity"},
+      {"asset": "Fixed Deposit", "underlying": "debt", "value": 3000000, "type": "debt"},
+      {"asset": "Cash / Liquid Fund", "underlying": "cash", "value": 2500000, "type": "cash"}
+    ]
+  },
+  {
+    "id": "C102", "name": "Anita Singh",
+    "risk_appetite": "moderate",
+    "loss_tolerance_pct": 15,
+    "horizon_months": 36,
+    "portfolio_value": 25000000,
+    "existing_exposures": {"NIFTY 50": 20},
+    "annual_income_inr": 5000000,
+    "liquidity_need": "low",
+    "rm_id": "RM001",
+    "email": "c102@finvision.demo",
+    "phone": "+91-98765-43211",
+    "city": "Delhi",
+    "pan": "ABCDE1235F",
+    "kyc_status": "verified",
+    "segment": "HNI",
+    "holdings": [
+      {"asset": "NIFTY 50 ETF", "underlying": "NIFTY 50", "value": 5000000, "type": "equity"},
+      {"asset": "Corporate Bonds", "underlying": "debt", "value": 10000000, "type": "debt"},
+      {"asset": "Gold ETF", "underlying": "gold", "value": 5000000, "type": "gold"},
+      {"asset": "Cash", "underlying": "cash", "value": 5000000, "type": "cash"}
+    ]
+  },
+  {
+    "id": "C103", "name": "Vikram Patel",
+    "risk_appetite": "aggressive",
+    "loss_tolerance_pct": 30,
+    "horizon_months": 60,
+    "portfolio_value": 50000000,
+    "existing_exposures": {"NIFTY 50": 30, "USDINR": 5},
+    "annual_income_inr": 12000000,
+    "liquidity_need": "low",
+    "rm_id": "RM002",
+    "email": "c103@finvision.demo",
+    "phone": "+91-98765-43212",
+    "city": "Bengaluru",
+    "pan": "ABCDE1236F",
+    "kyc_status": "verified",
+    "segment": "UHNI",
+    "holdings": [
+      {"asset": "NIFTY 50 Index Fund", "underlying": "NIFTY 50", "value": 15000000, "type": "equity"},
+      {"asset": "USDINR Forward", "underlying": "USDINR", "value": 2500000, "type": "fx"},
+      {"asset": "Private Equity", "underlying": "equity_other", "value": 20000000, "type": "equity"},
+      {"asset": "Real Estate Fund", "underlying": "debt", "value": 7500000, "type": "debt"},
+      {"asset": "Cash", "underlying": "cash", "value": 5000000, "type": "cash"}
+    ]
+  }
 ]

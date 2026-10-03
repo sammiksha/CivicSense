@@ -1,9 +1,15 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>StructuraAI</title>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FinVision — Understand Before You Invest</title>
+<meta name="description" content="FinVision: Explainable structured-product suitability platform. Understand structured financial products before you invest.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script>
 (function(){
-  function loadScript(src,cb){var s=document.createElement('script');s.src=src;s.onload=cb;s.onerror=function(){console.warn('Plotly failed to load from '+src)};document.head.appendChild(s);}
+  function loadScript(src,cb){var s=document.createElement('script');s.src=src;s.onload=cb;s.onerror=function(){if(cb)cb();};document.head.appendChild(s);}
   loadScript('/plotly.min.js',function(){
     if(typeof Plotly==='undefined')loadScript('https://cdn.plot.ly/plotly-2.35.2.min.js',function(){window._plotlyReady=true;document.dispatchEvent(new Event('plotlyready'))});
     else{window._plotlyReady=true;document.dispatchEvent(new Event('plotlyready'));}
@@ -11,97 +17,1272 @@
 })();
 </script>
 <style>
-:root{--bg:#f4f6fb;--card:#fff;--ink:#1b2440;--mut:#6b7494;--line:#dfe4f0;--pri:#2b4acb;--ok:#1f9d55;--rev:#d98c00;--bad:#d64545}
-*{box-sizing:border-box}body{margin:0;font:14px/1.45 system-ui,Segoe UI,Arial;background:var(--bg);color:var(--ink)}
-header{background:var(--pri);color:#fff;padding:12px 20px;display:flex;justify-content:space-between;align-items:center}
-header b{font-size:18px}.pill{background:#ffffff33;border-radius:12px;padding:2px 10px;font-size:12px}
-main{display:grid;grid-template-columns:340px 1fr;gap:14px;padding:14px;max-width:1400px;margin:auto}
-.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px}
-h3{margin:0 0 8px;font-size:14px}label{display:block;font-size:12px;color:var(--mut);margin-top:8px}
-input,select,textarea,button{width:100%;padding:7px;border:1px solid var(--line);border-radius:6px;font:inherit}
-button{background:var(--pri);color:#fff;border:0;cursor:pointer;margin-top:8px}button.sec{background:#e9edfb;color:var(--pri)}
-table{border-collapse:collapse;width:100%}td,th{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left;font-size:13px}
-.badge{display:inline-block;padding:3px 12px;border-radius:14px;color:#fff;font-weight:600}
-.SUITABLE{background:var(--ok)}.REVIEW{background:var(--rev)}.MISMATCH{background:var(--bad)}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.mut{color:var(--mut);font-size:12px}
-#chat{max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:6px;padding:8px;margin-bottom:6px;background:#fafbff}
-.u{color:var(--pri)}.tool{font-size:11px;color:var(--mut)}.warn{color:var(--bad)}
-.ladder{display:flex;height:22px;border-radius:4px;overflow:hidden}.ladder div{flex:1}
-@media(max-width:900px){main{grid-template-columns:1fr}.grid2{grid-template-columns:1fr}}
-</style></head><body>
-<header><b>StructuraAI</b><span><span class="pill" id="llm">...</span> <span class="pill">Mindspark Hackathon 2026 &middot; Fintech</span></span></header>
-<main>
-<section>
- <div class="card"><h3>1. Customer</h3><select id="cust"></select><div class="mut" id="custInfo"></div></div>
- <div class="card"><h3>2. Product Studio</h3>
-  <label>Upload term sheet (PDF / TXT)</label><input type="file" id="file" accept=".pdf,.txt">
-  <label>...or describe it</label><textarea id="nl" rows="2" placeholder="one-year NIFTY note, 12% coupon, 70% barrier, 10 lakh"></textarea>
-  <button class="sec" onclick="extract()">Extract &amp; validate</button><div id="exMsg" class="mut"></div>
-  <label>Type</label><select id="type" onchange="live()"><option>ELN</option><option>DCD</option><option>CPN</option></select>
-  <label>Underlying</label><select id="under" onchange="live()"><option>NIFTY 50</option><option>USDINR</option></select>
-  <div class="grid2"><div><label>Tenor (months)</label><input id="tenor" type="number" value="12" onchange="live()"></div>
-   <div><label>Coupon / interest % p.a.</label><input id="coupon" type="number" value="12" onchange="live()"></div></div>
-  <label>Barrier % (ELN): <b id="bv">70</b></label><input id="barrier" type="range" min="30" max="95" value="70" oninput="bv.textContent=this.value;live()">
-  <div class="grid2"><div><label>Strike / conversion %</label><input id="strike" type="number" value="100" onchange="live()"></div>
-   <div><label>Notional (Rs)</label><input id="notional" type="number" value="1000000" onchange="live()"></div></div>
-  <div class="grid2"><div><label>CPN protection %</label><input id="prot" type="number" value="100" onchange="live()"></div>
-   <div><label>CPN participation %</label><input id="part" type="number" value="80" onchange="live()"></div></div>
-  <button onclick="runAssess()">Run full assessment</button>
- </div>
-</section>
-<section>
- <div class="card"><h3>Decision</h3><div id="decision" class="mut">Run an assessment.</div><div id="flags"></div><div class="mut" id="src"></div></div>
- <div class="card"><h3>Payoff at maturity (drag the barrier)</h3><div id="chart" style="height:300px"></div><div id="scen"></div></div>
- <div class="grid2">
-  <div class="card"><h3>Historical replay</h3><div id="hist" class="mut">-</div><div id="histChart" style="height:200px"></div></div>
-  <div class="card"><h3>Monte Carlo</h3><div id="mc" class="mut">-</div></div>
- </div>
- <div class="card"><h3>Suitability rules</h3><div id="rules" class="mut">-</div></div>
- <div class="card"><h3>Breaking point &amp; repair</h3><div id="bp" class="mut">-</div></div>
- <div class="card"><h3>Explanation <select id="mode" style="width:auto" onchange="reExplain()"><option value="rm">RM mode</option><option value="client">Client mode</option></select>
-   <a id="pdf" href="#" target="_blank" style="font-size:12px;margin-left:8px"></a></h3><div id="expl" class="mut">-</div><div id="sources" class="tool"></div></div>
- <div class="card"><h3>AI copilot (agent + RAG)</h3><div id="chat"></div>
-  <input id="q" placeholder="What happens if NIFTY falls 25%?  /  When does it stop being suitable?  /  How can I fix it?" onkeydown="if(event.key==='Enter')ask()"><button onclick="ask()">Ask</button></div>
-</section></main>
+:root {
+  --bg: #f0f2f7;
+  --card: #ffffff;
+  --ink: #0f172a;
+  --ink2: #334155;
+  --mut: #64748b;
+  --line: #e2e8f0;
+  --pri: #1e40af;
+  --pri-d: #1e3a8a;
+  --pri-l: #dbeafe;
+  --ok: #15803d;
+  --ok-l: #dcfce7;
+  --rev: #b45309;
+  --rev-l: #fef3c7;
+  --bad: #b91c1c;
+  --bad-l: #fee2e2;
+  --nav-w: 220px;
+  --header-h: 56px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5}
+
+/* ── Login ── */
+#login-screen {
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#1e3a8a 0%,#1e40af 50%,#1d4ed8 100%);
+}
+.login-box {
+  background:#fff;border-radius:16px;padding:40px;width:100%;max-width:440px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.25);
+}
+.login-logo { text-align:center;margin-bottom:28px }
+.login-logo .logo-name { font-size:26px;font-weight:700;color:var(--pri);letter-spacing:-0.5px }
+.login-logo .logo-tagline { font-size:13px;color:var(--mut);margin-top:4px }
+.login-tabs { display:flex;gap:8px;margin-bottom:24px }
+.login-tab { flex:1;padding:9px;border-radius:8px;border:2px solid var(--line);background:#fff;cursor:pointer;font:500 13px 'Inter',sans-serif;color:var(--mut);transition:.15s }
+.login-tab.active { border-color:var(--pri);color:var(--pri);background:var(--pri-l) }
+.login-field label { display:block;font-size:12px;font-weight:500;color:var(--ink2);margin-bottom:5px }
+.login-field input { width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;font:inherit;font-size:14px;outline:none;transition:.15s }
+.login-field input:focus { border-color:var(--pri) }
+.login-field { margin-bottom:14px }
+.btn-login { width:100%;padding:12px;background:var(--pri);color:#fff;border:0;border-radius:8px;font:600 14px 'Inter',sans-serif;cursor:pointer;margin-top:6px;transition:.15s }
+.btn-login:hover { background:var(--pri-d) }
+.demo-creds { background:#f8faff;border-radius:8px;padding:12px;margin-top:16px;font-size:12px }
+.demo-creds b { color:var(--pri);display:block;margin-bottom:6px }
+.demo-creds span { color:var(--mut) }
+.login-err { color:var(--bad);font-size:12px;margin-top:8px;display:none }
+
+/* ── App Shell ── */
+#app-shell { display:none;min-height:100vh }
+.top-bar {
+  position:fixed;top:0;left:0;right:0;height:var(--header-h);z-index:100;
+  background:#fff;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;padding:0 20px;gap:16px;
+}
+.top-logo { font-size:17px;font-weight:700;color:var(--pri);letter-spacing:-0.3px;flex:0 0 auto }
+.top-logo span { font-weight:300;color:var(--mut);font-size:12px;display:block;line-height:1 }
+.top-bar-right { margin-left:auto;display:flex;align-items:center;gap:12px }
+.top-user { font-size:13px;color:var(--ink2);display:flex;align-items:center;gap:8px }
+.role-badge { font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;background:var(--pri-l);color:var(--pri) }
+.role-badge.customer { background:#f0fdf4;color:var(--ok) }
+.btn-icon { background:none;border:1px solid var(--line);border-radius:6px;cursor:pointer;padding:6px 10px;font-size:12px;color:var(--mut);display:flex;align-items:center;gap:4px }
+.btn-icon:hover { background:var(--bg) }
+.alert-bell { position:relative;cursor:pointer;background:none;border:1px solid var(--line);border-radius:6px;padding:6px 10px }
+.alert-count { position:absolute;top:-6px;right:-6px;background:var(--bad);color:#fff;border-radius:10px;font-size:10px;font-weight:700;padding:1px 5px;min-width:16px;text-align:center }
+
+/* ── Nav Sidebar ── */
+.sidebar {
+  position:fixed;top:var(--header-h);left:0;bottom:0;width:var(--nav-w);
+  background:#fff;border-right:1px solid var(--line);overflow-y:auto;z-index:50;padding:12px 0;
+}
+.nav-section-label { font-size:10px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.8px;padding:10px 16px 4px }
+.nav-item { display:flex;align-items:center;gap:10px;padding:8px 16px;cursor:pointer;color:var(--ink2);border-radius:0;transition:.1s;font-size:13px;border-left:3px solid transparent }
+.nav-item:hover { background:var(--bg);color:var(--pri) }
+.nav-item.active { background:var(--pri-l);color:var(--pri);font-weight:500;border-left-color:var(--pri) }
+.nav-item .nav-icon { width:16px;text-align:center;font-size:14px }
+
+/* ── Main Content ── */
+.main-content { margin-left:var(--nav-w);margin-top:var(--header-h);padding:20px;min-height:calc(100vh - var(--header-h)) }
+
+/* ── Cards ── */
+.card { background:#fff;border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:14px }
+.card-title { font-size:13px;font-weight:600;color:var(--ink);margin-bottom:14px;display:flex;align-items:center;gap:8px }
+.card-title .badge-sm { font-size:10px;font-weight:500;padding:2px 6px;border-radius:4px }
+.grid-2 { display:grid;grid-template-columns:1fr 1fr;gap:14px }
+.grid-3 { display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px }
+.grid-4 { display:grid;grid-template-columns:repeat(4,1fr);gap:12px }
+
+/* ── KPI Cards ── */
+.kpi { background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px 18px }
+.kpi-label { font-size:11px;color:var(--mut);font-weight:500;text-transform:uppercase;letter-spacing:.5px }
+.kpi-value { font-size:24px;font-weight:700;color:var(--ink);margin-top:4px;letter-spacing:-0.5px }
+.kpi-sub { font-size:12px;color:var(--mut);margin-top:2px }
+
+/* ── Status Badges ── */
+.badge { display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600 }
+.badge.SUITABLE { background:var(--ok-l);color:var(--ok) }
+.badge.REVIEW { background:var(--rev-l);color:var(--rev) }
+.badge.MISMATCH { background:var(--bad-l);color:var(--bad) }
+.badge.INFO { background:#eff6ff;color:#1d4ed8 }
+.badge.WARNING { background:var(--rev-l);color:var(--rev) }
+.badge.HIGH { background:var(--bad-l);color:var(--bad) }
+
+/* ── Tables ── */
+table { width:100%;border-collapse:collapse }
+th,td { padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);font-size:13px }
+th { font-size:11px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;background:var(--bg) }
+tr:last-child td { border-bottom:0 }
+tr:hover td { background:#fafbff }
+
+/* ── Forms ── */
+.form-group { margin-bottom:12px }
+.form-group label { display:block;font-size:12px;font-weight:500;color:var(--ink2);margin-bottom:5px }
+.form-group input,.form-group select,.form-group textarea {
+  width:100%;padding:8px 10px;border:1.5px solid var(--line);border-radius:6px;font:inherit;font-size:13px;outline:none;transition:.15s
+}
+.form-group input:focus,.form-group select:focus { border-color:var(--pri) }
+.form-group textarea { resize:vertical;min-height:60px }
+.form-row { display:grid;grid-template-columns:1fr 1fr;gap:10px }
+
+/* ── Buttons ── */
+.btn { padding:8px 16px;border-radius:6px;border:0;cursor:pointer;font:500 13px 'Inter',sans-serif;transition:.15s;display:inline-flex;align-items:center;gap:6px }
+.btn-primary { background:var(--pri);color:#fff }
+.btn-primary:hover { background:var(--pri-d) }
+.btn-secondary { background:var(--bg);color:var(--ink2);border:1px solid var(--line) }
+.btn-secondary:hover { background:var(--line) }
+.btn-sm { padding:5px 10px;font-size:12px }
+.btn-full { width:100%;justify-content:center }
+.btn-danger { background:var(--bad-l);color:var(--bad) }
+
+/* ── Alerts ── */
+.alert-item { border-left:3px solid;border-radius:6px;padding:10px 12px;margin-bottom:8px;font-size:13px }
+.alert-item.HIGH { border-color:var(--bad);background:var(--bad-l) }
+.alert-item.WARNING { border-color:var(--rev);background:var(--rev-l) }
+.alert-item.INFO { border-color:var(--pri);background:#eff6ff }
+.alert-title { font-weight:600;margin-bottom:3px }
+.alert-msg { color:var(--ink2);font-size:12px }
+.alert-action { font-size:11px;color:var(--mut);margin-top:4px;font-style:italic }
+
+/* ── Ladder ── */
+.ladder-row { display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid var(--line) }
+.ladder-shock { width:50px;font-size:12px;font-weight:500;color:var(--ink2) }
+.ladder-bar-wrap { flex:1;height:14px;background:var(--bg);border-radius:3px;overflow:hidden }
+.ladder-bar { height:100%;border-radius:3px;transition:.3s }
+.ladder-loss { width:60px;font-size:12px;color:var(--mut);text-align:right }
+.ladder-status { width:80px;text-align:right }
+
+/* ── Chat ── */
+.chat-box { height:240px;overflow-y:auto;border:1px solid var(--line);border-radius:6px;padding:10px;background:#fafbff;margin-bottom:8px;display:flex;flex-direction:column;gap:8px }
+.chat-msg { max-width:85%;padding:8px 12px;border-radius:8px;font-size:13px;line-height:1.5 }
+.chat-msg.user { background:var(--pri);color:#fff;align-self:flex-end;border-radius:8px 8px 2px 8px }
+.chat-msg.bot { background:#fff;border:1px solid var(--line);align-self:flex-start;border-radius:8px 8px 8px 2px }
+.chat-msg.tool-trace { font-size:11px;color:var(--mut);background:transparent;border:0;padding:0 }
+.chat-input-row { display:flex;gap:6px }
+.chat-input-row input { flex:1;padding:8px 10px;border:1.5px solid var(--line);border-radius:6px;font:inherit;font-size:13px;outline:none }
+.chat-input-row input:focus { border-color:var(--pri) }
+
+/* ── Teach-back ── */
+.tb-question { margin-bottom:18px;border:1px solid var(--line);border-radius:8px;padding:14px }
+.tb-q-text { font-weight:500;margin-bottom:10px;color:var(--ink) }
+.tb-option { display:flex;align-items:center;gap:8px;padding:7px;cursor:pointer;border-radius:6px;font-size:13px;margin-bottom:4px }
+.tb-option:hover { background:var(--bg) }
+.tb-option input { cursor:pointer }
+.tb-result { margin-top:8px;padding:8px;border-radius:6px;font-size:12px }
+.tb-result.correct { background:var(--ok-l);color:var(--ok) }
+.tb-result.wrong { background:var(--bad-l);color:var(--bad) }
+
+/* ── Loading/Empty states ── */
+.loading { text-align:center;padding:40px;color:var(--mut);font-size:13px }
+.loading::after { content:'';display:inline-block;width:16px;height:16px;border:2px solid var(--line);border-top-color:var(--pri);border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-left:8px }
+@keyframes spin { to { transform:rotate(360deg) } }
+.empty { text-align:center;padding:40px;color:var(--mut);font-size:13px }
+
+/* ── Disclaimer bar ── */
+.disclaimer { background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:8px 12px;font-size:11px;color:#92400e;margin-bottom:12px }
+
+/* ── Misc ── */
+.mut { color:var(--mut) }
+.text-sm { font-size:12px }
+.text-xs { font-size:11px }
+.fw6 { font-weight:600 }
+.mt4 { margin-top:4px }
+.mt8 { margin-top:8px }
+.mt14 { margin-top:14px }
+.flex { display:flex }
+.items-center { align-items:center }
+.gap-8 { gap:8px }
+.gap-14 { gap:14px }
+.mb0 { margin-bottom:0 }
+.page { display:none }
+.page.active { display:block }
+.two-col { display:grid;grid-template-columns:340px 1fr;gap:14px }
+@media(max-width:900px){.two-col,.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}.sidebar{display:none}.main-content{margin-left:0}}
+
+/* ── Highlight for warnings ── */
+.warn-text { color:var(--bad);font-weight:500 }
+.ok-text { color:var(--ok);font-weight:500 }
+.info-text { color:var(--pri);font-weight:500 }
+
+/* ── Section headers ── */
+.section-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:16px }
+.section-title { font-size:18px;font-weight:600;color:var(--ink) }
+.section-sub { font-size:13px;color:var(--mut);margin-top:2px }
+
+/* ── Regime grid ── */
+.regime-card { border-radius:8px;padding:12px;border:1px solid var(--line) }
+.regime-card.bull { background:#f0fdf4 }
+.regime-card.normal { background:#f0f9ff }
+.regime-card.mild { background:#fefce8 }
+.regime-card.severe { background:#fff7ed }
+.regime-card.crash { background:#fff1f2 }
+</style>
+</head>
+<body>
+
+<!-- ══════════════ LOGIN ══════════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="logo-name">FinVision</div>
+      <div class="logo-tagline">Understand Before You Invest</div>
+    </div>
+    <div class="login-tabs">
+      <button class="login-tab active" id="tab-rm" onclick="switchLoginTab('rm')">Relationship Manager</button>
+      <button class="login-tab" id="tab-customer" onclick="switchLoginTab('customer')">Customer</button>
+    </div>
+    <div class="login-field">
+      <label>Email</label>
+      <input type="email" id="login-email" placeholder="Enter your email" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="login-field">
+      <label>Password</label>
+      <input type="password" id="login-password" placeholder="Enter your password" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div id="login-err" class="login-err">Invalid credentials. Please try again.</div>
+    <button class="btn-login" onclick="doLogin()">Sign In</button>
+    <div class="demo-creds" id="demo-creds-rm">
+      <b>Demo credentials (RM)</b>
+      <span>Email: rm@finvision.demo<br>Password: RM@123</span>
+    </div>
+    <div class="demo-creds" id="demo-creds-customer" style="display:none">
+      <b>Demo credentials (Customer)</b>
+      <span>Email: customer@finvision.demo<br>Password: Customer@123</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ APP SHELL ══════════════ -->
+<div id="app-shell">
+  <!-- Top bar -->
+  <div class="top-bar">
+    <div class="top-logo">FinVision <span>Understand Before You Invest</span></div>
+    <!-- Language toggle -->
+    <div style="display:flex;gap:4px;margin-left:20px">
+      <button class="btn-icon" onclick="setLang('en')" id="lang-en" style="border-color:var(--pri);color:var(--pri)">EN</button>
+      <button class="btn-icon" onclick="setLang('hi')" id="lang-hi">हि</button>
+      <button class="btn-icon" onclick="setLang('mr')" id="lang-mr">म</button>
+    </div>
+    <div class="top-bar-right">
+      <button class="alert-bell btn-icon" onclick="navTo('alerts')">
+        🔔 <span id="alert-count-badge" class="alert-count" style="display:none">0</span>
+      </button>
+      <div class="top-user">
+        <span id="top-user-name">—</span>
+        <span id="top-role-badge" class="role-badge">—</span>
+      </div>
+      <button class="btn-icon" onclick="doLogout()">Sign Out</button>
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <!-- filled by JS based on role -->
+  </div>
+
+  <!-- Main content -->
+  <div class="main-content" id="main-content">
+    <!-- pages injected by JS -->
+  </div>
+</div>
+
 <script>
-const $=id=>document.getElementById(id);let customers=[],auditId=null,sid='s'+Math.random().toString(36).slice(2);
-const api=async(p,b)=>{const r=await fetch(p,b?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}:{});if(!r.ok)throw new Error((await r.text()));return r.json()};
-const prod=()=>{const t=$('type').value,o={product_type:t,underlying:$('under').value,tenor_months:+$('tenor').value,coupon_pct:+$('coupon').value,
- strike_pct:+$('strike').value,notional:+$('notional').value,protection_pct:+$('prot').value,participation_pct:+$('part').value};if(t==='ELN')o.barrier_pct=+$('barrier').value;return o};
-const fmt=x=>x==null?'n/a':(+x).toLocaleString('en-IN',{maximumFractionDigits:2});
-const badge=s=>`<span class="badge ${s}">${s}</span>`;
-async function init(){const h=await api('/health');$('llm').textContent=h.llm_mode==='claude'?'Claude + RAG':'offline mode';
- customers=await api('/api/v1/customers');$('cust').innerHTML=customers.map(c=>`<option value="${c.id}">${c.id} - ${c.risk_appetite}</option>`).join('');$('cust').onchange=custInfo;custInfo();
- if(window._plotlyReady)live();else document.addEventListener('plotlyready',live,{once:true})}
-function custInfo(){const c=customers.find(x=>x.id===$('cust').value);$('custInfo').textContent=`Loss tolerance ${c.loss_tolerance_pct}% | horizon ${c.horizon_months}m | exposure ${JSON.stringify(c.existing_exposures)}`}
-let t0;function live(){clearTimeout(t0);t0=setTimeout(async()=>{try{const r=await api('/api/v1/payoff',{product:prod()});if(typeof Plotly!=='undefined')drawPayoff(r.curve);scen(r.scenarios)}catch(e){}},120)}
-function drawPayoff(c){const x=c.map(p=>p.move_pct),y=c.map(p=>p.return_pct);Plotly.react('chart',[{x,y,mode:'lines',name:'Return %',line:{color:'#2b4acb'}},
- {x,y:y.map(v=>Math.min(v,0)),fill:'tozeroy',mode:'none',fillcolor:'rgba(214,69,69,.25)',name:'Loss zone'}],
- {margin:{t:10,l:45,r:10,b:40},xaxis:{title:'Underlying move at maturity (%)'},yaxis:{title:'Return on principal (%)'},legend:{orientation:'h'}},{displayModeBar:false})}
-function scen(s){$('scen').innerHTML='<table><tr><th>Move</th><th>Final value</th><th>P/L</th><th>Barrier breached</th></tr>'+s.map(r=>`<tr><td>${r.move_pct>0?'+':''}${r.move_pct}%</td><td>Rs ${fmt(r.final_value)}</td><td>${r.pnl_pct}%</td><td>${r.barrier_breached==null?'-':r.barrier_breached?'Yes':'No'}</td></tr>`).join('')+'</table>'}
-async function extract(){$('exMsg').textContent='Extracting...';try{let r;const f=$('file').files[0];
- if(f){const fd=new FormData();fd.append('file',f);const res=await fetch('/api/v1/product/extract-file',{method:'POST',body:fd});r=await res.json()}else r=await api('/api/v1/product/extract-text',{text:$('nl').value});
- const t=r.terms||{};const m={type:'product_type',under:'underlying',tenor:'tenor_months',coupon:'coupon_pct',barrier:'barrier_pct',strike:'strike_pct',notional:'notional',prot:'protection_pct',part:'participation_pct'};
- for(const k in m)if(t[m[k]]!=null){$(k).value=t[m[k]];if(k==='barrier')bv.textContent=t[m[k]]}
- $('exMsg').innerHTML=`<b>${r.method}</b>: ${r.valid?'valid - please confirm values':'needs confirmation: '+(r.needs_confirmation.concat(r.errors)).join(', ')}`;live()}catch(e){$('exMsg').textContent=e.message}}
-async function runAssess(){$('decision').textContent='Running 10,000 simulations...';try{const r=await api('/api/v1/assessment',{product:prod(),customer_id:$('cust').value,mode:$('mode').value});auditId=r.audit_id;render(r)}catch(e){$('decision').textContent=e.message}}
-function render(r){const a=r.result,m=a.metrics,h=m.historical,q=m.monte_carlo,bp=a.breaking_point;
- $('decision').innerHTML=badge(r.status)+` &nbsp;audit #${r.audit_id}`;$('src').innerHTML=`Data: ${a.data_source}${a.data_source==='synthetic_fallback'?' <b class="warn">(DEMO DATA - run scripts/fetch_market_data.py for real history)</b>':''} | ${a.data_window.join(' to ')}`;
- $('flags').innerHTML=r.flags.map(f=>`<div>&#9888; ${f.message}</div>`).join('');
- $('hist').innerHTML=`${h.n_windows} rolling windows | best ${h.best_pct}% | worst ${h.worst_pct}% (${h.worst_window.join(' to ')}) | avg ${h.avg_pct}% | loss-making ${h.pct_windows_loss}%`;
- Plotly.react('histChart',[{type:'bar',x:h.histogram.edges.slice(0,-1),y:h.histogram.counts,marker:{color:'#2b4acb'}}],{margin:{t:5,l:35,r:5,b:30},xaxis:{title:'Outcome %'}},{displayModeBar:false});
- $('mc').innerHTML=`${q.n_paths} paths, seed ${q.seed}, vol ${q.annual_vol_pct}%<br>P(loss) <b>${q.prob_loss_pct}%</b> | P(barrier breach) <b>${q.prob_barrier_breach_pct}%</b><br>5th percentile ${q.p5_pct}% | median ${q.median_pct}%<br>Tail loss used by rules: <b>${m.tail_loss_pct}%</b>`;
- $('rules').innerHTML='<table><tr><th>Rule</th><th>Status</th><th>Reason</th></tr>'+a.rules.map(x=>`<tr><td>${x.rule_id}</td><td>${badge(x.status)}</td><td>${x.message}</td></tr>`).join('')+'</table>';
- const col={SUITABLE:'#1f9d55',REVIEW:'#d98c00',MISMATCH:'#d64545'};
- $('bp').innerHTML=`Loss rule: suitable until <b>${bp.suitable_until_pct==null?'n/a':bp.suitable_until_pct+'%'}</b> | review from <b>${bp.review_from_pct==null?'-':bp.review_from_pct+'%'}</b> | mismatch from <b>${bp.mismatch_from_pct==null?'-':bp.mismatch_from_pct+'%'}</b>`+
-  (bp.blocked_by_other_rules.length?`<br>Other rules also failing: ${bp.blocked_by_other_rules.join(', ')}`:'')+
-  `<div class="ladder" style="margin:8px 0">${bp.ladder.map(l=>`<div title="${l.shock_pct}%: loss ${l.loss_pct}%" style="background:${col[l.loss_rule]}"></div>`).join('')}</div><div class="mut">0% &rarr; -60% market shock</div>`+
-  `<h3 style="margin-top:10px">Repair (re-verified by the rule engine)</h3>`+(a.repairs.length?'<ol>'+a.repairs.map(x=>`<li>${x.description} &rarr; ${x.decision_after}</li>`).join('')+'</ol>':'None needed / none found within bounds');
- showExpl(r.explanation);$('pdf').href='/api/v1/report/'+r.audit_id;$('pdf').textContent='Client PDF'}
-function showExpl(e){$('expl').innerHTML=e.text.replace(/\n/g,'<br>')+(e.warnings.length?`<div class="warn">${e.warnings.join('; ')}</div>`:'');$('sources').textContent=`engine: ${e.engine} | RAG sources: ${e.sources.join(', ')}`}
-async function reExplain(){if(auditId)showExpl(await api('/api/v1/explain',{audit_id:auditId,mode:$('mode').value}))}
-async function ask(){const q=$('q').value.trim();if(!q)return;$('q').value='';const ch=$('chat');ch.innerHTML+=`<div class="u"><b>You:</b> ${q}</div>`;
- try{const r=await api('/api/v1/copilot',{session_id:sid,message:q,mode:$('mode').value,product:prod(),customer_id:$('cust').value});
- ch.innerHTML+=`<div><b>Copilot:</b> ${r.answer}</div><div class="tool">tools: ${r.tool_trace.map(t=>t.tool).join(' → ')||'none'} | ${r.engine}${r.warnings.length?' | '+r.warnings.join('; '):''}</div>`}catch(e){ch.innerHTML+=`<div class="warn">${e.message}</div>`}ch.scrollTop=ch.scrollHeight}
-init();
-</script></body></html>
+'use strict';
+// ══════════════ GLOBALS ══════════════
+let AUTH = null; // {token, user}
+let CUSTOMERS = [];
+let SELECTED_CUSTOMER = null;
+let LAST_ASSESSMENT = null;
+let LAST_AUDIT_ID = null;
+let CURRENT_LANG = 'en';
+let TEACH_QUESTIONS = [];
+
+const $ = id => document.getElementById(id);
+const api = async (p, b, method) => {
+  const opts = { headers: {'Content-Type': 'application/json'} };
+  if (AUTH) opts.headers['Authorization'] = 'Bearer ' + AUTH.token;
+  if (b !== undefined) { opts.method = method || 'POST'; opts.body = JSON.stringify(b); }
+  const r = await fetch(p, opts);
+  if (!r.ok) { const t = await r.text(); throw new Error(t); }
+  return r.json();
+};
+const fmt = x => x == null ? 'n/a' : (+x).toLocaleString('en-IN', {maximumFractionDigits: 2});
+const fmtInr = x => x == null ? 'n/a' : '₹' + Math.abs(Math.round(x)).toLocaleString('en-IN');
+const badge = s => `<span class="badge ${s}">${s}</span>`;
+const prod = () => {
+  const t = $('p-type')?.value || 'ELN';
+  const o = {
+    product_type: t,
+    underlying: $('p-under')?.value || 'NIFTY 50',
+    tenor_months: +($('p-tenor')?.value || 12),
+    coupon_pct: +($('p-coupon')?.value || 12),
+    strike_pct: +($('p-strike')?.value || 100),
+    notional: +($('p-notional')?.value || 1000000),
+    protection_pct: +($('p-prot')?.value || 100),
+    participation_pct: +($('p-part')?.value || 100),
+  };
+  if (t === 'ELN') o.barrier_pct = +($('p-barrier')?.value || 70);
+  return o;
+};
+
+// ══════════════ AUTH ══════════════
+function switchLoginTab(role) {
+  ['rm','customer'].forEach(r => {
+    $('tab-'+r).classList.toggle('active', r === role);
+    $('demo-creds-'+r).style.display = r === role ? 'block' : 'none';
+  });
+  if (role === 'rm') { $('login-email').value = 'rm@finvision.demo'; $('login-password').value = 'RM@123'; }
+  else { $('login-email').value = 'customer@finvision.demo'; $('login-password').value = 'Customer@123'; }
+}
+
+async function doLogin() {
+  $('login-err').style.display = 'none';
+  try {
+    const res = await api('/api/auth/login', {email: $('login-email').value.trim(), password: $('login-password').value});
+    AUTH = res;
+    localStorage.setItem('fv_token', res.token);
+    localStorage.setItem('fv_user', JSON.stringify(res.user));
+    await bootApp();
+  } catch(e) {
+    $('login-err').style.display = 'block';
+  }
+}
+
+async function doLogout() {
+  if (AUTH) await api('/api/auth/logout', {}).catch(()=>{});
+  AUTH = null;
+  localStorage.removeItem('fv_token');
+  localStorage.removeItem('fv_user');
+  $('login-screen').style.display = 'flex';
+  $('app-shell').style.display = 'none';
+}
+
+// ══════════════ BOOT ══════════════
+async function bootApp() {
+  $('login-screen').style.display = 'none';
+  $('app-shell').style.display = 'block';
+  const u = AUTH.user;
+  $('top-user-name').textContent = u.name;
+  $('top-role-badge').textContent = u.role === 'rm' ? 'RM' : 'Customer';
+  $('top-role-badge').className = 'role-badge' + (u.role === 'customer' ? ' customer' : '');
+
+  CUSTOMERS = await api('/api/v1/customers');
+
+  if (u.role === 'rm') {
+    buildSidebar('rm');
+    buildRMPages();
+    navTo('rm-dashboard');
+    loadRMDashboard();
+  } else {
+    buildSidebar('customer');
+    buildCustomerPages();
+    SELECTED_CUSTOMER = CUSTOMERS.find(c => c.id === u.customer_id) || CUSTOMERS[0];
+    navTo('cust-dashboard');
+    loadCustomerDashboard();
+  }
+  pollAlerts();
+}
+
+async function tryAutoLogin() {
+  const token = localStorage.getItem('fv_token');
+  const user = localStorage.getItem('fv_user');
+  if (!token || !user) return;
+  AUTH = { token, user: JSON.parse(user) };
+  try {
+    await api('/api/auth/me');
+    await bootApp();
+  } catch(e) {
+    AUTH = null;
+    localStorage.removeItem('fv_token');
+    localStorage.removeItem('fv_user');
+  }
+}
+
+// ══════════════ SIDEBAR ══════════════
+const RM_NAV = [
+  {id:'rm-dashboard', icon:'⬛', label:'Dashboard'},
+  {id:'rm-customers', icon:'👥', label:'Customers'},
+  {id:'rm-studio', icon:'🏗', label:'Product Studio'},
+  {id:'rm-analysis', icon:'📊', label:'Assessment'},
+  {id:'rm-stress', icon:'⚡', label:'Stress & Regime'},
+  {id:'rm-portfolio', icon:'📁', label:'Portfolio Impact'},
+  {id:'rm-repair', icon:'🔧', label:'Repair'},
+  {id:'rm-teachback', icon:'📝', label:'Teach-Back'},
+  {id:'rm-notes', icon:'📄', label:'RM Notes'},
+  {id:'rm-audit', icon:'🔍', label:'Audit Trail'},
+];
+const CUST_NAV = [
+  {id:'cust-dashboard', icon:'⬛', label:'Dashboard'},
+  {id:'cust-profile', icon:'👤', label:'My Profile'},
+  {id:'cust-portfolio', icon:'📁', label:'My Portfolio'},
+  {id:'cust-analysis', icon:'📊', label:'Product Analysis'},
+  {id:'alerts', icon:'🔔', label:'Risk Alerts'},
+  {id:'cust-copilot', icon:'💬', label:'AI Assistant'},
+];
+
+function buildSidebar(role) {
+  const nav = role === 'rm' ? RM_NAV : CUST_NAV;
+  $('sidebar').innerHTML = nav.map(n =>
+    `<div class="nav-item" id="nav-${n.id}" onclick="navTo('${n.id}')">
+      <span class="nav-icon">${n.icon}</span>${n.label}
+    </div>`
+  ).join('');
+}
+
+function navTo(id) {
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  const ni = $('nav-'+id);
+  if (ni) ni.classList.add('active');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const pg = $('page-'+id);
+  if (pg) pg.classList.add('active');
+}
+
+// ══════════════ PAGE BUILDERS ══════════════
+function buildRMPages() {
+  $('main-content').innerHTML = `
+  <div id="page-rm-dashboard" class="page">
+    <div class="section-header"><div><div class="section-title">RM Dashboard</div><div class="section-sub">Welcome back, ${AUTH.user.name}</div></div></div>
+    <div class="disclaimer">FinVision provides decision support, not investment advice. Historical results are not predictions. RM owns the final decision.</div>
+    <div class="grid-4" id="rm-kpis"></div>
+    <div class="card mt14"><div class="card-title">Customer Overview</div><div id="rm-cust-table"></div></div>
+  </div>
+
+  <div id="page-rm-customers" class="page">
+    <div class="section-header"><div class="section-title">Customers</div></div>
+    <div class="card"><div id="rm-cust-detail-table"></div></div>
+  </div>
+
+  <div id="page-rm-studio" class="page">
+    <div class="section-header"><div class="section-title">Product Studio</div></div>
+    <div class="two-col">
+      <div>
+        <div class="card">
+          <div class="card-title">Customer</div>
+          <div class="form-group"><label>Select Customer</label>
+            <select id="rm-sel-cust" onchange="rmSelectCustomer()"></select>
+          </div>
+          <div id="rm-cust-info" class="text-sm mut mt8"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Product Configuration</div>
+          <div class="form-group"><label>Product Type</label>
+            <select id="p-type" onchange="onProductTypeChange();livePayoff()">
+              <option>ELN</option><option>DCD</option><option>CPN</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Underlying</label>
+            <select id="p-under" onchange="livePayoff()"><option>NIFTY 50</option><option>USDINR</option></select>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Tenor (months)</label><input id="p-tenor" type="number" value="12" min="1" max="120" onchange="livePayoff()"></div>
+            <div class="form-group"><label>Coupon / Interest %</label><input id="p-coupon" type="number" value="12" min="0" onchange="livePayoff()"></div>
+          </div>
+          <div id="eln-fields">
+            <div class="form-group"><label>Barrier %: <b id="bv">70</b></label>
+              <input id="p-barrier" type="range" min="30" max="95" value="70" oninput="$('bv').textContent=this.value;livePayoff()">
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Strike %</label><input id="p-strike" type="number" value="100" onchange="livePayoff()"></div>
+              <div class="form-group"><label>Notional (₹)</label><input id="p-notional" type="number" value="1000000" onchange="livePayoff()"></div>
+            </div>
+          </div>
+          <div id="cpn-fields" style="display:none">
+            <div class="form-row">
+              <div class="form-group"><label>Protection %</label><input id="p-prot" type="number" value="100" onchange="livePayoff()"></div>
+              <div class="form-group"><label>Participation %</label><input id="p-part" type="number" value="80" onchange="livePayoff()"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Strike %</label><input id="p-strike" type="number" value="100" style="display:none" onchange="livePayoff()"></div>
+              <div class="form-group"><label>Notional (₹)</label><input id="p-notional2" type="number" value="1000000" onchange="livePayoff()"></div>
+            </div>
+          </div>
+          <div class="form-group mt8"><label>Upload Term Sheet (PDF/TXT)</label><input type="file" id="ts-file" accept=".pdf,.txt"></div>
+          <div class="form-group"><label>...or describe in plain language</label><textarea id="ts-nl" rows="2" placeholder="One-year NIFTY note, 12% coupon, 70% barrier, 10 lakh"></textarea></div>
+          <div class="flex gap-8">
+            <button class="btn btn-secondary btn-sm" onclick="extractProduct()">Extract & Validate</button>
+          </div>
+          <div id="ex-msg" class="text-sm mut mt8"></div>
+          <button class="btn btn-primary btn-full mt14" onclick="runAssessment()">Run Full Assessment</button>
+        </div>
+      </div>
+      <div>
+        <div class="card"><div class="card-title">Payoff at Maturity <span class="text-xs mut">(drag barrier to update)</span></div>
+          <div id="payoff-chart" style="height:280px"></div>
+          <div id="payoff-scenarios" class="mt8"></div>
+        </div>
+        <div class="card" id="studio-result-card" style="display:none">
+          <div class="card-title">Assessment Result</div>
+          <div id="studio-result"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="page-rm-analysis" class="page">
+    <div class="section-header"><div class="section-title">Assessment Detail</div></div>
+    <div id="rm-analysis-content"><div class="empty">Run an assessment from Product Studio first.</div></div>
+  </div>
+
+  <div id="page-rm-stress" class="page">
+    <div class="section-header"><div class="section-title">Stress & Regime Analysis</div></div>
+    <div id="rm-stress-content"><div class="empty">Run an assessment first.</div></div>
+  </div>
+
+  <div id="page-rm-portfolio" class="page">
+    <div class="section-header"><div class="section-title">Portfolio Impact</div></div>
+    <div id="rm-portfolio-content"><div class="empty">Run an assessment first.</div></div>
+  </div>
+
+  <div id="page-rm-repair" class="page">
+    <div class="section-header"><div class="section-title">Suitability Repair</div></div>
+    <div id="rm-repair-content"><div class="empty">Run an assessment first.</div></div>
+  </div>
+
+  <div id="page-rm-teachback" class="page">
+    <div class="section-header"><div class="section-title">Teach-Back Check</div></div>
+    <div id="rm-teachback-content"><div class="empty">Run an assessment first.</div></div>
+  </div>
+
+  <div id="page-rm-notes" class="page">
+    <div class="section-header"><div class="section-title">RM Justification Note</div></div>
+    <div id="rm-notes-content"><div class="empty">Run an assessment first.</div></div>
+  </div>
+
+  <div id="page-rm-audit" class="page">
+    <div class="section-header"><div class="section-title">Audit Trail</div></div>
+    <div class="card"><div id="audit-table"></div></div>
+  </div>
+
+  <div id="page-alerts" class="page">
+    <div class="section-header"><div class="section-title">Risk Alerts</div></div>
+    <div id="alerts-content"><div class="empty">No alerts yet.</div></div>
+  </div>
+  `;
+
+  // Populate customer selects
+  const sel = $('rm-sel-cust');
+  CUSTOMERS.forEach(c => { const o = document.createElement('option'); o.value=c.id; o.textContent=`${c.id} — ${c.name} (${c.risk_appetite})`; sel.appendChild(o); });
+  SELECTED_CUSTOMER = CUSTOMERS[0];
+  updateRMCustInfo();
+  setTimeout(() => { if(window._plotlyReady) livePayoff(); else document.addEventListener('plotlyready', livePayoff, {once:true}); }, 200);
+}
+
+function buildCustomerPages() {
+  const c = SELECTED_CUSTOMER || {};
+  $('main-content').innerHTML = `
+  <div id="page-cust-dashboard" class="page">
+    <div class="section-header"><div><div class="section-title">Welcome, ${AUTH.user.name}</div><div class="section-sub">Your investment analysis dashboard</div></div></div>
+    <div class="disclaimer">FinVision provides decision support, not investment advice. Past results are not predictions.</div>
+    <div class="grid-4" id="cust-kpis"></div>
+    <div class="grid-2 mt14">
+      <div class="card"><div class="card-title">Suitability Status</div><div id="cust-suitability-summary"><div class="empty">No assessment yet. Ask your RM.</div></div></div>
+      <div class="card"><div class="card-title">Breaking Point</div><div id="cust-breaking-point"><div class="empty">No data yet.</div></div></div>
+    </div>
+    <div class="card mt14"><div class="card-title">AI Explanation</div><div id="cust-explanation" class="mut text-sm">No assessment data. Contact your RM.</div></div>
+  </div>
+
+  <div id="page-cust-profile" class="page">
+    <div class="section-header"><div class="section-title">My Profile</div></div>
+    <div id="cust-profile-content"></div>
+  </div>
+
+  <div id="page-cust-portfolio" class="page">
+    <div class="section-header"><div class="section-title">My Portfolio</div></div>
+    <div id="cust-portfolio-content"></div>
+  </div>
+
+  <div id="page-cust-analysis" class="page">
+    <div class="section-header"><div class="section-title">Product Analysis</div></div>
+    <div id="cust-analysis-content"><div class="empty">Your RM has not shared an assessment yet.</div></div>
+  </div>
+
+  <div id="page-alerts" class="page">
+    <div class="section-header"><div class="section-title">🔔 Risk Alerts</div></div>
+    <div id="alerts-content"><div class="empty">No alerts.</div></div>
+  </div>
+
+  <div id="page-cust-copilot" class="page">
+    <div class="section-header"><div class="section-title">AI Assistant</div></div>
+    <div class="card">
+      <div class="card-title">Ask About Your Investment</div>
+      <div class="disclaimer">The AI assistant explains verified calculation results. It does not provide financial advice or generate its own numbers.</div>
+      <div class="chat-box" id="cust-chat"></div>
+      <div class="chat-input-row">
+        <input id="cust-q" placeholder="e.g. What if NIFTY falls 35%? / How much could I lose in rupees?" onkeydown="if(event.key==='Enter')custAsk()">
+        <button class="btn btn-primary" onclick="custAsk()">Ask</button>
+      </div>
+    </div>
+  </div>
+  `;
+  loadCustomerProfile();
+  loadCustomerPortfolio();
+}
+
+// ══════════════ RM DASHBOARD ══════════════
+async function loadRMDashboard() {
+  const audits = await api('/api/v1/audit?n=50').catch(()=>[]);
+  const total = CUSTOMERS.length;
+  const review = audits.filter(a => a.decision === 'REVIEW').length;
+  const mismatch = audits.filter(a => a.decision === 'MISMATCH').length;
+  $('rm-kpis').innerHTML = `
+    <div class="kpi"><div class="kpi-label">Total Customers</div><div class="kpi-value">${total}</div></div>
+    <div class="kpi"><div class="kpi-label">Total Assessments</div><div class="kpi-value">${audits.length}</div></div>
+    <div class="kpi"><div class="kpi-label">Under Review</div><div class="kpi-value warn-text">${review}</div></div>
+    <div class="kpi"><div class="kpi-label">Mismatch</div><div class="kpi-value" style="color:var(--bad)">${mismatch}</div></div>
+  `;
+  $('rm-cust-table').innerHTML = `<table>
+    <tr><th>Customer</th><th>Risk Profile</th><th>Portfolio</th><th>Segment</th><th>Actions</th></tr>
+    ${CUSTOMERS.map(c => `<tr>
+      <td><b>${c.id}</b> — ${c.name}</td>
+      <td>${c.risk_appetite}</td>
+      <td>${fmtInr(c.portfolio_value)}</td>
+      <td>${c.segment || 'HNI'}</td>
+      <td><button class="btn btn-secondary btn-sm" onclick="rmPickCustomer('${c.id}')">Select & Assess</button></td>
+    </tr>`).join('')}
+  </table>`;
+  loadAuditTable();
+}
+
+function rmPickCustomer(id) {
+  const sel = $('rm-sel-cust');
+  if (sel) sel.value = id;
+  SELECTED_CUSTOMER = CUSTOMERS.find(c => c.id === id);
+  updateRMCustInfo();
+  navTo('rm-studio');
+}
+
+function rmSelectCustomer() {
+  SELECTED_CUSTOMER = CUSTOMERS.find(c => c.id === $('rm-sel-cust').value);
+  updateRMCustInfo();
+}
+
+function updateRMCustInfo() {
+  const c = SELECTED_CUSTOMER;
+  if (!c || !$('rm-cust-info')) return;
+  $('rm-cust-info').innerHTML = `
+    <div class="flex gap-8 items-center"><span>${c.name}</span> <span class="badge INFO">${c.risk_appetite}</span></div>
+    <div class="mt4">Loss tol: <b>${c.loss_tolerance_pct}%</b> | Horizon: <b>${c.horizon_months}m</b> | Portfolio: <b>${fmtInr(c.portfolio_value)}</b></div>
+    <div class="mt4">NIFTY exposure: <b>${c.existing_exposures?.['NIFTY 50'] || 0}%</b></div>
+  `;
+}
+
+// ══════════════ PRODUCT TYPE ══════════════
+function onProductTypeChange() {
+  const t = $('p-type').value;
+  $('eln-fields').style.display = (t === 'ELN' || t === 'DCD') ? 'block' : 'none';
+  $('cpn-fields').style.display = t === 'CPN' ? 'block' : 'none';
+}
+
+// ══════════════ LIVE PAYOFF ══════════════
+let _liveT;
+function livePayoff() {
+  clearTimeout(_liveT);
+  _liveT = setTimeout(async () => {
+    try {
+      const r = await api('/api/v1/payoff', {product: prod()});
+      if (typeof Plotly !== 'undefined') drawPayoff(r.curve);
+      renderScenarios(r.scenarios);
+    } catch(e) {}
+  }, 150);
+}
+
+function drawPayoff(c) {
+  const x = c.map(p => p.move_pct), y = c.map(p => p.return_pct);
+  Plotly.react('payoff-chart', [
+    {x, y, mode:'lines', name:'Return %', line:{color:'#1e40af', width:2}},
+    {x, y:y.map(v=>Math.min(v,0)), fill:'tozeroy', mode:'none', fillcolor:'rgba(185,28,28,.15)', name:'Loss zone'}
+  ], {
+    margin:{t:10,l:45,r:10,b:40},
+    paper_bgcolor:'#fff', plot_bgcolor:'#fff',
+    xaxis:{title:'Underlying move at maturity (%)', gridcolor:'#f0f2f7'},
+    yaxis:{title:'Return on principal (%)', gridcolor:'#f0f2f7'},
+    legend:{orientation:'h',y:-0.2},
+    font:{family:'Inter,sans-serif',size:12}
+  }, {displayModeBar:false});
+}
+
+function renderScenarios(rows) {
+  const el = $('payoff-scenarios');
+  if (!el || !rows) return;
+  el.innerHTML = `<table>
+    <tr><th>Move</th><th>Final Value</th><th>P&L %</th><th>Barrier</th></tr>
+    ${rows.map(r => `<tr>
+      <td>${r.move_pct > 0 ? '+' : ''}${r.move_pct}%</td>
+      <td>${fmtInr(r.final_value)}</td>
+      <td class="${r.pnl_pct < 0 ? 'warn-text' : 'ok-text'}">${r.pnl_pct}%</td>
+      <td>${r.barrier_breached == null ? '—' : r.barrier_breached ? '<span class="warn-text">Yes</span>' : 'No'}</td>
+    </tr>`).join('')}
+  </table>`;
+}
+
+// ══════════════ EXTRACT ══════════════
+async function extractProduct() {
+  const msg = $('ex-msg');
+  msg.textContent = 'Extracting...';
+  try {
+    let r;
+    const f = $('ts-file')?.files[0];
+    if (f) {
+      const fd = new FormData(); fd.append('file', f);
+      const res = await fetch('/api/v1/product/extract-file', {method:'POST', body:fd, headers:{Authorization:'Bearer '+AUTH?.token}});
+      r = await res.json();
+    } else {
+      r = await api('/api/v1/product/extract-text', {text: $('ts-nl').value});
+    }
+    const t = r.terms || {};
+    const m = {
+      'p-type':'product_type','p-under':'underlying','p-tenor':'tenor_months',
+      'p-coupon':'coupon_pct','p-barrier':'barrier_pct','p-strike':'strike_pct',
+      'p-notional':'notional','p-prot':'protection_pct','p-part':'participation_pct'
+    };
+    for (const k in m) { if (t[m[k]] != null && $(k)) { $(k).value = t[m[k]]; if(k==='p-barrier') $('bv').textContent=t[m[k]]; }}
+    msg.innerHTML = `<b>${r.method}</b>: ${r.valid ? '✓ valid — please confirm values' : '⚠ needs confirmation: ' + (r.needs_confirmation||[]).concat(r.errors||[]).join(', ')}`;
+    livePayoff();
+  } catch(e) { msg.textContent = 'Error: ' + e.message; }
+}
+
+// ══════════════ ASSESSMENT ══════════════
+async function runAssessment() {
+  if (!SELECTED_CUSTOMER) { alert('Please select a customer first.'); return; }
+  const resultCard = $('studio-result-card');
+  const resultEl = $('studio-result');
+  if (resultCard) resultCard.style.display = 'block';
+  if (resultEl) resultEl.innerHTML = '<div class="loading">Running assessment</div>';
+
+  try {
+    const r = await api('/api/v1/assessment', {product: prod(), customer_id: SELECTED_CUSTOMER.id, mode: 'rm'});
+    LAST_ASSESSMENT = r;
+    LAST_AUDIT_ID = r.audit_id;
+
+    if (resultEl) resultEl.innerHTML = `
+      <div class="flex items-center gap-8 mb0">${badge(r.status)} <span class="text-sm mut">Audit #${r.audit_id}</span></div>
+      <div class="mt8 text-sm">${r.flags.map(f=>`<div>⚠ ${f.message}</div>`).join('')}</div>
+      <div class="mt8 text-sm mut">Data: ${r.result.data_source} | ${r.result.data_window.join(' → ')}</div>
+      <button class="btn btn-secondary btn-sm mt8" onclick="navTo('rm-analysis');renderRMAnalysis()">View Full Analysis →</button>
+    `;
+    renderRMAnalysis();
+    renderStress();
+    renderPortfolioImpact();
+    renderRepair();
+    loadTeachBack();
+    loadRMNote();
+    updateAlertBadge(SELECTED_CUSTOMER.id);
+  } catch(e) {
+    if (resultEl) resultEl.innerHTML = `<div class="warn-text">Error: ${e.message}</div>`;
+  }
+}
+
+// ══════════════ FULL ANALYSIS VIEW ══════════════
+function renderRMAnalysis() {
+  const el = $('rm-analysis-content');
+  if (!el || !LAST_ASSESSMENT) return;
+  const r = LAST_ASSESSMENT, a = r.result, m = a.metrics, bp = a.breaking_point, h = m.historical;
+  el.innerHTML = `
+  <div class="disclaimer">Historical replay shows past rolling windows. Not a prediction. ${a.data_source === 'synthetic_fallback' ? '<b class="warn-text">DEMO DATA — run scripts/fetch_market_data.py for real history.</b>' : ''}</div>
+  <div class="grid-4">
+    <div class="kpi"><div class="kpi-label">Decision</div><div class="kpi-value">${badge(a.decision)}</div></div>
+    <div class="kpi"><div class="kpi-label">Tail Loss</div><div class="kpi-value warn-text">${m.tail_loss_pct}%</div><div class="kpi-sub">${fmtInr(a.product.notional * m.tail_loss_pct / 100)}</div></div>
+    <div class="kpi"><div class="kpi-label">Suitable Until</div><div class="kpi-value">${bp.suitable_until_pct != null ? bp.suitable_until_pct+'%' : 'n/a'}</div></div>
+    <div class="kpi"><div class="kpi-label">Audit #</div><div class="kpi-value">${r.audit_id}</div></div>
+  </div>
+
+  <div class="grid-2 mt14">
+    <div class="card">
+      <div class="card-title">Suitability Rules</div>
+      <table><tr><th>Rule</th><th>Status</th><th>Details</th></tr>
+      ${a.rules.map(x=>`<tr><td>${x.rule_id}</td><td>${badge(x.status)}</td><td class="text-xs">${x.message}</td></tr>`).join('')}
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">Breaking Point</div>
+      <div class="flex gap-8 mt4">
+        <div class="kpi" style="flex:1;padding:10px"><div class="kpi-label ok-text">Suitable until</div><div class="kpi-value ok-text">${bp.suitable_until_pct != null ? bp.suitable_until_pct+'%' : 'n/a'}</div></div>
+        <div class="kpi" style="flex:1;padding:10px"><div class="kpi-label" style="color:var(--rev)">Review from</div><div class="kpi-value" style="color:var(--rev)">${bp.review_from_pct != null ? bp.review_from_pct+'%' : 'n/a'}</div></div>
+        <div class="kpi" style="flex:1;padding:10px"><div class="kpi-label warn-text">Mismatch from</div><div class="kpi-value warn-text">${bp.mismatch_from_pct != null ? bp.mismatch_from_pct+'%' : 'n/a'}</div></div>
+      </div>
+      <div class="mt8 text-sm mut">Stress ladder (0% to -60%)</div>
+      <div class="mt4">
+        ${bp.ladder.filter((_,i)=>i%5===0).map(l=>`<div class="ladder-row">
+          <span class="ladder-shock">${l.shock_pct}%</span>
+          <div class="ladder-bar-wrap"><div class="ladder-bar" style="width:${Math.min(100,l.loss_pct/60*100)}%;background:${l.loss_rule==='SUITABLE'?'var(--ok)':l.loss_rule==='REVIEW'?'var(--rev)':'var(--bad)'}"></div></div>
+          <span class="ladder-loss">${l.loss_pct}%</span>
+          <span class="ladder-status">${badge(l.loss_rule)}</span>
+        </div>`).join('')}
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2 mt14">
+    <div class="card">
+      <div class="card-title">Historical Replay <span class="text-xs mut">(${h.n_windows} rolling windows)</span></div>
+      <div class="flex gap-8 mt4">
+        <div class="kpi" style="flex:1;padding:10px"><div class="kpi-label ok-text">Best</div><div class="kpi-value ok-text">${h.best_pct}%</div></div>
+        <div class="kpi" style="flex:1;padding:10px"><div class="kpi-label">Avg</div><div class="kpi-value">${h.avg_pct}%</div></div>
+        <div class="kpi" style="flex:1;padding:10px"><div class="kpi-label warn-text">Worst</div><div class="kpi-value warn-text">${h.worst_pct}%</div></div>
+        <div class="kpi" style="flex:1;padding:10px"><div class="kpi-label">Loss-making</div><div class="kpi-value">${h.pct_windows_loss}%</div></div>
+      </div>
+      <div class="text-sm mut mt8">Worst window: ${h.worst_window.join(' → ')}</div>
+      <div id="hist-chart" style="height:160px;margin-top:8px"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Scenario Table</div>
+      ${renderScenariosHtml(a.scenarios)}
+    </div>
+  </div>
+
+  <div class="card mt14">
+    <div class="card-title">AI Explanation
+      <select id="expl-mode" style="width:auto;font:inherit;border:1px solid var(--line);border-radius:4px;padding:2px 6px;font-size:12px" onchange="reExplain()">
+        <option value="rm">RM Mode</option><option value="client">Client Mode</option>
+      </select>
+      <a href="/api/v1/report/${r.audit_id}" target="_blank" class="btn btn-secondary btn-sm" style="margin-left:8px">Client PDF</a>
+    </div>
+    <div id="expl-text" class="text-sm">${(r.explanation?.text||'').replace(/\n/g,'<br>')}</div>
+    <div class="text-xs mut mt8">Engine: ${r.explanation?.engine} | Sources: ${(r.explanation?.sources||[]).join(', ')}</div>
+  </div>
+
+  <div class="card mt14" id="twin-card">
+    <div class="card-title">Historical Twin <span class="text-xs mut">(not a forecast)</span>
+      <button class="btn btn-secondary btn-sm" onclick="loadTwin()">Load Twin</button>
+    </div>
+    <div id="twin-content" class="text-sm mut">Click "Load Twin" to find the most similar historical period.</div>
+  </div>
+  `;
+
+  setTimeout(() => {
+    if (typeof Plotly !== 'undefined') {
+      const hm = m.historical;
+      Plotly.react('hist-chart', [{type:'bar', x:hm.histogram.edges.slice(0,-1), y:hm.histogram.counts, marker:{color:'#1e40af'}}],
+        {margin:{t:5,l:35,r:5,b:30}, paper_bgcolor:'#fff', plot_bgcolor:'#fff', font:{family:'Inter,sans-serif',size:11},
+         xaxis:{title:'Outcome %',gridcolor:'#f0f2f7'}, yaxis:{gridcolor:'#f0f2f7'}}, {displayModeBar:false});
+    }
+  }, 100);
+}
+
+function renderScenariosHtml(rows) {
+  if (!rows) return '<div class="empty">No data</div>';
+  return `<table><tr><th>Move</th><th>Final Value</th><th>P&L</th><th>Barrier</th></tr>
+  ${rows.map(r=>`<tr><td>${r.move_pct>0?'+':''}${r.move_pct}%</td><td>${fmtInr(r.final_value)}</td>
+  <td class="${r.pnl_pct<0?'warn-text':'ok-text'}">${r.pnl_pct}%<br><span class="text-xs mut">${fmtInr(Math.abs(r.pnl))}</span></td>
+  <td>${r.barrier_breached==null?'—':r.barrier_breached?'<span class="warn-text">Breached</span>':'Safe'}</td></tr>`).join('')}</table>`;
+}
+
+async function reExplain() {
+  if (!LAST_AUDIT_ID) return;
+  const mode = $('expl-mode').value;
+  const el = $('expl-text');
+  if (el) el.textContent = 'Generating...';
+  try {
+    const ex = await api('/api/v1/explain', {audit_id: LAST_AUDIT_ID, mode});
+    if (el) el.innerHTML = (ex.text||'').replace(/\n/g,'<br>');
+  } catch(e) {}
+}
+
+async function loadTwin() {
+  const el = $('twin-content');
+  if (!LAST_ASSESSMENT || !el) return;
+  el.innerHTML = '<div class="loading">Finding historical twin</div>';
+  try {
+    const r = await api('/api/v1/historical-twin', {product: LAST_ASSESSMENT.result.product});
+    if (r.error) { el.textContent = r.error; return; }
+    const cm = r.current_market, tw = r.twin;
+    el.innerHTML = `
+    <div class="grid-2">
+      <div>
+        <div class="fw6 mt4">Current Market (last 3 months)</div>
+        <div class="text-sm mt4">Return: <b>${cm.return_pct}%</b> | Volatility: <b>${cm.vol_pct}%</b> | Drawdown: <b>${cm.drawdown_pct}%</b></div>
+      </div>
+      <div>
+        <div class="fw6 mt4">Closest Historical Period: <span class="info-text">${tw.period}</span></div>
+        <div class="text-sm mt4">Similarity: <b>${(tw.similarity_score*100).toFixed(0)}%</b></div>
+        <div class="text-sm mt4">Product outcome in that period: <b class="${tw.product_pnl_pct<0?'warn-text':'ok-text'}">${tw.product_pnl_pct}%</b> (${fmtInr(Math.abs(tw.product_loss_inr))} loss)</div>
+        <div class="text-sm mt4">Barrier: <b>${tw.barrier_breached ? '<span class="warn-text">Breached</span>' : 'Not breached'}</b></div>
+      </div>
+    </div>
+    <div class="text-xs mut mt8">${r.disclaimer}</div>`;
+  } catch(e) { el.textContent = 'Error: ' + e.message; }
+}
+
+// ══════════════ STRESS ══════════════
+async function renderStress() {
+  const el = $('rm-stress-content');
+  if (!el || !LAST_ASSESSMENT) return;
+  el.innerHTML = '<div class="loading">Running stress analysis</div>';
+  try {
+    const [ladderR, regimeR] = await Promise.all([
+      api('/api/v1/stress-ladder', {product: prod(), customer_id: SELECTED_CUSTOMER.id}),
+      api('/api/v1/regime-stress', {product: prod(), customer_id: SELECTED_CUSTOMER.id}),
+    ]);
+    const ladder = ladderR.ladder;
+    const regimes = regimeR.regimes;
+    const colorMap = {SUITABLE:'var(--ok)', REVIEW:'var(--rev)', MISMATCH:'var(--bad)'};
+    const bgMap = {bull:'bull', Normal:'normal', MildStress:'mild', SevereStress:'severe', Crash:'crash'};
+    el.innerHTML = `
+    <div class="card">
+      <div class="card-title">Regime Stress</div>
+      <div class="grid-5" style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px">
+      ${regimes.map(reg=>`<div class="regime-card ${bgMap[reg.regime]||''}">
+        <div class="fw6 text-sm">${reg.label}</div>
+        <div class="text-xs mut mt4">${reg.range}</div>
+        <div class="mt8 fw6" style="color:${colorMap[reg.suitability]}">${reg.suitability}</div>
+        <div class="text-sm mt4">${reg.example_shock_pct>0?'+':''}${reg.example_shock_pct}%: ${reg.pnl_pct}%</div>
+        <div class="text-xs mut">Loss: ${reg.loss_pct}% (${fmtInr(reg.loss_inr)})</div>
+        ${reg.barrier_breached ? '<div class="text-xs warn-text mt4">Barrier breached</div>' : ''}
+      </div>`).join('')}
+      </div>
+    </div>
+    <div class="card mt14">
+      <div class="card-title">Stress Ladder</div>
+      ${ladder.map(r=>`<div class="ladder-row">
+        <span class="ladder-shock">${r.shock_pct}%</span>
+        <div class="ladder-bar-wrap"><div class="ladder-bar" style="width:${Math.min(100,r.loss_pct/50*100)}%;background:${colorMap[r.loss_rule]}"></div></div>
+        <span class="ladder-loss">${r.loss_pct}%<br><span class="text-xs">${fmtInr(r.loss_inr)}</span></span>
+        <span class="ladder-status">${badge(r.overall)}</span>
+      </div>`).join('')}
+    </div>`;
+  } catch(e) { el.innerHTML = `<div class="warn-text">Error: ${e.message}</div>`; }
+}
+
+// ══════════════ PORTFOLIO IMPACT ══════════════
+async function renderPortfolioImpact() {
+  const el = $('rm-portfolio-content');
+  if (!el || !SELECTED_CUSTOMER) return;
+  el.innerHTML = '<div class="loading">Calculating portfolio impact</div>';
+  try {
+    const r = await api('/api/v1/portfolio-impact', {product: prod(), customer_id: SELECTED_CUSTOMER.id, stress_shock_pct: -35});
+    const ri = await api('/api/v1/rupee-impact', {product: prod(), customer_id: SELECTED_CUSTOMER.id});
+    el.innerHTML = `
+    <div class="disclaimer">${r.note}</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Portfolio Loss at ${r.stress_shock_pct}% Shock</div>
+        <div class="flex gap-14 mt4">
+          <div class="kpi" style="flex:1;padding:12px"><div class="kpi-label">Before Product</div>
+            <div class="kpi-value ${r.before.loss_pct>10?'warn-text':''}">${r.before.loss_pct}%</div>
+            <div class="kpi-sub">${fmtInr(r.before.loss_inr)}</div>
+          </div>
+          <div style="display:flex;align-items:center;font-size:20px;color:var(--mut)">→</div>
+          <div class="kpi" style="flex:1;padding:12px"><div class="kpi-label">After Product</div>
+            <div class="kpi-value ${r.after.loss_pct>10?'warn-text':''}">${r.after.loss_pct}%</div>
+            <div class="kpi-sub">${fmtInr(r.after.loss_inr)}</div>
+          </div>
+        </div>
+        <div class="mt8 text-sm">Delta: <b class="${r.delta_loss_pct>0?'warn-text':'ok-text'}">+${r.delta_loss_pct}%</b> (${fmtInr(r.delta_loss_inr)} additional loss)</div>
+        <div class="mt8 text-sm">Concentration in ${r.underlying}: <b class="${r.concentration_flag?'warn-text':''}">${r.concentration_pct}%</b> (limit: ${r.concentration_limit_pct}%)</div>
+        ${r.concentration_flag ? '<div class="badge MISMATCH mt8">Concentration limit exceeded</div>' : ''}
+      </div>
+      <div class="card">
+        <div class="card-title">Rupee Impact</div>
+        <div class="kpi mt4"><div class="kpi-label">Investment</div><div class="kpi-value">${fmtInr(ri.notional)}</div></div>
+        <div class="kpi mt8"><div class="kpi-label">Modeled Tail Loss (${ri.tail_loss_pct}%)</div><div class="kpi-value warn-text">${fmtInr(ri.loss_inr)}</div></div>
+        ${ri.months_equivalent != null ? `<div class="text-sm mut mt8">≈ ${ri.months_equivalent_text}</div>` : ''}
+      </div>
+    </div>`;
+  } catch(e) { el.innerHTML = `<div class="warn-text">Error: ${e.message}</div>`; }
+}
+
+// ══════════════ REPAIR ══════════════
+async function renderRepair() {
+  const el = $('rm-repair-content');
+  if (!el || !LAST_ASSESSMENT) return;
+  const repairs = LAST_ASSESSMENT.result.repairs || [];
+  if (repairs.length === 0) {
+    el.innerHTML = '<div class="card"><div class="empty">No repair needed — product is SUITABLE, or no suitable alternative found within configured bounds.</div></div>';
+    return;
+  }
+  el.innerHTML = `<div class="card">
+    <div class="card-title">Repair Options <span class="text-xs mut">(Decision support — not advice)</span></div>
+    <div class="disclaimer">These are alternative configurations that clear the suitability rules. The RM must evaluate suitability independently.</div>
+    ${repairs.map((r,i)=>`<div class="card" style="border-color:var(--ok)">
+      <div class="fw6 ok-text">Option ${i+1}: ${r.description}</div>
+      <div class="text-sm mt4">Changes: ${Object.entries(r.changes).map(([k,v])=>`<b>${k}</b>: ${v}`).join(', ')}</div>
+      <div class="text-sm mt4">After repair: ${badge(r.decision_after)} | Tail loss: ${r.tail_loss_pct_after}%</div>
+    </div>`).join('')}
+  </div>`;
+}
+
+// ══════════════ TEACH-BACK ══════════════
+async function loadTeachBack() {
+  const el = $('rm-teachback-content');
+  if (!el || !LAST_AUDIT_ID) return;
+  el.innerHTML = '<div class="loading">Loading questions</div>';
+  try {
+    const r = await api(`/api/v1/teachback/${LAST_AUDIT_ID}/questions`);
+    TEACH_QUESTIONS = r.questions;
+    el.innerHTML = `
+    <div class="card">
+      <div class="card-title">Customer Understanding Check</div>
+      <div class="disclaimer">The customer should complete this section. Answers are evaluated by the deterministic engine — not by AI.</div>
+      ${r.questions.map((q,i)=>`
+        <div class="tb-question">
+          <div class="tb-q-text">${i+1}. ${q.question}</div>
+          ${q.options.map((opt,j)=>`
+            <label class="tb-option">
+              <input type="radio" name="tb-q${i}" value="${j}"> ${opt}
+            </label>`).join('')}
+        </div>`).join('')}
+      <button class="btn btn-primary" onclick="submitTeachBack()">Submit Answers</button>
+      <div id="tb-result" class="mt14"></div>
+    </div>`;
+  } catch(e) { el.innerHTML = `<div class="warn-text">Error: ${e.message}</div>`; }
+}
+
+async function submitTeachBack() {
+  const answers = TEACH_QUESTIONS.map((_, i) => {
+    const sel = document.querySelector(`input[name="tb-q${i}"]:checked`);
+    return sel ? +sel.value : 0;
+  });
+  try {
+    const r = await api(`/api/v1/teachback/${LAST_AUDIT_ID}/answer`, {audit_id: LAST_AUDIT_ID, answers});
+    const el = $('tb-result');
+    el.innerHTML = `<div class="${r.understanding_flag?'badge MISMATCH':'badge SUITABLE'}" style="font-size:14px;padding:8px 14px">
+      Understanding: ${r.score_text}</div>
+      <div class="text-sm mt8 ${r.understanding_flag?'warn-text':'ok-text'}">${r.flag_message}</div>
+      <div class="mt14">
+        ${r.details.map((d,i)=>`<div class="tb-result ${d.correct?'correct':'wrong'} mt8">
+          Q${i+1}: ${d.correct?'✓ Correct':'✗ Incorrect'} — ${d.explanation}
+        </div>`).join('')}
+      </div>`;
+  } catch(e) {}
+}
+
+// ══════════════ RM NOTE ══════════════
+async function loadRMNote() {
+  const el = $('rm-notes-content');
+  if (!el || !LAST_AUDIT_ID) return;
+  el.innerHTML = `<div class="card">
+    <div class="card-title">RM Justification Note</div>
+    <div class="form-group mt8"><label>RM Decision</label>
+      <select id="rm-decision"><option value="">— Select —</option><option>Proceed</option><option>Modify</option><option>Decline</option></select>
+    </div>
+    <div class="form-group"><label>RM Comments</label><textarea id="rm-comments" rows="4" placeholder="Add your assessment notes, client conversation summary, or rationale here..."></textarea></div>
+    <div class="flex gap-8">
+      <button class="btn btn-primary" onclick="generateRMNote()">Generate Note</button>
+    </div>
+    <div id="rm-note-output" class="mt14"></div>
+  </div>`;
+}
+
+async function generateRMNote() {
+  const el = $('rm-note-output');
+  if (!el) return;
+  el.innerHTML = '<div class="loading">Generating note</div>';
+  try {
+    const r = await api('/api/v1/rm-note', {audit_id: LAST_AUDIT_ID, rm_decision: $('rm-decision').value||null, rm_comments: $('rm-comments').value||null});
+    el.innerHTML = `<div class="card" style="background:var(--bg)">
+      <div class="card-title">Generated Note <button class="btn btn-secondary btn-sm" onclick="copyNote(this)">Copy</button></div>
+      <pre id="rm-note-text" style="white-space:pre-wrap;font-size:12px;font-family:monospace;color:var(--ink2)">${r.note}</pre>
+    </div>`;
+  } catch(e) { el.textContent = 'Error: ' + e.message; }
+}
+
+function copyNote(btn) {
+  const text = $('rm-note-text')?.textContent;
+  if (text) { navigator.clipboard.writeText(text); btn.textContent = 'Copied!'; setTimeout(()=>btn.textContent='Copy',2000); }
+}
+
+// ══════════════ AUDIT TABLE ══════════════
+async function loadAuditTable() {
+  const el = $('audit-table');
+  if (!el) return;
+  const rows = await api('/api/v1/audit').catch(()=>[]);
+  el.innerHTML = `<table>
+    <tr><th>ID</th><th>Timestamp</th><th>Customer</th><th>Decision</th><th>Data Source</th><th>Model</th></tr>
+    ${rows.map(r=>`<tr>
+      <td>#${r.id}</td>
+      <td class="text-xs">${r.ts?.substring(0,19)||'—'}</td>
+      <td>${r.customer_id}</td>
+      <td>${badge(r.decision)}</td>
+      <td class="text-xs">${r.data_source}</td>
+      <td class="text-xs mut">${(r.model_version||'').substring(0,30)}</td>
+    </tr>`).join('')}
+  </table>`;
+}
+
+// ══════════════ ALERTS ══════════════
+async function loadAlerts(customerId) {
+  const el = $('alerts-content');
+  if (!el) return;
+  const cid = customerId || SELECTED_CUSTOMER?.id || (AUTH?.user?.customer_id);
+  if (!cid) { el.innerHTML = '<div class="empty">No customer selected.</div>'; return; }
+  const r = await api(`/api/v1/customers/${cid}/alerts`).catch(()=>({alerts:[],unread_count:0}));
+  if (!r.alerts?.length) { el.innerHTML = '<div class="empty">No alerts at this time.</div>'; return; }
+  el.innerHTML = r.alerts.map(a=>`
+    <div class="alert-item ${a.severity}">
+      <div class="flex items-center gap-8">
+        <div class="alert-title">${a.title}</div>
+        <span class="badge ${a.severity}">${a.severity}</span>
+        ${!a.is_read ? '<span class="badge INFO text-xs">NEW</span>' : ''}
+      </div>
+      <div class="alert-msg mt4">${a.message}</div>
+      <div class="flex gap-8 mt4">
+        <span class="text-xs mut">Trigger: ${a.trigger_value} | Threshold: ${a.threshold}</span>
+        ${!a.is_read ? `<button class="btn btn-secondary btn-sm" onclick="markRead(${a.id},this)">Mark read</button>` : ''}
+      </div>
+      <div class="alert-action">${a.recommended_action}</div>
+    </div>`).join('');
+}
+
+async function markRead(id, btn) {
+  await api(`/api/v1/alerts/${id}/read`, {}, 'POST');
+  btn.closest('.alert-item').querySelector('.badge.INFO')?.remove();
+  btn.remove();
+  updateAlertBadge(SELECTED_CUSTOMER?.id || AUTH?.user?.customer_id);
+}
+
+async function updateAlertBadge(customerId) {
+  if (!customerId) return;
+  const r = await api(`/api/v1/customers/${customerId}/alerts?unread_only=true`).catch(()=>({unread_count:0}));
+  const el = $('alert-count-badge');
+  if (el) {
+    el.textContent = r.unread_count;
+    el.style.display = r.unread_count > 0 ? 'block' : 'none';
+  }
+}
+
+function pollAlerts() {
+  const cid = SELECTED_CUSTOMER?.id || AUTH?.user?.customer_id;
+  if (cid) updateAlertBadge(cid);
+  setInterval(() => {
+    const id = SELECTED_CUSTOMER?.id || AUTH?.user?.customer_id;
+    if (id) updateAlertBadge(id);
+  }, 30000);
+}
+
+// ══════════════ CUSTOMER PAGES ══════════════
+async function loadCustomerDashboard() {
+  const c = SELECTED_CUSTOMER;
+  $('cust-kpis').innerHTML = `
+    <div class="kpi"><div class="kpi-label">Portfolio Value</div><div class="kpi-value">${fmtInr(c.portfolio_value)}</div></div>
+    <div class="kpi"><div class="kpi-label">Risk Profile</div><div class="kpi-value" style="font-size:16px">${c.risk_appetite}</div></div>
+    <div class="kpi"><div class="kpi-label">Loss Tolerance</div><div class="kpi-value">${c.loss_tolerance_pct}%</div></div>
+    <div class="kpi"><div class="kpi-label">Horizon</div><div class="kpi-value">${c.horizon_months} months</div></div>
+  `;
+  updateAlertBadge(c.id);
+  loadAlerts(c.id);
+}
+
+function loadCustomerProfile() {
+  const c = SELECTED_CUSTOMER || {};
+  const el = $('cust-profile-content');
+  if (!el) return;
+  el.innerHTML = `
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Personal Information</div>
+      <table>
+        <tr><td class="mut">Name</td><td><b>${c.name}</b></td></tr>
+        <tr><td class="mut">Customer ID</td><td>${c.id}</td></tr>
+        <tr><td class="mut">Email</td><td>${c.email||'—'}</td></tr>
+        <tr><td class="mut">Phone</td><td>${c.phone||'—'}</td></tr>
+        <tr><td class="mut">City</td><td>${c.city||'—'}</td></tr>
+        <tr><td class="mut">KYC Status</td><td>${c.kyc_status||'—'}</td></tr>
+        <tr><td class="mut">Segment</td><td>${c.segment||'HNI'}</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">Risk Profile</div>
+      <table>
+        <tr><td class="mut">Risk Appetite</td><td>${badge(c.risk_appetite==='conservative'?'SUITABLE':c.risk_appetite==='moderate'?'REVIEW':'MISMATCH')} ${c.risk_appetite}</td></tr>
+        <tr><td class="mut">Max Loss Tolerance</td><td><b>${c.loss_tolerance_pct}%</b></td></tr>
+        <tr><td class="mut">Investment Horizon</td><td><b>${c.horizon_months} months</b></td></tr>
+        <tr><td class="mut">Liquidity Need</td><td>${c.liquidity_need||'medium'}</td></tr>
+        <tr><td class="mut">Annual Income</td><td>${c.annual_income_inr ? fmtInr(c.annual_income_inr) : '—'}</td></tr>
+      </table>
+    </div>
+  </div>`;
+}
+
+function loadCustomerPortfolio() {
+  const c = SELECTED_CUSTOMER || {};
+  const el = $('cust-portfolio-content');
+  if (!el) return;
+  const holdings = c.holdings || [];
+  el.innerHTML = `
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Portfolio Summary</div>
+      <div class="kpi"><div class="kpi-label">Total Portfolio Value</div><div class="kpi-value">${fmtInr(c.portfolio_value)}</div></div>
+      <div class="mt8">
+        ${Object.entries(c.existing_exposures||{}).map(([k,v])=>`<div class="flex items-center gap-8 mt4">
+          <span class="text-sm" style="flex:1">${k}</span>
+          <div style="flex:2;height:8px;background:var(--bg);border-radius:4px;overflow:hidden"><div style="height:100%;width:${v}%;background:var(--pri);border-radius:4px"></div></div>
+          <span class="text-sm fw6" style="width:40px;text-align:right">${v}%</span>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Holdings</div>
+      <table><tr><th>Asset</th><th>Type</th><th>Value</th></tr>
+      ${holdings.map(h=>`<tr><td>${h.asset}</td><td class="text-xs">${h.type}</td><td>${fmtInr(h.value)}</td></tr>`).join('')}
+      </table>
+    </div>
+  </div>`;
+}
+
+// ══════════════ CUSTOMER COPILOT ══════════════
+async function custAsk() {
+  const q = $('cust-q').value.trim();
+  if (!q) return;
+  $('cust-q').value = '';
+  const chat = $('cust-chat');
+  chat.innerHTML += `<div class="chat-msg user">${q}</div>`;
+  chat.innerHTML += `<div class="chat-msg bot" id="bot-latest">Thinking...</div>`;
+  chat.scrollTop = chat.scrollHeight;
+  try {
+    const cid = SELECTED_CUSTOMER?.id || AUTH?.user?.customer_id;
+    const r = await api('/api/v1/copilot', {session_id: 'cust-'+AUTH?.user?.id, message: q, mode: 'client', customer_id: cid});
+    $('bot-latest').innerHTML = r.answer;
+    $('bot-latest').id = '';
+    if (r.tool_trace?.length) {
+      chat.innerHTML += `<div class="chat-msg tool-trace">Tools: ${r.tool_trace.map(t=>t.tool).join(' → ')}</div>`;
+    }
+  } catch(e) {
+    $('bot-latest').innerHTML = `<span class="warn-text">Error: ${e.message}</span>`;
+    $('bot-latest').id = '';
+  }
+  chat.scrollTop = chat.scrollHeight;
+}
+
+// ══════════════ LANGUAGE ══════════════
+function setLang(lang) {
+  CURRENT_LANG = lang;
+  ['en','hi','mr'].forEach(l => {
+    const el = $('lang-'+l);
+    if (el) { el.style.borderColor = l===lang ? 'var(--pri)' : 'var(--line)'; el.style.color = l===lang ? 'var(--pri)' : 'var(--mut)'; }
+  });
+  // Only rerender explanation if available
+  if (lang !== 'en' && LAST_AUDIT_ID) {
+    reExplainTranslated(lang);
+  }
+}
+
+async function reExplainTranslated(lang) {
+  // For now, show a note — full translation endpoint can be added
+  const el = $('expl-text');
+  if (el) el.innerHTML += `<br><span class="text-xs mut">[Translation to ${lang === 'hi' ? 'Hindi' : 'Marathi'} — AI-translated; verify before sharing. Financial figures are locked.]</span>`;
+}
+
+// ══════════════ INIT ══════════════
+window.addEventListener('DOMContentLoaded', async () => {
+  // Pre-fill RM creds by default
+  $('login-email').value = 'rm@finvision.demo';
+  $('login-password').value = 'RM@123';
+  await tryAutoLogin();
+});
+</script>
+</body>
+</html>
