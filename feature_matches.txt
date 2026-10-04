@@ -1,0 +1,12 @@
+L1225: <div id="sim-replay-chart" style="width:100%;height:230px"></div>
+L1238: <div class="card mt14" id="sim-twin-card" style="background:linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);border:1px solid #bf
+L1242: <div id="sim-twin-content" class="text-sm" style="line-height:1.6">
+L1357: <div class="form-group mt8"><label>Upload Term Sheet (PDF/TXT)</label><input type="file" id="ts-file" accept=".pdf,.txt"></div>
+L1689: <button class="btn btn-primary btn-full mt14" onclick="runCustomerConfiguredAnalysis()">Check suitability with historical data</bu
+L2214: <a href="/api/v1/report/${r.audit_id}" target="_blank" class="btn btn-secondary btn-sm" style="margin-left:8px">Client PDF</a>
+L2220: <div class="card mt14" id="twin-card">
+L2222: <button class="btn btn-secondary btn-sm" onclick="loadTwin()">Load Twin</button>
+L2224: <div id="twin-content" class="text-sm mut">Click "Load Twin" to find the most similar historical period.</div>
+L2257: async function loadTwin() {
+L4985: function renderSimReplayChart(state) {
+L5048: async function loadSimTwinMatch(state) {

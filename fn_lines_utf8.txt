@@ -1,0 +1,22 @@
+L2562: async function loadCustomerDashboard() {
+L2579: async function runCustDashboardAnalysis() {
+L2636: async function runCustAnalysis() {
+L2697: async function loadCustPayoff() {
+L2721: async function loadCustStress() {
+L2766: async function loadCustPortfolioImpact() {
+L2816: async function loadCustProfilePortfolio() {
+L3021: function loadCustomerProfile() {
+L3026: function loadCustomerPortfolio() {
+L3032: function custAskPrompt(prompt) {
+L3072: async function custAsk() {
+L3414: function onDashSimAmountChange(val) {
+L3424: function setDashSimAmount(amt) {
+L3430: function onDashSimMoveChange(val) {
+L3444: function setDashSimMove(movePct) {
+L3517: function initCustomerPlayground() {
+L3528: function onPlayNotionalInputChange(val) {
+L3539: function onPlayNotionalSliderChange(val) {
+L3550: function setPlayNotional(amt) {
+L3557: function onPlayMoveSliderChange(val) {
+L3572: function setPlayScenario(movePct) {
+L3720: function runCustomerConfiguredAnalysis() {
