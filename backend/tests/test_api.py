@@ -29,3 +29,13 @@ def test_payoff_extract_copilot_kb():
     assert r.json()["tool_trace"][0]["tool"] == "run_scenario"
     assert c.get("/api/v1/knowledge/search", params={"q": "dual currency deposit risk"}).json()[0]["doc"] == "dcd"
     assert c.post("/api/v1/assessment", json={"product": P, "customer_id": "nope"}).status_code == 404
+
+
+def test_live_market_quotes():
+    r = c.get("/api/v1/market-quotes")
+    assert r.status_code == 200
+    j = r.json()
+    assert j["status"] == "ok"
+    assert len(j["quotes"]) >= 6
+    ids = [q["id"] for q in j["quotes"]]
+    assert "nifty50" in ids and "sensex" in ids and "gold" in ids and "usdinr" in ids

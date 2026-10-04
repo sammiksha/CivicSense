@@ -394,6 +394,17 @@ def historical_twin_endpoint(req: ScenarioRequest):
         raise HTTPException(422, str(e))
 
 
+# ── live market quotes ────────────────────────────────────────────────────────
+
+@app.get("/api/v1/market-quotes")
+def market_quotes_endpoint(refresh: bool = False):
+    try:
+        from .services.live_market import get_live_market_quotes
+        return get_live_market_quotes(force_refresh=refresh)
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
+
 # ── RM note ───────────────────────────────────────────────────────────────────
 
 @app.post("/api/v1/rm-note")
