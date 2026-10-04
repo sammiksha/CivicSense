@@ -766,12 +766,16 @@ let LAST_AUDIT_ID = null;
 let SESSION_CHAT_HISTORY = [];
 let LAST_CUST_QUERY = '';
 
+// API Base URL resolution (for Vercel frontend -> Render backend deployment)
+window.API_BASE_URL = window.API_BASE_URL || localStorage.getItem('fv_api_base') || '';
+const getApiUrl = p => (p && (p.startsWith('http://') || p.startsWith('https://'))) ? p : ((window.API_BASE_URL || '') + p);
+
 const $ = id => document.getElementById(id);
 const api = async (p, b, method) => {
   const opts = { headers: {'Content-Type': 'application/json'} };
   if (AUTH) opts.headers['Authorization'] = 'Bearer ' + AUTH.token;
   if (b !== undefined) { opts.method = method || 'POST'; opts.body = JSON.stringify(b); }
-  const r = await fetch(p, opts);
+  const r = await fetch(getApiUrl(p), opts);
   if (!r.ok) { const t = await r.text(); throw new Error(t); }
   return r.json();
 };
@@ -2244,7 +2248,7 @@ async function extractProduct() {
     const f = $('ts-file')?.files[0];
     if (f) {
       const fd = new FormData(); fd.append('file', f);
-      const res = await fetch('/api/v1/product/extract-file', {method:'POST', body:fd, headers:{Authorization:'Bearer '+AUTH?.token}});
+      const res = await fetch(getApiUrl('/api/v1/product/extract-file'), {method:'POST', body:fd, headers:{Authorization:'Bearer '+AUTH?.token}});
       r = await res.json();
     } else {
       r = await api('/api/v1/product/extract-text', {text: $('ts-nl').value});
@@ -2427,7 +2431,7 @@ function renderRMAnalysis() {
       <select id="expl-mode" style="width:auto;font:inherit;border:1px solid var(--line);border-radius:4px;padding:2px 6px;font-size:12px" onchange="reExplain()">
         <option value="rm">RM Mode</option><option value="client">Client Mode</option>
       </select>
-      <a href="/api/v1/report/${r.audit_id}" target="_blank" class="btn btn-secondary btn-sm" style="margin-left:8px">Client PDF</a>
+      <a href="#" onclick="window.open(getApiUrl('/api/v1/report/${r.audit_id}'), '_blank'); return false;" class="btn btn-secondary btn-sm" style="margin-left:8px">Client PDF</a>
     </div>
     <div id="expl-text" class="text-sm">${(r.explanation?.text||'').replace(/\n/g,'<br>')}</div>
     <div class="text-xs mut mt8">Engine: ${r.explanation?.engine} | Sources: ${(r.explanation?.sources||[]).join(', ')}</div>
@@ -3077,7 +3081,7 @@ function downloadCustReportPdf() {
     alert("Please wait for the suitability assessment to finish generating.");
     return;
   }
-  window.open('/api/v1/report/' + LAST_AUDIT_ID, '_blank');
+  window.open(getApiUrl('/api/v1/report/' + LAST_AUDIT_ID), '_blank');
 }
 
 async function uploadCustTermSheet() {
@@ -3088,7 +3092,7 @@ async function uploadCustTermSheet() {
   try {
     const fd = new FormData();
     fd.append('file', f);
-    const res = await fetch('/api/v1/product/extract-file', {
+    const res = await fetch(getApiUrl('/api/v1/product/extract-file'), {
       method: 'POST',
       body: fd,
       headers: { Authorization: 'Bearer ' + (AUTH?.token || '') }
