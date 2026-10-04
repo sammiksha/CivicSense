@@ -3284,29 +3284,115 @@ async function loadCustPayoff() {
 
 let CUST_REPLAY_EPISODE = '2020';
 
+// All 7 historical episodes with rich metadata
+const REPLAY_EPISODES_DATA = [
+  { id: '2008', name: '2008 Lehman Crisis',       move: -52, icon: '💥',
+    fullName: '2008 Lehman Brothers Global Financial Crisis',
+    context: 'The biggest financial crash since 1929. Lehman Brothers collapsed, credit markets froze, and NIFTY 50 fell -52% in 12 months. Almost no barrier level (except very deep buffers of -50%+) could protect investors.',
+    journeyShape: 'crash_fast',
+    barrierNote: 'At -52%, even a 70% barrier (which gives -30% cushion) is completely overwhelmed. The barrier is breached 22% into the drop — at the point NIFTY falls -30%. Everything after that is full capital erosion.'
+  },
+  { id: '2011', name: '2011 Market Dip',          move: -24, icon: '📉',
+    fullName: '2011 European Debt Crisis / Indian Inflation Shock',
+    context: 'Euro-zone sovereign debt crisis combined with high Indian inflation. NIFTY corrected -24% over the year — painful but manageable.',
+    journeyShape: 'gradual_slide',
+    barrierNote: 'A -24% move sits RIGHT at the borderline for a 70% barrier (which protects the first -30%). With a 30% cushion, the barrier HOLDS in this crisis — you get back capital and coupon in full. But if your barrier were at 80% (only -20% cushion), it would have been breached.'
+  },
+  { id: '2016', name: '2016 Demonetisation',      move: 4,   icon: '📊',
+    fullName: '2016 Demonetisation / Rangebound Recovery',
+    context: 'Government cancelled ₹500 and ₹1000 notes overnight. Markets panicked temporarily but absorbed the shock — NIFTY ended the year +4%.',
+    journeyShape: 'v_recovery',
+    barrierNote: 'At +4% the market is positive — there is zero barrier risk. Your barrier only becomes relevant if the market falls, which never happened in this scenario. You earn your full coupon (e.g. 12%) on top of the flat market.'
+  },
+  { id: '2018', name: '2018 NBFC Crisis',         move: -15, icon: '⚠️',
+    fullName: '2018 NBFC Liquidity Crisis & Midcap Correction',
+    context: 'IL&FS defaulted on ₹91,000 crore of debt. Liquidity in credit markets dried up. NIFTY corrected -15% from peaks.',
+    journeyShape: 'mild_dip',
+    barrierNote: 'A -15% fall is well within the -30% cushion of a 70% barrier. Your barrier is safe by a comfortable 15% margin. This demonstrates the power of structured notes in moderate corrections — zero capital loss.'
+  },
+  { id: '2020', name: '2020 Covid Crash',         move: -38, icon: '💥',
+    fullName: '2020 Covid-19 Global Pandemic Flash Crash',
+    context: 'NIFTY crashed -38% in just 6 weeks (Feb–Mar 2020) — the fastest crash in history. Then it recovered just as fast.',
+    journeyShape: 'v_crash',
+    barrierNote: 'At -38%, a 70% barrier (30% cushion) is breached — specifically, it breaks at the -30% mark. The last -8% of market fall becomes full capital loss. A deeper barrier (e.g. 60% barrier = 40% cushion) would have protected even this crash.'
+  },
+  { id: '2021', name: '2021 Bull Rally',          move: 42,  icon: '📈',
+    fullName: '2021 Post-Covid Economic Recovery Bull Market',
+    context: 'Massive stimulus packages, vaccine rollout, and pent-up demand fueled a historic +42% rally in NIFTY 50.',
+    journeyShape: 'steady_rise',
+    barrierNote: 'In a bull market, barrier risk is zero. However, ELN notes have a cap — your return is capped at the coupon (e.g. 12%) regardless of how much the market rises. You sacrifice the upside in exchange for downside protection.'
+  },
+  { id: '2023', name: '2023 Steady Growth',       move: 18,  icon: '📊',
+    fullName: '2023 Steady Market Growth — Goldilocks Scenario',
+    context: 'Robust corporate earnings, stable inflation, and steady FII inflows pushed NIFTY +18%. No major shocks.',
+    journeyShape: 'steady_rise',
+    barrierNote: 'At +18%, this is the ideal scenario for an ELN investor. Market is up, barrier is nowhere near being threatened, and you earn your full coupon (e.g. 12%). Stable markets are the sweet spot for structured products.'
+  }
+];
+
+// Generates a simulated monthly NIFTY price path for a given crisis episode
+function generateCrisisJourney(ep, tenorMonths) {
+  const months = Math.min(tenorMonths || 12, 12);
+  const path = [100]; // Start at 100 (normalised)
+  const finalMove = ep.move;
+  let shape = ep.journeyShape;
+
+  for (let m = 1; m <= months; m++) {
+    const progress = m / months;
+    let level;
+    if (shape === 'crash_fast') {
+      // Sharp crash in first 4 months, then flat
+      const crashProgress = Math.min(1, m / 5);
+      const stabilizeProgress = Math.max(0, (m - 5) / (months - 5));
+      level = 100 + (finalMove * 0.9 * Math.pow(crashProgress, 1.4)) + (finalMove * 0.1 * stabilizeProgress);
+    } else if (shape === 'v_crash') {
+      // Fall to bottom at ~40% through, then recover slightly
+      const bottom = months * 0.4;
+      if (m <= bottom) {
+        level = 100 + (finalMove * 1.2 * (m / bottom));
+      } else {
+        const recovery = 0.15; // partial V recovery
+        level = 100 + finalMove * 1.2 + (Math.abs(finalMove) * recovery * ((m - bottom) / (months - bottom)));
+      }
+    } else if (shape === 'v_recovery') {
+      // Brief dip then full recovery
+      const dipAt = months * 0.3;
+      const dipDepth = -12;
+      if (m <= dipAt) {
+        level = 100 + dipDepth * (m / dipAt);
+      } else {
+        level = 100 + dipDepth + (finalMove - dipDepth) * ((m - dipAt) / (months - dipAt));
+      }
+    } else if (shape === 'gradual_slide') {
+      // Smooth decline throughout
+      level = 100 + finalMove * Math.pow(progress, 0.85);
+    } else if (shape === 'mild_dip') {
+      // Moderate decline, stabilises at end
+      level = 100 + finalMove * Math.pow(progress, 1.1);
+    } else if (shape === 'steady_rise') {
+      // Consistent upward slope with mild wobble
+      const wobble = Math.sin(m * 0.8) * 1.5;
+      level = 100 + finalMove * progress + wobble;
+    } else {
+      level = 100 + finalMove * progress;
+    }
+    path.push(Math.round(level * 10) / 10);
+  }
+  return path;
+}
+
 function renderCustReplayChart() {
   const chartEl = $('cust-replay-chart');
   if (!chartEl) return;
   const p = CUST_PRODUCT || CUST_DEFAULT_PRODUCT;
   const notional = CUST_PAYOFF_NOTIONAL || 1000000;
-  
-  const episodes = [
-    { id: '2008', name: '2008 Lehman Crisis', move: -52 },
-    { id: '2011', name: '2011 Indian Market Dip', move: -24 },
-    { id: '2016', name: '2016 Demonetisation', move: 4 },
-    { id: '2018', name: '2018 NBFC Crisis', move: -15 },
-    { id: '2020', name: '2020 Covid Crash', move: -38 },
-    { id: '2021', name: '2021 Bull Rally', move: 42 },
-    { id: '2023', name: '2023 Steady Market', move: 18 },
-  ];
+  const barrierPct = p.barrier_pct ?? 70;
+  const barrierLevel = barrierPct; // normalised: barrier is at 70 when start = 100
 
-  const outcomes = episodes.map(ep => {
+  const outcomes = REPLAY_EPISODES_DATA.map(ep => {
     const res = calculateSimulatorOutcome({
-      notional,
-      movePct: ep.move,
-      underlying: p.underlying,
-      barrierPct: p.barrier_pct ?? 70,
-      strikePct: p.strike_pct ?? 100,
+      notional, movePct: ep.move, underlying: p.underlying,
+      barrierPct, strikePct: p.strike_pct ?? 100,
       protectionPct: p.protection_pct ?? 90,
       participationPct: p.participation_pct ?? 100,
       couponPct: p.coupon_pct ?? 12,
@@ -3317,33 +3403,27 @@ function renderCustReplayChart() {
     return { ...ep, res };
   });
 
-  if (typeof Plotly !== 'undefined') {
-    const x = outcomes.map(o => o.name);
-    const y = outcomes.map(o => o.res.pnlPct);
-    const colors = y.map(v => v >= 0 ? '#10b981' : '#ef4444');
+  // Store outcomes globally so selectCustReplayEpisode can reference them
+  window._REPLAY_OUTCOMES = outcomes;
 
-    Plotly.react('cust-replay-chart', [{
-      x, y, type: 'bar', marker: { color: colors },
-      text: y.map(v => `${v >= 0 ? '+' : ''}${v.toFixed(1)}%`), textposition: 'auto'
-    }], {
-      margin: { t: 15, l: 45, r: 15, b: 65 },
-      paper_bgcolor: '#ffffff', plot_bgcolor: '#ffffff',
-      xaxis: { gridcolor: '#f1f5f9', tickangle: -20 },
-      yaxis: { title: 'Net Return on Note (%)', gridcolor: '#f1f5f9' },
-      font: { family: 'Inter, sans-serif', size: 11 }
-    }, { displayModeBar: false, responsive: true });
+  if (typeof Plotly !== 'undefined') {
+    _renderReplayBarChart(outcomes, CUST_REPLAY_EPISODE, barrierPct);
   }
 
   const episodesEl = $('cust-replay-episodes');
   if (episodesEl) {
     episodesEl.innerHTML = `
-      <div style="font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:8px">Click any historical crisis to inspect how your investment behaves:</div>
+      <div style="font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:8px">Click any historical crisis to see exactly how your investment behaves:</div>
       <div class="flex gap-8 wrap">
         ${outcomes.map(o => `
           <button class="scenario-btn ${CUST_REPLAY_EPISODE === o.id ? 'active' : ''}" onclick="selectCustReplayEpisode('${o.id}')">
-            ${o.move < 0 ? '💥' : '📈'} ${o.name} (${o.move > 0 ? '+' : ''}${o.move}%)
+            ${o.icon} ${o.name} (${o.move > 0 ? '+' : ''}${o.move}%)
           </button>
         `).join('')}
+      </div>
+      <div id="cust-replay-journey-wrap" class="mt12" style="display:none">
+        <div style="font-weight:700;font-size:13px;color:var(--ink2);margin-bottom:6px">📉 NIFTY Price Journey During Selected Crisis (with Barrier Level):</div>
+        <div id="cust-replay-journey-chart" style="height:230px;width:100%"></div>
       </div>
       <div id="cust-replay-detail" class="mt12"></div>
     `;
@@ -3351,45 +3431,182 @@ function renderCustReplayChart() {
   }
 }
 
+function _renderReplayBarChart(outcomes, selectedId, barrierPct) {
+  const x = outcomes.map(o => o.name);
+  const y = outcomes.map(o => o.res.pnlPct);
+  const colors = outcomes.map(o => {
+    if (o.id === selectedId) return o.res.pnlPct >= 0 ? '#10b981' : '#ef4444';
+    return o.res.pnlPct >= 0 ? '#86efac' : '#fca5a5'; // muted for non-selected
+  });
+  const lineWidths = outcomes.map(o => o.id === selectedId ? 2.5 : 0);
+  const lineColors = outcomes.map(o => o.id === selectedId ? '#1d4ed8' : 'transparent');
+
+  Plotly.react('cust-replay-chart', [{
+    x, y, type: 'bar',
+    marker: { color: colors, line: { color: lineColors, width: lineWidths } },
+    text: y.map((v, i) => outcomes[i].id === selectedId ? `▶ ${v >= 0 ? '+' : ''}${v.toFixed(1)}%` : `${v >= 0 ? '+' : ''}${v.toFixed(1)}%`),
+    textposition: 'auto',
+    hovertemplate: '%{x}<br>Return: %{y:.1f}%<extra></extra>'
+  }], {
+    margin: { t: 20, l: 50, r: 15, b: 70 },
+    paper_bgcolor: '#ffffff', plot_bgcolor: '#f8fafc',
+    xaxis: { gridcolor: '#e2e8f0', tickangle: -25, tickfont: { size: 11 } },
+    yaxis: { title: 'Net Return on Note (%)', gridcolor: '#e2e8f0', zeroline: true, zerolinecolor: '#94a3b8', zerolinewidth: 2 },
+    font: { family: 'Inter, sans-serif', size: 11 },
+    annotations: [{
+      x: outcomes.findIndex(o => o.id === selectedId),
+      y: y[outcomes.findIndex(o => o.id === selectedId)],
+      xref: 'x', yref: 'y',
+      text: '◀ Selected',
+      showarrow: true, arrowhead: 2, arrowcolor: '#1d4ed8',
+      font: { color: '#1d4ed8', size: 11 }, ax: 0, ay: -28
+    }]
+  }, { displayModeBar: false, responsive: true });
+}
+
+function _renderReplayJourneyChart(ep, barrierPct, tenorMonths) {
+  const wrapEl = $('cust-replay-journey-wrap');
+  const chartEl = $('cust-replay-journey-chart');
+  if (!wrapEl || !chartEl || typeof Plotly === 'undefined') return;
+  wrapEl.style.display = 'block';
+
+  const path = generateCrisisJourney(ep, tenorMonths);
+  const months = path.length;
+  const xLabels = path.map((_, i) => i === 0 ? 'Start' : `M${i}`);
+  const barrierLine = path.map(() => barrierPct); // horizontal barrier
+
+  // Colour segments: red after breach, green before
+  const breachMonth = path.findIndex((v, i) => i > 0 && v < barrierPct);
+  const lineColors = path.map((v, i) => {
+    if (breachMonth === -1) return '#10b981';
+    return i >= breachMonth ? '#ef4444' : '#10b981';
+  });
+
+  // Determine if barrier is ever breached
+  const isBreached = path.some(v => v < barrierPct);
+
+  const traces = [
+    {
+      x: xLabels, y: path, type: 'scatter', mode: 'lines+markers',
+      name: 'NIFTY Level (normalised)', line: { color: '#3b82f6', width: 2.5 },
+      marker: { size: 5, color: lineColors },
+      fill: 'tozeroy', fillcolor: isBreached ? 'rgba(239,68,68,0.06)' : 'rgba(16,185,129,0.06)',
+      hovertemplate: 'Month: %{x}<br>Level: %{y:.1f}<extra></extra>'
+    },
+    {
+      x: xLabels, y: barrierLine, type: 'scatter', mode: 'lines',
+      name: `Safety Barrier (${barrierPct}%)`,
+      line: { color: '#dc2626', width: 2, dash: 'dash' },
+      hovertemplate: `Barrier Level: ${barrierPct}<extra></extra>`
+    }
+  ];
+
+  // Add breach annotation if needed
+  const annotations = [];
+  if (isBreached && breachMonth > 0) {
+    annotations.push({
+      x: xLabels[breachMonth], y: path[breachMonth],
+      xref: 'x', yref: 'y',
+      text: '⚠️ Barrier Breached!',
+      showarrow: true, arrowhead: 3, arrowcolor: '#dc2626',
+      font: { color: '#dc2626', size: 11, bold: true }, ax: 30, ay: -30
+    });
+  } else if (!isBreached) {
+    annotations.push({
+      x: xLabels[Math.floor(months / 2)], y: barrierPct,
+      xref: 'x', yref: 'y',
+      text: '✅ Barrier Never Breached',
+      showarrow: false,
+      font: { color: '#10b981', size: 11 },
+      bgcolor: 'rgba(16,185,129,0.12)', borderpad: 4
+    });
+  }
+
+  Plotly.react('cust-replay-journey-chart', traces, {
+    margin: { t: 10, l: 45, r: 15, b: 40 },
+    paper_bgcolor: '#ffffff', plot_bgcolor: '#f8fafc',
+    xaxis: { gridcolor: '#e2e8f0', title: 'Month of Investment' },
+    yaxis: { gridcolor: '#e2e8f0', title: 'NIFTY Level (Start=100)', range: [Math.min(...path, barrierPct) - 10, 115] },
+    font: { family: 'Inter, sans-serif', size: 11 },
+    legend: { orientation: 'h', y: -0.25, font: { size: 11 } },
+    annotations,
+    shapes: isBreached ? [{
+      type: 'rect', xref: 'x', yref: 'y',
+      x0: xLabels[breachMonth], x1: xLabels[months - 1],
+      y0: 0, y1: barrierPct,
+      fillcolor: 'rgba(239,68,68,0.04)', line: { width: 0 }
+    }] : []
+  }, { displayModeBar: false, responsive: true });
+}
+
 function selectCustReplayEpisode(epId) {
   CUST_REPLAY_EPISODE = epId;
   const p = CUST_PRODUCT || CUST_DEFAULT_PRODUCT;
   const notional = CUST_PAYOFF_NOTIONAL || 1000000;
-  const dropBuffer = Math.max(0, 100 - (p.barrier_pct ?? 70));
+  const barrierPct = p.barrier_pct ?? 70;
+  const dropBuffer = Math.max(0, 100 - barrierPct);
+  const tenorMonths = p.tenor_months || 12;
 
-  const episodes = {
-    '2008': { name: '2008 Lehman Global Financial Crisis', move: -52, context: 'The NIFTY dropped -52% during the global financial meltdown.' },
-    '2011': { name: '2011 European Debt / Indian Market Dip', move: -24, context: 'High inflation and global sovereign debt triggered a -24% market dip.' },
-    '2016': { name: '2016 Demonetisation / Rangebound Year', move: 4, context: 'Market absorbed demonetisation shock and ended flat to +4%.' },
-    '2018': { name: '2018 NBFC Crisis & Midcap Correction', move: -15, context: 'IL&FS default caused liquidity freeze, index dropped -15%.' },
-    '2020': { name: '2020 Covid-19 Global Pandemic Crash', move: -38, context: 'Rapid global crash dropped NIFTY -38% in under 6 weeks.' },
-    '2021': { name: '2021 Post-Covid Economic Recovery', move: 42, context: 'Massive economic recovery rally lifted markets +42%.' },
-    '2023': { name: '2023 Steady Market Growth', move: 18, context: 'Steady corporate earnings and robust GDP growth pushed index +18%.' }
-  };
+  const ep = REPLAY_EPISODES_DATA.find(e => e.id === epId) || REPLAY_EPISODES_DATA.find(e => e.id === '2020');
+  const outcomes = window._REPLAY_OUTCOMES || [];
 
-  const ep = episodes[epId] || episodes['2020'];
+  // Recalculate outcome for this episode
   const res = calculateSimulatorOutcome({
-    notional,
-    movePct: ep.move,
-    underlying: p.underlying,
-    barrierPct: p.barrier_pct ?? 70,
-    strikePct: p.strike_pct ?? 100,
+    notional, movePct: ep.move, underlying: p.underlying,
+    barrierPct, strikePct: p.strike_pct ?? 100,
     protectionPct: p.protection_pct ?? 90,
     participationPct: p.participation_pct ?? 100,
     couponPct: p.coupon_pct ?? 12,
-    tenorMonths: p.tenor_months || 12,
-    productType: p.product_type || 'ELN',
+    tenorMonths, productType: p.product_type || 'ELN',
     customer: SELECTED_CUSTOMER
   });
 
+  const isBarrierBreached = ep.move < -dropBuffer;
+
+  // 1. Update overview bar chart: highlight selected bar
+  if (typeof Plotly !== 'undefined' && outcomes.length) {
+    _renderReplayBarChart(outcomes, epId, barrierPct);
+  }
+
+  // 2. Update active button styling
+  document.querySelectorAll('#cust-replay-episodes .scenario-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.onclick?.toString().includes(`'${epId}'`));
+  });
+
+  // 3. Render the NIFTY journey chart for this crisis
+  _renderReplayJourneyChart(ep, barrierPct, tenorMonths);
+
+  // 4. Build the crisis-specific barrier explanation
+  const bufferMargin = dropBuffer + ep.move; // negative = breached by this much
+  let barrierExplain;
+  if (isBarrierBreached) {
+    barrierExplain = `
+      <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px;margin-top:10px">
+        <b style="color:#dc2626">❌ Barrier Breached — Here's Why:</b><br><br>
+        Your barrier sits at <b>${barrierPct}%</b> of the starting level — meaning you are safe until the market falls more than <b>-${dropBuffer}%</b>.<br><br>
+        In the <b>${ep.fullName}</b>, the market actually fell <b>${ep.move}%</b>.<br>
+        That is <b>${Math.abs(bufferMargin).toFixed(0)}% beyond your safety buffer</b> — which means the barrier was broken,
+        and your capital fell proportionally for every percentage point beyond that break point.<br><br>
+        ${ep.barrierNote}
+      </div>`;
+  } else {
+    barrierExplain = `
+      <div style="background:#f0fdf4;border:1px solid #a7f3d0;border-radius:10px;padding:12px;margin-top:10px">
+        <b style="color:#059669">✅ Barrier Held — Here's Why:</b><br><br>
+        Your barrier sits at <b>${barrierPct}%</b> — meaning you can absorb up to a <b>-${dropBuffer}% market drop</b> with zero capital loss.<br><br>
+        In the <b>${ep.fullName}</b>, the market moved <b>${ep.move > 0 ? '+' : ''}${ep.move}%</b>.
+        That is still <b>${Math.abs(bufferMargin).toFixed(0)}% within your safety cushion</b>.<br><br>
+        ${ep.barrierNote}
+      </div>`;
+  }
+
   const detailEl = $('cust-replay-detail');
   if (detailEl) {
-    const isBarrierBreached = ep.move < -dropBuffer;
     detailEl.innerHTML = `
       <div style="background:#f8fafc;border:1.5px solid ${isBarrierBreached ? '#fecaca' : '#a7f3d0'};border-radius:14px;padding:16px">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
           <div>
-            <div style="font-weight:800;font-size:15px;color:var(--ink)">${ep.name}</div>
+            <div style="font-weight:800;font-size:15px;color:var(--ink)">${ep.fullName}</div>
             <div class="text-xs mut mt2">${ep.context}</div>
           </div>
           <div>${badge(res.badgeClass)}</div>
@@ -3400,19 +3617,20 @@ function selectCustReplayEpisode(epId) {
             <div class="val ${ep.move < 0 ? 'warn-text' : 'ok-text'}" style="font-size:18px">${ep.move > 0 ? '+' : ''}${ep.move}%</div>
           </div>
           <div class="sim-stat-tile" style="background:#fff">
-            <div class="label">Barrier Status</div>
-            <div class="val" style="font-size:16px">${isBarrierBreached ? '❌ Breached (-' + dropBuffer + '% buffer)' : '✅ Shielded (Barrier Intact)'}</div>
+            <div class="label">Your Safety Cushion</div>
+            <div class="val" style="font-size:15px">Buffer: -${dropBuffer}%<br>${isBarrierBreached ? '<span class="warn-text">❌ Exhausted</span>' : '<span class="ok-text">✅ Intact</span>'}</div>
           </div>
           <div class="sim-stat-tile" style="background:#fff">
             <div class="label">Final Payout on ${formatInrWords(notional)}</div>
-            <div class="val ${res.pnl >= 0 ? 'ok-text' : 'warn-text'}" style="font-size:18px">${fmtInr(res.finalValue)} (${res.pnl >= 0 ? '+' : ''}${res.pnlPct.toFixed(1)}%)</div>
+            <div class="val ${res.pnl >= 0 ? 'ok-text' : 'warn-text'}" style="font-size:16px">${fmtInr(res.finalValue)}<br><span class="text-xs">(${res.pnl >= 0 ? '+' : ''}${res.pnlPct.toFixed(1)}%)</span></div>
           </div>
         </div>
+        ${barrierExplain}
         <div class="text-xs mt10" style="line-height:1.6;color:var(--ink2)">
-          <b>Plain English Lesson:</b> ${
+          <b>Plain English:</b> ${
             isBarrierBreached
-              ? `Because the market crash (${ep.move}%) exceeded your -${dropBuffer}% safety cushion, your returned capital was reduced in lockstep with the market. However, your ${p.coupon_pct}% coupon cushioned the blow.`
-              : `Even though the market fell by ${ep.move}%, it never broke through your -${dropBuffer}% barrier cushion. As a result, you suffered <b>ZERO capital loss</b> and received your full <b>${p.coupon_pct}% return</b>.`
+              ? `The ${ep.fullName.split(' ').slice(0,2).join(' ')} crash (${ep.move}%) broke through your -${dropBuffer}% cushion. Your capital dropped for every % beyond the barrier. Your ${p.coupon_pct}% coupon partially cushioned the blow.`
+              : `The ${ep.fullName.split(' ').slice(0,2).join(' ')} ${ep.move < 0 ? 'drop' : 'move'} (${ep.move > 0 ? '+' : ''}${ep.move}%) stayed inside your -${dropBuffer}% safety cushion. Zero capital lost — you earned your full ${p.coupon_pct}% coupon.`
           }
         </div>
       </div>
@@ -3480,13 +3698,30 @@ async function loadCustStress() {
     <div class="card mt14">
       <div class="card-title">Stress Ladder — Step-by-Step Market Drop</div>
       <div class="text-sm mut mb8">Shows how your capital is affected as the market falls progressively from 0% to -60%</div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:10px;font-size:12px">
+        <div style="background:#f0fdf4;border:1px solid #a7f3d0;border-radius:8px;padding:6px 12px">
+          ✅ <b style="color:var(--ok)">Within limit</b> = Loss ≤ your ${c.loss_tolerance_pct}% tolerance
+        </div>
+        <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:6px 12px">
+          ⚠️ <b style="color:var(--rev)">Review threshold</b> = Loss between ${c.loss_tolerance_pct}% and ${(c.loss_tolerance_pct * 1.5).toFixed(1)}% (1.5× limit)
+        </div>
+        <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:6px 12px">
+          ❌ <b style="color:var(--bad)">Above limit</b> = Loss exceeds ${(c.loss_tolerance_pct * 1.5).toFixed(1)}% (1.5× your ${c.loss_tolerance_pct}% limit)
+        </div>
+      </div>
       ${ladderR.ladder.map(r=>`<div class="ladder-row">
         <span class="ladder-shock">${r.shock_pct}%</span>
         <div class="ladder-bar-wrap"><div class="ladder-bar" style="width:${Math.min(100,r.loss_pct/50*100)}%;background:${colorMap[r.loss_rule]}"></div></div>
         <span class="ladder-loss">${r.loss_pct}%<br><span class="text-xs">${fmtInr(r.loss_inr)}</span></span>
-        <span class="ladder-status"><b style="color:${colorMap[r.loss_rule]}">${lossLabel[r.loss_rule]||r.loss_rule}</b><br><span class="text-xs">${profileLabel[r.overall]||r.overall}</span></span>
+        <span class="ladder-status">
+          <b style="color:${colorMap[r.loss_rule]}">${lossLabel[r.loss_rule]||r.loss_rule}</b><br>
+          <span class="text-xs" style="color:${colorMap[r.overall]};font-weight:600">${profileLabel[r.overall]||r.overall}</span>
+        </span>
       </div>`).join('')}
-      <div class="text-xs mut mt8">The first label compares this shock's loss with your stated loss limit. The second reflects overall suitability.</div>
+      <div class="text-xs mut mt8">
+        <b>First label</b>: compares this shock's loss % against your ${c.loss_tolerance_pct}% loss limit (and the 1.5× review band at ${(c.loss_tolerance_pct*1.5).toFixed(1)}%).<br>
+        <b>Second label</b>: overall profile suitability — combines the loss check with all other rules (risk appetite, horizon, concentration).
+      </div>
     </div>
 
     <!-- ═══ 3 PILLARS ACTION GUIDE ═══ -->
