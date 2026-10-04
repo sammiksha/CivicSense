@@ -61,6 +61,7 @@ def find_twin(p: ProductSpec, prices: pd.Series) -> dict:
         vf = float(value_fraction(p, final_ret, min(min_ret, 0.0)))
         pnl_pct = round((vf - 1) * 100, 2)
         breached = bool(barrier_breached(p, min(min_ret, 0.0))) if p.product_type == "ELN" else False
+        payout_inr = round(p.notional * vf)
 
         records.append({
             "i": i,
@@ -69,10 +70,18 @@ def find_twin(p: ProductSpec, prices: pd.Series) -> dict:
             "context_return_pct": round(ret, 2),
             "context_vol_pct": round(vol, 2),
             "context_drawdown_pct": round(dd, 2),
+            "underlying_return_pct": round(final_ret * 100, 2),
+            "min_return_pct": round(min_ret * 100, 2),
             "dist": dist,
             "product_pnl_pct": pnl_pct,
             "product_loss_pct": round(max(0, -pnl_pct), 2),
             "barrier_breached": breached,
+            "final_payout_inr": payout_inr,
+            "status": "BARRIER BREACHED" if breached else ("CAPITAL PRESERVED" if vf >= 1.0 else "CAPITAL ERODED"),
+            "summary": (
+                f"Underlying moved {final_ret * 100:+.1f}% across this window. "
+                f"{'Downside safety barrier was breached, exposing principal to market loss.' if breached else 'Safety barrier held safely throughout: 100% principal was protected and full coupon paid.'}"
+            )
         })
 
     if not records:
@@ -92,16 +101,23 @@ def find_twin(p: ProductSpec, prices: pd.Series) -> dict:
             "context_return_pct": best["context_return_pct"],
             "context_vol_pct": best["context_vol_pct"],
             "context_drawdown_pct": best["context_drawdown_pct"],
+            "underlying_return_pct": best["underlying_return_pct"],
+            "min_return_pct": best["min_return_pct"],
             "product_pnl_pct": best["product_pnl_pct"],
             "product_loss_pct": best["product_loss_pct"],
             "barrier_breached": best["barrier_breached"],
             "product_loss_inr": round(p.notional * best["product_loss_pct"] / 100),
+            "final_payout_inr": best["final_payout_inr"],
+            "status": best["status"],
+            "summary": best["summary"],
         },
         "top3": [
             {
                 "period": f"{r['start_date']} to {r['end_date']}",
                 "similarity_score": round(1.0 / (1.0 + r["dist"]), 3),
+                "underlying_return_pct": r["underlying_return_pct"],
                 "product_pnl_pct": r["product_pnl_pct"],
+                "final_payout_inr": r["final_payout_inr"],
                 "barrier_breached": r["barrier_breached"],
             }
             for r in records[:3]

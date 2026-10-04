@@ -4,9 +4,18 @@ from pydantic import BaseModel, Field, model_validator
 
 UNDERLYINGS = {
     "NIFTY 50": "NIFTY50",
+    "NIFTY50": "NIFTY50",
+    "SENSEX": "NIFTY50",
+    "Bank NIFTY": "NIFTY50",
+    "NIFTY IT": "NIFTY50",
     "USDINR": "USDINR",
-    "EURUSD": "EURUSD",
-    "GBPUSD": "GBPUSD"
+    "USD/INR": "USDINR",
+    "EURUSD": "USDINR",
+    "GBPUSD": "USDINR",
+    "Gold": "GOLD",
+    "GOLD": "GOLD",
+    "S&P 500": "NIFTY50",
+    "Debt": "NIFTY50",
 }
 
 
